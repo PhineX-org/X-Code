@@ -3,1862 +3,1448 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>X Code — Code Editor</title>
-<meta name="description" content="X Code is a lightweight code editor, designed for free and simplicity. It features a modern interface, syntax highlighting, and essential development tools, making it perfect for quick edits and small projects.">
-<meta name="keywords" content="X Code, code editor, lightweight, modern interface, syntax highlighting, development tools, free, simplicity, quick edits, small projects">
-<meta name="author" content="PhineX Group">
-<meta property="og:title" content="X Code — PhineX Group">
-<meta property="og:description" content="X Code is a lightweight code editor, designed for free and simplicity. It features a modern interface, syntax highlighting, and essential development tools, making it perfect for quick edits and small projects.">
-<meta property="og:type" content="website">
-<meta name="image" property="og:image" content="https://example.com/X-Code.jpg">
-<meta type="image/png" href="X-Code.png" style="width: 40px; height: 40px;">
-<link rel="icon" href="X-Code.png">
+<title>XCode Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<!-- ╔══════════════════════════════════════╗
+     ║   LINK THE EDITOR — Step 1           ║
+     ╚══════════════════════════════════════╝ -->
+<script src="https://phinex-org.github.io/X-Code/XCode.js"></script>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{
-  --bg:#1e1e1e;--bg2:#252526;--bg3:#2d2d30;--bg4:#333333;
-  --sidebar:#252526;--activity:#333333;--tab-bg:#2d2d30;--tab-active:#1e1e1e;
-  --border:#3c3c3c;--text:#d4d4d4;--muted:#858585;--accent:#39ff14;
-  --accent-dim:rgba(57,255,20,0.12);--accent-glow:rgba(57,255,20,0.3);
-  --sel:rgba(57,255,20,0.18);
-  --kw:#569cd6;--str:#ce9178;--cmt:#6a9955;--fn:#dcdcaa;--num:#b5cea8;
-  --type:#4ec9b0;--prop:#9cdcfe;--op:#d4d4d4;--regex:#d16969;--sel-css:#d7ba7d;
-  --ghost:#5a6272;--status-bg:#007acc;
-  --err:#f44747;--warn:#cca700;--info:#3794ff;
-  --font:'JetBrains Mono',monospace;
+/* ════════════════════════════════════════
+   RESET & ROOT
+════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:       #040605;
+  --bg1:      #080c09;
+  --bg2:      #0d120e;
+  --bg3:      #111a12;
+  --border:   #1a2e1c;
+  --border2:  #233327;
+  --text:     #c8d9c9;
+  --muted:    #4a6b4d;
+  --dim:      #2a3d2c;
+  --accent:   #39ff14;
+  --accent2:  #00ff88;
+  --accentd:  rgba(57,255,20,.08);
+  --accentg:  rgba(57,255,20,.18);
+  --accentb:  rgba(57,255,20,.35);
+  --blue:     #00d4ff;
+  --orange:   #ff8c00;
+  --red:      #ff4466;
+  --yellow:   #ffd700;
+  --mono:     'JetBrains Mono', monospace;
+  --ui:       'Syne', sans-serif;
+  --r:        8px;
+  --glow:     0 0 40px rgba(57,255,20,.15);
+  --glow2:    0 0 80px rgba(57,255,20,.08);
 }
-html,body,#app{height:100%;width:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);}
-#app{display:flex;flex-direction:column;}
 
-/* TITLE BAR */
-.titlebar{height:30px;background:#3c3c3c;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-bottom:1px solid #111;position:relative;-webkit-app-region:drag;}
-.titlebar-title{font-size:11px;color:var(--muted);letter-spacing:.5px;}
-.titlebar-brand{position:absolute;left:10px;display:flex;align-items:center;gap:6px;-webkit-app-region:no-drag;}
-.brand-logo{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),#00bb33);border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#000;}
-.brand-name{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:1px;}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ui);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
 
-/* MAIN AREA */
-.main-area{display:flex;flex:1;overflow:hidden;}
+/* ════════════════════════════════════════
+   SCANLINE OVERLAY (aesthetic texture)
+════════════════════════════════════════ */
+.xce-scanline-overlay,
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,.03) 0px,
+    rgba(0,0,0,.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
 
-/* ACTIVITY BAR */
-.activity-bar{width:48px;background:var(--activity);display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:2px;flex-shrink:0;border-right:1px solid #111;}
-.act-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;color:var(--muted);border-radius:4px;transition:color .15s;position:relative;}
-.act-btn:hover{color:var(--text);}
-.act-btn.active{color:var(--text);border-left:2px solid var(--accent);}
-.act-sep{width:28px;height:1px;background:var(--border);margin:4px 0;}
-.act-bottom{margin-top:auto;}
+/* ════════════════════════════════════════
+   SCROLLBAR
+════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-/* SIDEBAR */
-.sidebar{width:260px;background:var(--sidebar);border-right:1px solid #111;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:width .15s;}
-.sidebar.collapsed{width:0;}
-.sidebar-head{height:32px;display:flex;align-items:center;padding:0 12px;font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;flex-shrink:0;justify-content:space-between;}
-.sidebar-acts{display:flex;gap:2px;}
-.sact{width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;color:var(--muted);border-radius:3px;transition:all .15s;}
-.sact:hover{color:var(--text);background:rgba(255,255,255,.08);}
+/* ════════════════════════════════════════
+   NAV
+════════════════════════════════════════ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  height: 52px;
+  background: rgba(4,6,5,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 32px; gap: 32px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+}
+.nav-logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--accent), #00bb33);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font: 800 14px var(--mono); color: #000;
+  box-shadow: 0 0 16px rgba(57,255,20,.4);
+  flex-shrink: 0;
+}
+.nav-logo-text {
+  font: 700 13px var(--mono);
+  color: var(--accent); letter-spacing: 2px; text-transform: uppercase;
+}
+.nav-links { display: flex; gap: 4px; margin-left: auto; }
+.nav-link {
+  padding: 5px 14px;
+  font: 600 11px var(--mono); letter-spacing: .8px; text-transform: uppercase;
+  color: var(--muted); text-decoration: none;
+  border-radius: 4px; transition: color .15s, background .15s;
+}
+.nav-link:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-link.cta {
+  color: var(--accent);
+  border: 1px solid var(--accentb);
+  background: var(--accentd);
+}
+.nav-link.cta:hover { background: var(--accentg); }
 
-/* FILE TREE */
-.file-tree{flex:1;overflow-y:auto;overflow-x:hidden;}
-.file-tree::-webkit-scrollbar{width:6px;}
-.file-tree::-webkit-scrollbar-thumb{background:var(--border);}
-.ftree-item{display:flex;align-items:center;height:22px;cursor:pointer;font-size:12.5px;color:var(--text);user-select:none;position:relative;}
-.ftree-item:hover{background:rgba(255,255,255,.05);}
-.ftree-item.active-file{background:var(--accent-dim);color:var(--accent);}
-.ftree-inner{display:flex;align-items:center;gap:4px;width:100%;padding-right:6px;overflow:hidden;}
-.ftree-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:12.5px;}
-.ftree-chevron{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .12s;}
-.ftree-chevron.open{transform:rotate(90deg);}
-.ftree-actions{display:none;margin-left:auto;gap:2px;flex-shrink:0;}
-.ftree-item:hover .ftree-actions{display:flex;}
-.ftree-act{width:16px;height:16px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:2px;}
-.ftree-act:hover{color:var(--text);background:rgba(255,255,255,.1);}
-.inline-row{display:flex;align-items:center;height:22px;gap:4px;}
-.inline-inp{background:var(--bg3);border:1px solid var(--accent);color:var(--text);font:12px var(--font);padding:1px 5px;outline:none;flex:1;height:18px;}
+/* ════════════════════════════════════════
+   HERO
+════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 100px 32px 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(57,255,20,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57,255,20,.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 100%);
+}
+.hero-glow {
+  position: absolute; top: 20%; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 300px;
+  background: radial-gradient(ellipse, rgba(57,255,20,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 700 10px var(--mono); letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accentb);
+  background: var(--accentd); border-radius: 20px;
+  padding: 5px 14px; margin-bottom: 28px;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
 
-/* SEARCH PANEL */
-.search-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.search-box{padding:8px;border-bottom:1px solid var(--border);}
-.search-inp{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font:12px var(--font);padding:5px 8px;outline:none;}
-.search-inp:focus{border-color:var(--accent);}
-.search-info{padding:4px 12px;font-size:11px;color:var(--muted);}
-.search-results{flex:1;overflow-y:auto;}
-.search-results::-webkit-scrollbar{width:6px;}
-.search-results::-webkit-scrollbar-thumb{background:var(--border);}
-.sresult{padding:4px 12px;cursor:pointer;}
-.sresult:hover{background:rgba(255,255,255,.04);}
-.sresult.active-result{background:var(--accent-dim);}
-.sresult-path{font-size:11px;color:var(--accent);margin-bottom:1px;}
-.sresult-text{font-size:12px;color:var(--text);}
-.s-match{background:rgba(255,220,0,.25);border-radius:2px;}
+.hero-title {
+  font: 800 72px/1 var(--ui);
+  letter-spacing: -2px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #ffffff 30%, var(--accent) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-title span { color: var(--accent); -webkit-text-fill-color: var(--accent); }
+.hero-sub {
+  font-size: 17px; color: var(--muted); max-width: 540px;
+  margin: 0 auto 40px; line-height: 1.7;
+}
+.hero-install {
+  display: inline-flex; align-items: center; gap: 0;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--r); overflow: hidden;
+  font-family: var(--mono); font-size: 12px;
+  max-width: 100%;
+}
+.hero-install-label {
+  padding: 10px 14px;
+  background: var(--accentd);
+  color: var(--accent); font-weight: 700; font-size: 10px;
+  letter-spacing: 1px; text-transform: uppercase; border-right: 1px solid var(--border2);
+  flex-shrink: 0;
+}
+.hero-install-code {
+  padding: 10px 16px; color: var(--text); flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.hero-install-code .hl-tag { color: #569cd6; }
+.hero-install-code .hl-attr { color: #9cdcfe; }
+.hero-install-code .hl-str { color: #ce9178; }
+.hero-copy {
+  padding: 0 14px; height: 100%;
+  background: transparent; border: none; border-left: 1px solid var(--border2);
+  color: var(--muted); font: 11px var(--mono); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: color .15s, background .15s; flex-shrink: 0;
+}
+.hero-copy:hover { color: var(--accent); background: var(--accentd); }
+.hero-scroll {
+  position: absolute; bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--muted); font: 10px var(--mono); letter-spacing: 2px;
+  text-transform: uppercase; animation: float 3s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+.hero-scroll svg { opacity: .5; }
 
-/* AI CHAT PANEL */
-.ai-chat-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.ai-chat-msgs{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px;}
-.ai-chat-msgs::-webkit-scrollbar{width:6px;}
-.ai-chat-msgs::-webkit-scrollbar-thumb{background:var(--border);}
-.ai-msg{padding:8px 10px;border-radius:4px;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word;}
-.ai-msg.user{background:var(--bg3);color:var(--text);border-left:2px solid var(--accent);}
-.ai-msg.assistant{background:rgba(86,156,214,.08);color:var(--text);border-left:2px solid var(--kw);}
-.ai-msg.system{color:var(--muted);font-style:italic;font-size:11px;padding:2px 6px;}
-.ai-chat-input-row{padding:8px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0;}
-.ai-chat-inp{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);font:12px var(--font);padding:5px 8px;outline:none;resize:none;height:56px;}
-.ai-chat-inp:focus{border-color:var(--accent);}
-.ai-send-btn{width:32px;height:56px;background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
-.ai-send-btn:hover{background:var(--accent);color:#000;}
-.ai-chat-actions{padding:0 8px 6px;display:flex;gap:4px;flex-wrap:wrap;}
-.ai-quick-btn{padding:2px 8px;background:transparent;border:1px solid var(--border);color:var(--muted);font:10px var(--font);cursor:pointer;border-radius:10px;transition:all .15s;}
-.ai-quick-btn:hover{border-color:var(--accent);color:var(--accent);}
+/* ════════════════════════════════════════
+   SECTION LAYOUT
+════════════════════════════════════════ */
+.section {
+  max-width: 1120px; margin: 0 auto;
+  padding: 80px 32px;
+}
+.section + .section { border-top: 1px solid var(--border); }
+.section-eyebrow {
+  font: 700 10px var(--mono); letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-eyebrow::before {
+  content: ''; display: block;
+  width: 24px; height: 2px; background: var(--accent);
+  border-radius: 2px;
+}
+.section-title {
+  font: 800 40px/1.1 var(--ui); letter-spacing: -1px;
+  color: #fff; margin-bottom: 12px;
+}
+.section-desc {
+  font-size: 15px; color: var(--muted); max-width: 600px;
+  line-height: 1.75; margin-bottom: 44px;
+}
 
-/* EDITOR CONTAINER */
-.editor-container{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+/* ════════════════════════════════════════
+   STEPS
+════════════════════════════════════════ */
+.steps { display: flex; flex-direction: column; gap: 48px; }
+.step {
+  display: grid; grid-template-columns: 64px 1fr;
+  gap: 0 28px; align-items: start;
+}
+.step-num {
+  width: 48px; height: 48px;
+  border: 2px solid var(--accentb);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font: 700 18px var(--mono); color: var(--accent);
+  background: var(--accentd);
+  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(57,255,20,.1);
+}
+.step-body { padding-top: 8px; }
+.step-title {
+  font: 700 20px var(--ui); color: #fff;
+  margin-bottom: 8px;
+}
+.step-desc {
+  font-size: 14px; color: var(--muted); line-height: 1.7;
+  margin-bottom: 18px; max-width: 600px;
+}
+.step-connector {
+  width: 2px; height: 32px;
+  background: linear-gradient(to bottom, var(--accentb), transparent);
+  margin: 4px 0 4px 23px;
+}
 
-/* TAB BAR */
-.tab-bar{height:35px;background:var(--tab-bg);display:flex;overflow-x:auto;overflow-y:hidden;flex-shrink:0;border-bottom:1px solid #111;}
-.tab-bar::-webkit-scrollbar{height:2px;}
-.tab-bar::-webkit-scrollbar-thumb{background:var(--border);}
-.tab{height:35px;min-width:100px;max-width:180px;display:flex;align-items:center;gap:5px;padding:0 10px;cursor:pointer;font-size:12px;color:var(--muted);border-right:1px solid var(--border);flex-shrink:0;background:var(--tab-bg);transition:background .1s;}
-.tab:hover{background:rgba(255,255,255,.04);}
-.tab.active-tab{background:var(--tab-active);color:var(--text);border-top:2px solid var(--accent);}
-.tab-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
-.tab-close{width:16px;height:16px;display:flex;align-items:center;justify-content:center;border-radius:3px;opacity:0;flex-shrink:0;border:none;background:transparent;cursor:pointer;color:var(--muted);}
-.tab:hover .tab-close,.tab.active-tab .tab-close{opacity:.7;}
-.tab-close:hover{opacity:1!important;background:rgba(255,255,255,.15);color:var(--text);}
-.tab-toolbar{margin-left:auto;display:flex;align-items:center;gap:4px;padding:0 8px;flex-shrink:0;}
-.tb-btn{height:24px;padding:0 8px;background:transparent;border:1px solid var(--border);color:var(--muted);font:11px var(--font);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s;}
-.tb-btn:hover{border-color:var(--accent);color:var(--accent);}
-.tb-btn.active-btn{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+/* ════════════════════════════════════════
+   CODE BLOCKS
+════════════════════════════════════════ */
+.code-wrap {
+  background: var(--bg1);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+  font-family: var(--mono);
+  position: relative;
+}
+.code-header {
+  display: flex; align-items: center;
+  padding: 0 16px;
+  height: 36px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+.code-dots { display: flex; gap: 6px; }
+.code-dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-dot.r { background: #ff5f57; }
+.code-dot.y { background: #febc2e; }
+.code-dot.g { background: #28c840; }
+.code-fname {
+  font-size: 11px; color: var(--muted); font-weight: 500;
+  letter-spacing: .5px;
+}
+.code-copy {
+  margin-left: auto;
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--muted); font: 10px var(--mono); letter-spacing: .5px;
+  text-transform: uppercase; padding: 3px 10px; border-radius: 3px;
+  cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 4px;
+}
+.code-copy:hover { border-color: var(--accent); color: var(--accent); }
+.code-copy.copied { border-color: var(--accent); color: var(--accent); }
+.code-body {
+  padding: 20px 24px;
+  font-size: 12.5px; line-height: 1.8;
+  overflow-x: auto; color: var(--text);
+}
+.code-body::-webkit-scrollbar { height: 4px; }
+.code-body::-webkit-scrollbar-thumb { background: var(--border2); }
 
-/* EDITOR PANELS */
-.editor-panels{flex:1;display:flex;overflow:hidden;position:relative;}
+/* Inline syntax */
+.t-tag  { color: #569cd6; }
+.t-attr { color: #9cdcfe; }
+.t-str  { color: #ce9178; }
+.t-kw   { color: #569cd6; }
+.t-fn   { color: #dcdcaa; }
+.t-cm   { color: #6a9955; font-style: italic; }
+.t-nm   { color: #b5cea8; }
+.t-ty   { color: #4ec9b0; }
+.t-pr   { color: #9cdcfe; }
+.t-op   { color: #d4d4d4; }
+.t-pu   { color: #d4d4d4; }
 
-/* CODE EDITOR */
-.code-editor{flex:1;display:flex;overflow:hidden;background:var(--bg);position:relative;}
-.gutter{width:52px;overflow:hidden;background:var(--bg);border-right:1px solid var(--border);flex-shrink:0;user-select:none;position:relative;}
-.gutter-inner{padding:16px 8px 16px 0;text-align:right;font-size:14px;line-height:21px;color:var(--muted);font-family:var(--font);white-space:pre;}
-.gutter-markers{position:absolute;top:0;left:0;width:100%;pointer-events:none;}
-.err-marker{position:absolute;left:2px;width:8px;height:8px;border-radius:50%;cursor:pointer;pointer-events:all;z-index:10;}
-.err-marker.error{background:var(--err);}
-.err-marker.warning{background:var(--warn);}
-.err-marker.info{background:var(--info);}
-.err-tooltip{position:fixed;background:#1a1a2e;border:1px solid var(--err);color:var(--text);font:11px var(--font);padding:6px 10px;z-index:9999;max-width:320px;white-space:pre-wrap;pointer-events:none;border-radius:3px;box-shadow:0 4px 16px rgba(0,0,0,.7);}
-.editor-scroll{flex:1;overflow:auto;position:relative;}
-.editor-scroll::-webkit-scrollbar{width:10px;height:10px;}
-.editor-scroll::-webkit-scrollbar-track{background:var(--bg2);}
-.editor-scroll::-webkit-scrollbar-thumb{background:#4a4a4a;}
-.editor-scroll::-webkit-scrollbar-thumb:hover{background:#666;}
-.editor-scroll::-webkit-scrollbar-corner{background:var(--bg2);}
-.editor-inner{position:relative;width:max-content;min-width:100%;}
-.hl-layer{padding:16px;font-size:14px;line-height:21px;font-family:var(--font);white-space:pre;pointer-events:none;display:block;width:max-content;min-width:100%;min-height:300px;}
-.ed-textarea{position:absolute;top:0;left:0;width:100%;height:100%;padding:16px;font-size:14px;line-height:21px;font-family:var(--font);background:transparent;color:transparent;caret-color:#fff;border:none;outline:none;resize:none;white-space:pre;word-wrap:normal;overflow:hidden;z-index:2;tab-size:2;spellcheck:false;}
-.ghost-text{color:var(--ghost);font-style:normal;}
+/* ════════════════════════════════════════
+   INLINE BADGE
+════════════════════════════════════════ */
+code {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--bg2); border: 1px solid var(--border2);
+  padding: 2px 7px; border-radius: 4px;
+  color: var(--accent);
+}
 
-/* Error squiggles in highlight layer */
-.err-squiggle{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--err);}
-.warn-squiggle{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--warn);}
+/* ════════════════════════════════════════
+   LIVE EDITOR DEMOS
+════════════════════════════════════════ */
+.demo-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media(max-width:800px){ .demo-grid{ grid-template-columns:1fr; } }
 
-/* Quick Fix Panel */
-.quick-fix-panel{position:absolute;background:var(--bg3);border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.7);z-index:5000;min-width:280px;border-radius:4px;overflow:hidden;}
-.qf-head{padding:6px 10px;font-size:11px;color:var(--muted);background:var(--bg4);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-.qf-error{padding:8px 10px;font-size:12px;color:var(--err);border-bottom:1px solid var(--border);white-space:pre-wrap;}
-.qf-fix{padding:8px 10px;cursor:pointer;font-size:12px;color:var(--text);display:flex;align-items:center;gap:6px;transition:background .1s;}
-.qf-fix:hover{background:var(--accent-dim);color:var(--accent);}
-.qf-loading{padding:8px 10px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.demo-card {
+  background: var(--bg1);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.demo-card-head {
+  padding: 14px 18px;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.demo-card-title { font: 700 13px var(--ui); color: #fff; }
+.demo-card-badge {
+  font: 700 9px var(--mono); letter-spacing: 1px; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 3px;
+}
+.badge-console { background: rgba(57,255,20,.12); color: var(--accent); border: 1px solid var(--accentb); }
+.badge-page    { background: rgba(0,212,255,.1);  color: #00d4ff; border: 1px solid rgba(0,212,255,.3); }
+.badge-noview  { background: rgba(255,140,0,.1);  color: #ff8c00; border: 1px solid rgba(255,140,0,.3); }
+.badge-split   { background: rgba(255,68,102,.1); color: #ff4466; border: 1px solid rgba(255,68,102,.3); }
 
-/* Syntax token classes */
-.tk-kw{color:var(--kw);}
-.tk-str{color:var(--str);}
-.tk-cmt{color:var(--cmt);font-style:italic;}
-.tk-fn{color:var(--fn);}
-.tk-num{color:var(--num);}
-.tk-type{color:var(--type);}
-.tk-prop{color:var(--prop);}
-.tk-regex{color:var(--regex);}
-.tk-sel{color:var(--sel-css);}
-.tk-plain{color:var(--text);}
-.tk-op{color:var(--op);}
+/* The actual editor containers */
+.demo-editor {
+  height: 340px;
+}
+.demo-editor .xce-viewer { height: 130px !important; }
 
-/* Search highlights */
-.hl-match{background:rgba(255,220,0,.22);border-radius:2px;}
-.hl-match-active{background:rgba(255,130,0,.45);}
+/* ════════════════════════════════════════
+   THEME GALLERY
+════════════════════════════════════════ */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.theme-card {
+  border-radius: var(--r); overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer; transition: border-color .2s, transform .15s;
+}
+.theme-card:hover { transform: translateY(-2px); }
+.theme-card.active { border-color: var(--accent); }
+.theme-preview {
+  height: 100px;
+  font: 11px var(--mono); padding: 12px 14px;
+  line-height: 1.6; overflow: hidden;
+}
+.theme-footer {
+  padding: 10px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.theme-name { font: 700 12px var(--ui); }
+.theme-dot { width: 12px; height: 12px; border-radius: 50%; }
 
-/* IMAGE PREVIEW */
-.img-preview{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);gap:12px;overflow:auto;padding:20px;}
-.img-preview img{max-width:90%;max-height:70vh;border:1px solid var(--border);}
-.img-meta{font-size:11px;color:var(--muted);}
+/* ════════════════════════════════════════
+   CSS VARIABLES TABLE
+════════════════════════════════════════ */
+.var-table {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--mono); font-size: 12px;
+}
+.var-table th {
+  text-align: left; padding: 10px 14px;
+  font: 700 10px var(--mono); letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border2);
+}
+.var-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  vertical-align: top;
+}
+.var-table tr:last-child td { border-bottom: none; }
+.var-table td:nth-child(1) { color: var(--accent); }
+.var-table td:nth-child(2) { color: #ce9178; }
+.var-table td:nth-child(3) { color: var(--muted); font-family: var(--ui); font-size: 12px; }
+.var-swatch {
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.var-swatch-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.2); flex-shrink: 0;
+}
 
-/* WELCOME */
-.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;color:var(--muted);}
-.welcome-logo{width:72px;height:72px;background:linear-gradient(135deg,var(--accent),#00bb33);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;color:#000;box-shadow:0 0 40px var(--accent-glow);}
-.welcome-title{font-size:28px;font-weight:700;color:var(--text);letter-spacing:2px;}
-.welcome-sub{font-size:13px;color:var(--muted);}
-.welcome-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-.welcome-btn{padding:8px 18px;background:var(--bg3);border:1px solid var(--border);color:var(--text);cursor:pointer;font:12px var(--font);display:flex;align-items:center;gap:6px;transition:all .15s;}
-.welcome-btn:hover{border-color:var(--accent);color:var(--accent);}
-.welcome-keys{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:11px;margin-top:8px;}
-.k{background:var(--bg3);border:1px solid var(--border);padding:1px 6px;font:11px var(--font);color:var(--text);white-space:nowrap;}
+/* ════════════════════════════════════════
+   WEBSITE INTEGRATION SHOWCASE
+════════════════════════════════════════ */
+.website-mockup {
+  border: 1px solid var(--border2);
+  border-radius: 10px; overflow: hidden;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+}
+.mockup-bar {
+  height: 36px; background: #e8e8e8;
+  display: flex; align-items: center; padding: 0 14px; gap: 10px;
+}
+.mockup-dots { display: flex; gap: 6px; }
+.mockup-dot { width: 12px; height: 12px; border-radius: 50%; }
+.mockup-dot.r { background: #ff5f57; }
+.mockup-dot.y { background: #febc2e; }
+.mockup-dot.g { background: #28c840; }
+.mockup-url {
+  flex: 1; height: 22px; background: #fff;
+  border-radius: 4px; margin: 0 10px;
+  display: flex; align-items: center; padding: 0 10px;
+  font: 11px sans-serif; color: #555;
+}
+.mockup-body {
+  background: #f5f5f5;
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.mockup-header {
+  background: #1e1e1e;
+  height: 48px; border-radius: 6px;
+  display: flex; align-items: center; padding: 0 18px; gap: 8px;
+}
+.mockup-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.mockup-logo-text { font: 700 12px var(--mono); color: var(--accent); letter-spacing: 2px; }
+.mockup-nav { display: flex; gap: 16px; margin-left: auto; }
+.mockup-nav span { font: 11px sans-serif; color: #888; }
+.mockup-content { display: flex; gap: 16px; }
+.mockup-sidebar {
+  width: 140px; flex-shrink: 0;
+  background: #fff; border-radius: 6px; padding: 12px;
+  border: 1px solid #e0e0e0;
+}
+.mockup-sidebar div {
+  height: 10px; background: #e8e8e8; border-radius: 3px;
+  margin-bottom: 8px;
+}
+.mockup-sidebar div.active { background: var(--accentg); }
+.mockup-main { flex: 1; }
+.mockup-editor-slot {
+  border-radius: 6px; overflow: hidden;
+  border: 1px solid var(--border2);
+  height: 260px;
+}
+/* The live editor inside the mockup */
+#mockup-editor {
+  height: 260px;
+  --xce-font-size: 11px;
+  --xce-line-h: 18px;
+}
+#mockup-editor .xce-viewer { height: 90px !important; }
 
-/* TERMINAL */
-.terminal{background:var(--bg2);border-top:1px solid #111;display:flex;flex-direction:column;flex-shrink:0;}
-.term-head{height:28px;display:flex;align-items:center;padding:0 12px;gap:8px;font-size:11px;color:var(--muted);background:var(--bg3);border-bottom:1px solid var(--border);flex-shrink:0;justify-content:space-between;}
-.term-tabs{display:flex;gap:1px;}
-.term-tab{padding:0 12px;height:28px;display:flex;align-items:center;font-size:11px;cursor:pointer;color:var(--muted);}
-.term-tab.active-term{color:var(--text);border-bottom:1px solid var(--accent);}
-.term-out{flex:1;overflow-y:auto;padding:8px 12px;font-size:12px;line-height:1.5;}
-.term-out::-webkit-scrollbar{width:6px;}
-.term-out::-webkit-scrollbar-thumb{background:var(--border);}
-.term-in-row{display:flex;align-items:center;padding:2px 12px;height:26px;border-top:1px solid var(--border);flex-shrink:0;}
-.term-prompt{color:var(--accent);margin-right:8px;font-size:12px;flex-shrink:0;}
-.term-inp{flex:1;background:transparent;border:none;outline:none;color:var(--text);font:12px var(--font);}
+/* ════════════════════════════════════════
+   API QUICK REF
+════════════════════════════════════════ */
+.api-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media(max-width:700px){ .api-grid{ grid-template-columns:1fr; } }
+.api-card {
+  background: var(--bg1); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 18px 20px;
+}
+.api-card-title {
+  font: 700 11px var(--mono); color: var(--accent);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.api-card-title::after { content:''; flex:1; height:1px; background:var(--border2); }
+.api-method {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.03);
+  font-size: 12px;
+}
+.api-method:last-child { border-bottom: none; }
+.api-method-name { color: #dcdcaa; font-family: var(--mono); flex-shrink: 0; }
+.api-method-desc { color: var(--muted); font-size: 11px; }
 
-/* STATUS BAR */
-.statusbar{height:22px;background:var(--status-bg);display:flex;align-items:center;padding:0 8px;font-size:11px;color:rgba(255,255,255,.85);gap:0;flex-shrink:0;}
-.status-item{padding:0 6px;height:22px;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;}
-.status-item:hover{background:rgba(255,255,255,.12);}
-.status-right{margin-left:auto;display:flex;}
-.status-ai{background:rgba(57,255,20,.25);color:var(--accent);}
-.status-errors{background:rgba(244,71,71,.2);color:#ff6b6b;}
-.large-file-badge{background:rgba(255,180,0,.15);color:#ffb400;padding:0 6px;font-size:10px;letter-spacing:.5px;}
+/* ════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════ */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 32px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+.footer a { color: var(--accent); text-decoration: none; }
+.footer-logo {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-bottom: 16px;
+}
+.footer-logo-icon {
+  width: 24px; height: 24px;
+  background: linear-gradient(135deg, var(--accent), #00bb33);
+  border-radius: 5px; display: flex; align-items: center; justify-content: center;
+  font: 800 12px var(--mono); color: #000;
+}
 
-/* DRAWING */
-.draw-canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:900;cursor:crosshair;}
-.draw-toolbar{position:fixed;top:60px;right:16px;background:var(--bg3);border:1px solid var(--border);padding:10px;display:flex;flex-direction:column;gap:6px;z-index:901;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.6);min-width:130px;}
-.draw-toolbar-drag{font-size:11px;color:var(--muted);text-align:center;margin-bottom:4px;cursor:move;padding:2px 0;}
-.dtool-row{display:flex;gap:4px;}
-.dtool{width:32px;height:32px;border:1px solid transparent;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);border-radius:4px;transition:all .15s;}
-.dtool:hover{background:rgba(255,255,255,.08);color:var(--text);}
-.dtool.active-tool{border-color:var(--accent);background:var(--accent-dim);color:var(--accent);}
-.dtool-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
-.draw-color{width:100%;height:28px;border:1px solid var(--border);border-radius:3px;cursor:pointer;background:transparent;}
-.draw-range{width:100%;accent-color:var(--accent);}
-.draw-act{width:100%;padding:5px;background:transparent;border:1px solid var(--border);color:var(--text);font:11px var(--font);cursor:pointer;border-radius:3px;transition:all .15s;}
-.draw-act:hover{border-color:var(--accent);color:var(--accent);}
-.draw-exit{border-color:#cc2222;color:#ff5555;}
-.draw-exit:hover{background:rgba(204,34,34,.15);}
+/* ════════════════════════════════════════
+   UTILITIES
+════════════════════════════════════════ */
+.flex { display: flex; }
+.gap-12 { gap: 12px; }
+.mt-8  { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-0  { margin-bottom: 0; }
 
-/* CONTEXT MENU */
-.ctx-menu{position:fixed;background:var(--bg3);border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.7);z-index:8000;min-width:170px;padding:3px 0;}
-.ctx-item{padding:6px 14px;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text);}
-.ctx-item:hover{background:var(--accent-dim);color:var(--accent);}
-.ctx-sep{height:1px;background:var(--border);margin:3px 0;}
+/* Highlight a specific line in code block */
+.line-hl {
+  display: block;
+  background: rgba(57,255,20,.06);
+  border-left: 2px solid var(--accent);
+  margin: 0 -24px; padding: 0 24px 0 22px;
+}
+.line-num {
+  display: inline-block; width: 28px;
+  color: var(--dim); text-align: right;
+  margin-right: 16px; user-select: none; font-size: 11px;
+}
 
-/* SCROLLBARS */
-::-webkit-scrollbar{width:8px;height:8px;}
-::-webkit-scrollbar-track{background:var(--bg2);}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:0;}
-::-webkit-scrollbar-thumb:hover{background:#666;}
-.resize-handle{width:4px;cursor:col-resize;background:transparent;flex-shrink:0;}
-.resize-handle:hover{background:var(--accent);}
+/* Tooltip for copy */
+.copied-msg {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--accent); color: #000;
+  font: 700 12px var(--mono); padding: 8px 18px;
+  border-radius: 6px; z-index: 9999;
+  opacity: 0; transform: translateY(10px);
+  transition: all .25s;
+  pointer-events: none;
+}
+.copied-msg.show { opacity: 1; transform: translateY(0); }
 
-/* AI indicators */
-.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:ai-pulse 1.2s infinite;display:inline-block;}
-@keyframes ai-pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-.unsaved-dot{width:7px;height:7px;border-radius:50%;background:var(--text);flex-shrink:0;}
-.unsaved-dot.modified{background:var(--muted);}
-
-/* Error indicator button in gutter */
-.gutter-err-btn{position:absolute;left:0;width:52px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;}
+/* ════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════ */
+@media(max-width:600px){
+  .hero-title { font-size: 42px; }
+  .section-title { font-size: 28px; }
+  .step { grid-template-columns: 1fr; }
+  .step-num { display: none; }
+  .nav-links .nav-link:not(.cta) { display: none; }
+}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<script>
-'use strict';
 
-/* ================================================================
-   STATE
-================================================================ */
-const DEFAULT_STATE = {
-  files:{},openTabs:[],activeTab:null,fileTree:[],
-  expandedFolders:[],autoSave:true,
-  activePanel:'explorer',showSidebar:true,showTerminal:false,
-  searchQuery:'',searchResults:[],searchIdx:0,
-  drawMode:false,drawTool:'pen',drawColor:'#39ff14',drawSize:3,
-  editorZoom:1,splitView:1,
-  terminalHistory:[{text:'X Code  —  type "help" for commands',cmd:false}],
-  modified:{},
-  theme:{bg:'#1e1e1e',accent:'#39ff14',status:'#007acc'},
-  aiChatHistory:[],
-  diagnostics:{} // path -> [{line,col,msg,severity}]
+<!-- ════════════ COPIED TOAST ════════════ -->
+<div class="copied-msg" id="toast">✓ Copied!</div>
+
+<!-- ════════════ NAV ════════════ -->
+<nav class="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">X</div>
+    <span class="nav-logo-text">X Code</span>
+  </a>
+  <div class="nav-links">
+    <a href="#link"      class="nav-link">Link</a>
+    <a href="#style"     class="nav-link">Style</a>
+    <a href="#demos"     class="nav-link">Demos</a>
+    <a href="#integrate" class="nav-link">Integrate</a>
+    <a href="#api"       class="nav-link">API</a>
+    <a href="https://phinex-org.github.io/X-Code/" class="nav-link cta" target="_blank">X Code</a>
+  </div>
+</nav>
+
+<!-- ════════════ HERO ════════════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    Embeddable · Zero dependencies · AI-powered
+  </div>
+
+  <h1 class="hero-title">XCode <span>Window</span><br>Previewer</h1>
+  <p class="hero-sub">
+    Drop a full-featured code editor — with syntax highlighting, inline AI completions,
+    and a live page or console viewer — into any website with a single script tag.
+  </p>
+
+  <!-- CDN link snippet -->
+  <div class="hero-install">
+    <div class="hero-install-label">CDN</div>
+    <div class="hero-install-code">
+      <span class="hl-tag">&lt;script</span>
+      <span class="hl-attr"> src</span>=<span class="hl-str">"https://phinex-org.github.io/X-Code/XCode.js"</span>
+      <span class="hl-tag">&gt;&lt;/script&gt;</span>
+    </div>
+    <button class="hero-copy" onclick="copy('<script src=&quot;https://phinex-org.github.io/X-Code/XCode.js&quot;></script>',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg> Copy
+    </button>
+  </div>
+
+  <div class="hero-scroll">
+    <span>Scroll to start</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 5v14M5 12l7 7 7-7"/>
+    </svg>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 1 — HOW TO LINK
+══════════════════════════════════════════════════════ -->
+<section class="section" id="link">
+  <div class="section-eyebrow">Step 1</div>
+  <h2 class="section-title">Link the Editor</h2>
+  <p class="section-desc">
+    Paste one <code>&lt;script&gt;</code> tag inside your <code>&lt;head&gt;</code>.
+    That's the entire installation — no npm, no build step, no dependencies.
+  </p>
+
+  <div class="code-wrap">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
+      <span class="code-fname">index.html</span>
+      <button class="code-copy" onclick="copyBlock('cb1',this)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+    </div>
+    <div class="code-body" id="cb1">&lt;!DOCTYPE html&gt;<br>
+&lt;<span class="t-tag">html</span> <span class="t-attr">lang</span>=<span class="t-str">"en"</span>&gt;<br>
+&lt;<span class="t-tag">head</span>&gt;<br>
+  &lt;<span class="t-tag">meta</span> <span class="t-attr">charset</span>=<span class="t-str">"UTF-8"</span>&gt;<br>
+  &lt;<span class="t-tag">meta</span> <span class="t-attr">name</span>=<span class="t-str">"viewport"</span> <span class="t-attr">content</span>=<span class="t-str">"width=device-width, initial-scale=1.0"</span>&gt;<br>
+  &lt;<span class="t-tag">title</span>&gt;My Website&lt;/<span class="t-tag">title</span>&gt;<br>
+
+<span class="line-hl">  <span class="t-cm">&lt;!-- ✦ XCode Editor — add this line --&gt;</span><br>
+  &lt;<span class="t-tag">script</span> <span class="t-attr">src</span>=<span class="t-str">"https://phinex-org.github.io/X-Code/XCode.js"</span>&gt;&lt;/<span class="t-tag">script</span>&gt;</span><br>
+
+&lt;/<span class="t-tag">head</span>&gt;<br>
+&lt;<span class="t-tag">body</span>&gt;<br>
+  <span class="t-cm">&lt;!-- your page content --&gt;</span><br>
+&lt;/<span class="t-tag">body</span>&gt;<br>
+&lt;/<span class="t-tag">html</span>&gt;<br></div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 2 — STYLE
+══════════════════════════════════════════════════════ -->
+<section class="section" id="style">
+  <div class="section-eyebrow">Step 2</div>
+  <h2 class="section-title">Style the Editor</h2>
+  <p class="section-desc">
+    The editor lives inside any <code>&lt;div&gt;</code> you choose.
+    Control its size with regular CSS and override any colour with <code>--xce-*</code> custom properties.
+  </p>
+
+  <div class="steps">
+
+    <!-- Step A: Size -->
+    <div class="step">
+      <div class="step-num">A</div>
+      <div class="step-body">
+        <div class="step-title">Set the container size</div>
+        <div class="step-desc">Give your div any <code>width</code> and <code>height</code>. The editor fills it completely.</div>
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
+            <span class="code-fname">style.css</span>
+            <button class="code-copy" onclick="copyBlock('cb2',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+          </div>
+          <div class="code-body" id="cb2"><span class="t-tag">#my-editor</span> {<br>
+  <span class="t-pr">   width</span>:  <span class="t-nm">100%</span>;         <br><span class="t-cm">/* or 800px, 50vw, etc. */</span><br>
+  <span class="t-pr">   height</span>: <span class="t-nm">480px</span>;        <br><span class="t-cm">/* total editor height   */</span><br>
+  <span class="t-pr">   border-radius</span>: <span class="t-nm">8px</span>;   <br><span class="t-cm">/* optional rounding     */</span><br>
+}
+
+<span class="t-cm">/* Viewer panel height (inside the editor) */</span><br>
+<span class="t-tag">#my-editor .xce-viewer</span> {<br>
+  <span class="t-pr">   height</span>: <span class="t-nm">180px</span>;<br>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step B: Colours -->
+    <div class="step">
+      <div class="step-num">B</div>
+      <div class="step-body">
+        <div class="step-title">Override colours with CSS variables</div>
+        <div class="step-desc">Set any <code>--xce-*</code> token on the container. They cascade down so only your editor is affected.</div>
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
+            <span class="code-fname">style.css — theme tokens</span>
+            <button class="code-copy" onclick="copyBlock('cb3',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+          </div>
+          <div class="code-body" id="cb3"><span class="t-tag">#my-editor</span> {<br>
+  <span class="t-cm">/* ── Backgrounds ── */</span><br>
+  <span class="t-pr">--xce-bg</span>:      <span class="t-str">#1e1e1e</span>;   <br><span class="t-cm">/* main editor background  */</span><br>
+  <span class="t-pr">--xce-bg2</span>:     <span class="t-str">#252526</span>;   <br><span class="t-cm">/* control bar / gutter    */</span><br>
+  <span class="t-pr">--xce-bg3</span>:     <span class="t-str">#2d2d30</span>;   <br><span class="t-cm">/* viewer background       */</span><br>
+
+  <span class="t-cm">/* ── Borders & text ── */</span><br>
+  <span class="t-pr">--xce-border</span>:  <span class="t-str">#3c3c3c</span>;   <br><span class="t-cm">/* divider / border lines  */</span><br>
+  <span class="t-pr">--xce-text</span>:    <span class="t-str">#d4d4d4</span>;   <br><span class="t-cm">/* default code colour     */</span><br>
+  <span class="t-pr">--xce-muted</span>:   <span class="t-str">#858585</span>;   <br><span class="t-cm">/* gutter numbers / labels */</span><br>
+
+  <span class="t-cm">/* ── Accent (cursor, buttons, AI pulse) ── */</span><br>
+  <span class="t-pr">--xce-accent</span>:  <span class="t-str">#39ff14</span>;   <br><span class="t-cm">/* neon green (default)    */</span><br>
+
+  <span class="t-cm">/* ── Syntax token colours ── */</span><br>
+  <span class="t-pr">--xce-kw</span>:      <span class="t-str">#569cd6</span>;   <br><span class="t-cm">/* keywords                */</span><br>
+  <span class="t-pr">--xce-str</span>:     <span class="t-str">#ce9178</span>;   <br><span class="t-cm">/* strings                 */</span><br>
+  <span class="t-pr">--xce-cmt</span>:     <span class="t-str">#6a9955</span>;   <br><span class="t-cm">/* comments                */</span><br>
+  <span class="t-pr">--xce-fn</span>:      <span class="t-str">#dcdcaa</span>;   <br><span class="t-cm">/* function names          */</span><br>
+  <span class="t-pr">--xce-num</span>:     <span class="t-str">#b5cea8</span>;   <br><span class="t-cm">/* numbers                 */</span><br>
+  <span class="t-pr">--xce-type</span>:    <span class="t-str">#4ec9b0</span>;   <br><span class="t-cm">/* types / builtins        */</span><br>
+  <span class="t-pr">--xce-prop</span>:    <span class="t-str">#9cdcfe</span>;   <br><span class="t-cm">/* properties              */</span><br>
+
+  <span class="t-cm">/* ── Typography ── */</span><br>
+  <span class="t-pr">--xce-font</span>:      <span class="t-str">'JetBrains Mono', monospace</span>;<br>
+  <span class="t-pr">--xce-font-size</span>: <span class="t-nm">13px</span>;<br>
+  <span class="t-pr">--xce-line-h</span>:    <span class="t-nm">20px</span>;<br>
+}</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /steps -->
+
+  <!-- Theme gallery -->
+  <h3 style="font:700 18px var(--ui);color:#fff;margin:44px 0 20px;">Built-in theme presets</h3>
+  <div class="theme-grid" id="theme-gallery">
+
+    <div class="theme-card active" data-theme="default" onclick="setThemeOnLive('default',this)">
+      <div class="theme-preview" style="background:#1e1e1e;">
+        <span style="color:#569cd6">const</span> <span style="color:#9cdcfe">x</span> <span style="color:#d4d4d4">=</span> <span style="color:#ce9178">"hello"</span><span style="color:#d4d4d4">;</span><br>
+        <span style="color:#6a9955;font-style:italic">// default theme</span><br>
+        <span style="color:#dcdcaa">console</span><span style="color:#d4d4d4">.</span><span style="color:#dcdcaa">log</span><span style="color:#d4d4d4">(</span><span style="color:#9cdcfe">x</span><span style="color:#d4d4d4">);</span>
+      </div>
+      <div class="theme-footer" style="background:#252526;border-top:1px solid #3c3c3c;">
+        <span class="theme-name" style="color:#d4d4d4">VS Dark</span>
+        <div class="theme-dot" style="background:#39ff14"></div>
+      </div>
+    </div>
+
+    <div class="theme-card" data-theme="ocean" onclick="setThemeOnLive('ocean',this)">
+      <div class="theme-preview" style="background:#0a0a0f;">
+        <span style="color:#c792ea">const</span> <span style="color:#89ddff">x</span> <span style="color:#89ddff">=</span> <span style="color:#c3e88d">"ocean"</span><span style="color:#89ddff">;</span><br>
+        <span style="color:#546e7a;font-style:italic">// material ocean</span><br>
+        <span style="color:#82aaff">console</span><span style="color:#89ddff">.</span><span style="color:#82aaff">log</span><span style="color:#89ddff">(</span><span style="color:#89ddff">x</span><span style="color:#89ddff">);</span>
+      </div>
+      <div class="theme-footer" style="background:#111118;border-top:1px solid #1e1e2e;">
+        <span class="theme-name" style="color:#89ddff">Material Ocean</span>
+        <div class="theme-dot" style="background:#00d4ff"></div>
+      </div>
+    </div>
+
+    <div class="theme-card" data-theme="midnight" onclick="setThemeOnLive('midnight',this)">
+      <div class="theme-preview" style="background:#1a1a2e;">
+        <span style="color:#ff6b9d">const</span> <span style="color:#fff">x</span> <span style="color:#fff">=</span> <span style="color:#ffd93d">"night"</span><span style="color:#fff">;</span><br>
+        <span style="color:#4d4d8a;font-style:italic">// midnight</span><br>
+        <span style="color:#6bcb77">console</span><span style="color:#fff">.</span><span style="color:#6bcb77">log</span><span style="color:#fff">(</span><span style="color:#fff">x</span><span style="color:#fff">);</span>
+      </div>
+      <div class="theme-footer" style="background:#16213e;border-top:1px solid #1e3a5f;">
+        <span class="theme-name" style="color:#ff6b9d">Midnight</span>
+        <div class="theme-dot" style="background:#e94560"></div>
+      </div>
+    </div>
+
+    <div class="theme-card" data-theme="light" onclick="setThemeOnLive('light',this)">
+      <div class="theme-preview" style="background:#fafafa;">
+        <span style="color:#0000ff">const</span> <span style="color:#001080">x</span> <span style="color:#000">=</span> <span style="color:#a31515">"light"</span><span style="color:#000">;</span><br>
+        <span style="color:#008000;font-style:italic">// light theme</span><br>
+        <span style="color:#795e26">console</span><span style="color:#000">.</span><span style="color:#795e26">log</span><span style="color:#000">(</span><span style="color:#001080">x</span><span style="color:#000">);</span>
+      </div>
+      <div class="theme-footer" style="background:#f3f3f3;border-top:1px solid #ddd;">
+        <span class="theme-name" style="color:#333">VS Light</span>
+        <div class="theme-dot" style="background:#0066cc"></div>
+      </div>
+    </div>
+
+    <div class="theme-card" data-theme="dracula" onclick="setThemeOnLive('dracula',this)">
+      <div class="theme-preview" style="background:#282a36;">
+        <span style="color:#ff79c6">const</span> <span style="color:#f8f8f2">x</span> <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">"dracula"</span><span style="color:#f8f8f2">;</span><br>
+        <span style="color:#6272a4;font-style:italic">// dracula theme</span><br>
+        <span style="color:#50fa7b">console</span><span style="color:#f8f8f2">.</span><span style="color:#50fa7b">log</span><span style="color:#f8f8f2">(</span><span style="color:#f8f8f2">x</span><span style="color:#f8f8f2">);</span>
+      </div>
+      <div class="theme-footer" style="background:#21222c;border-top:1px solid #44475a;">
+        <span class="theme-name" style="color:#f8f8f2">Dracula</span>
+        <div class="theme-dot" style="background:#bd93f9"></div>
+      </div>
+    </div>
+
+    <div class="theme-card" data-theme="monokai" onclick="setThemeOnLive('monokai',this)">
+      <div class="theme-preview" style="background:#272822;">
+        <span style="color:#f92672">const</span> <span style="color:#f8f8f2">x</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">"monokai"</span><span style="color:#f8f8f2">;</span><br>
+        <span style="color:#75715e;font-style:italic">// monokai</span><br>
+        <span style="color:#a6e22e">console</span><span style="color:#f8f8f2">.</span><span style="color:#a6e22e">log</span><span style="color:#f8f8f2">(</span><span style="color:#f8f8f2">x</span><span style="color:#f8f8f2">);</span>
+      </div>
+      <div class="theme-footer" style="background:#1e1f1c;border-top:1px solid #3e3d32;">
+        <span class="theme-name" style="color:#f8f8f2">Monokai</span>
+        <div class="theme-dot" style="background:#a6e22e"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CSS for each theme (copy-ready) -->
+  <div id="theme-css-output" style="margin-top:20px;">
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
+        <span class="code-fname" id="theme-css-fname">VS Dark — CSS</span>
+        <button class="code-copy" onclick="copyBlock('theme-css-body',this)">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy
+        </button>
+      </div>
+      <div class="code-body" id="theme-css-body"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 3 — LIVE DEMOS
+══════════════════════════════════════════════════════ -->
+<section class="section" id="demos">
+  <div class="section-eyebrow">Step 3</div>
+  <h2 class="section-title">Use the Editor</h2>
+  <p class="section-desc">
+    Pass a config object when initialising. Pick a <code>viewer</code> mode,
+    choose your <code>language</code>, and optionally enable <code>aiEnabled</code>
+    for Tab-to-complete ghost text.
+  </p>
+
+  <!-- Full init code -->
+  <div class="code-wrap" style="margin-bottom:40px;">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
+      <span class="code-fname">script.js — full initialisation</span>
+      <button class="code-copy" onclick="copyBlock('cb-init',this)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+    </div>
+    <div class="code-body" id="cb-init"><span class="t-kw">const</span> <span class="t-pr">editor</span> <span class="t-op">=</span> <span class="t-kw">new</span> <span class="t-ty">XCodeEditor</span>({
+
+  <span class="t-cm">// ── Required ──────────────────────────────</span><br>
+  <span class="t-pr">container</span>:    <span class="t-str">'#my-editor'</span>,   <br>  <span class="t-cm">// CSS selector or DOM element</span><br>
+
+  <span class="t-cm">// ── Language ──────────────────────────────</span><br>
+  <span class="t-pr">language</span>:     <span class="t-str">'javascript'</span>,    <span class="t-cm">// javascript | typescript | html | css</span>
+                                      <span class="t-cm">// python | json | markdown | shell</span><br>
+
+  <span class="t-cm">// ── Viewer ────────────────────────────────</span><br>
+  <span class="t-pr">viewer</span>:       <span class="t-str">'console'</span>,     <span class="t-cm">// 'console' | 'page' | 'none'</span><br>
+  <span class="t-pr">viewerHeight</span>: <span class="t-str">'180px'</span>,          <span class="t-cm">// initial viewer panel height</span><br>
+
+  <span class="t-cm">// ── AI Suggestions ────────────────────────</span><br>
+  <span class="t-pr">aiEnabled</span>:    <span class="t-nm">true</span>,             <span class="t-cm">// show AI toggle button</span><br>
+  <span class="t-pr">apiKey</span>:       <span class="t-str">'sk-ant-...'</span>,     <span class="t-cm">// Anthropic key (Tab to accept)</span><br>
+
+  <span class="t-cm">// ── Starting code ─────────────────────────</span><br>
+  <span class="t-pr">initialCode</span>:  <span class="t-str">`console.log("Hello!")`</span>,<br>
+
+  <span class="t-cm">// ── Callbacks ─────────────────────────────</span><br>
+  <span class="t-pr">onChange</span>: <span class="t-pr">code</span> <span class="t-op">=&gt;</span> <span class="t-fn">autoSave</span>(code),<br>
+  <span class="t-pr">onRun</span>:    <span class="t-pr">code</span> <span class="t-op">=&gt;</span> <span class="t-fn">console</span>.<span class="t-fn">log</span>(<span class="t-str">'running'</span>),<br>
+});</div>
+  </div>
+
+  <!-- 4 live demos -->
+  <div class="demo-grid">
+
+    <!-- Demo 1: JS Console -->
+    <div class="demo-card">
+      <div class="demo-card-head">
+        <span class="demo-card-title">JavaScript + Console</span>
+        <span class="demo-card-badge badge-console">console</span>
+      </div>
+      <div class="demo-editor" id="demo-js"></div>
+    </div>
+
+    <!-- Demo 2: HTML Page -->
+    <div class="demo-card">
+      <div class="demo-card-head">
+        <span class="demo-card-title">HTML + Page Viewer</span>
+        <span class="demo-card-badge badge-page">page</span>
+      </div>
+      <div class="demo-editor" id="demo-html" style="--xce-accent:#00d4ff;--xce-accent-dim:rgba(0,212,255,.1);"></div>
+    </div>
+
+    <!-- Demo 3: Editor only -->
+    <div class="demo-card">
+      <div class="demo-card-head">
+        <span class="demo-card-title">Editor Only (no viewer)</span>
+        <span class="demo-card-badge badge-noview">none</span>
+      </div>
+      <div class="demo-editor" id="demo-py" style="height:280px;--xce-accent:#ff8c00;--xce-accent-dim:rgba(255,140,0,.1);--xce-kw:#ff8c00;"></div>
+    </div>
+
+    <!-- Demo 4: CSS + Page -->
+    <div class="demo-card">
+      <div class="demo-card-head">
+        <span class="demo-card-title">CSS + Page Viewer</span>
+        <span class="demo-card-badge badge-split">page</span>
+      </div>
+      <div class="demo-editor" id="demo-css" style="--xce-accent:#bd93f9;--xce-accent-dim:rgba(189,147,249,.1);--xce-kw:#ff79c6;--xce-str:#f1fa8c;--xce-fn:#50fa7b;--xce-prop:#8be9fd;"></div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 4 — MERGE INTO YOUR WEBSITE
+══════════════════════════════════════════════════════ -->
+<section class="section" id="integrate">
+  <div class="section-eyebrow">Step 4</div>
+  <h2 class="section-title">Merge Into Your Website</h2>
+  <p class="section-desc">
+    Below is a realistic website mockup with XCode Editor embedded inside a dashboard layout —
+    complete, copy-ready code below the preview.
+  </p>
+
+  <!-- Website mockup -->
+  <div class="website-mockup">
+    <div class="mockup-bar">
+      <div class="mockup-dots">
+        <div class="mockup-dot r"></div>
+        <div class="mockup-dot y"></div>
+        <div class="mockup-dot g"></div>
+      </div>
+      <div class="mockup-url">https://mywebsite.com/editor</div>
+    </div>
+    <div class="mockup-body">
+      <!-- fake header -->
+      <div class="mockup-header">
+        <div class="mockup-logo-dot"></div>
+        <div class="mockup-logo-text">My App</div>
+        <div class="mockup-nav">
+          <span>Dashboard</span><span>Docs</span><span>Settings</span>
+        </div>
+      </div>
+      <!-- fake content layout -->
+      <div class="mockup-content">
+        <div class="mockup-sidebar">
+          <div class="active"></div>
+          <div></div><div></div><div></div>
+          <div style="height:1px;background:#eee;margin:8px 0;"></div>
+          <div></div><div></div>
+        </div>
+        <div class="mockup-main">
+          <div class="mockup-editor-slot">
+            <div id="mockup-editor"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full integration code -->
+  <div class="code-wrap" style="margin-top:28px;">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
+      <span class="code-fname">my-page.html — complete integration example</span>
+      <button class="code-copy" onclick="copyBlock('cb-full',this)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+    </div>
+    <div class="code-body" id="cb-full">&lt;!DOCTYPE html&gt;<br>
+&lt;<span class="t-tag">html</span> <span class="t-attr">lang</span>=<span class="t-str">"en"</span>&gt;<br>
+&lt;<span class="t-tag">head</span>&gt;<br>
+  &lt;<span class="t-tag">meta</span> <span class="t-attr">charset</span>=<span class="t-str">"UTF-8"</span>&gt;<br>
+  &lt;<span class="t-tag">title</span>&gt;My Website&lt;/<span class="t-tag">title</span>&gt;<br>
+
+  <span class="t-cm">&lt;!-- 1. Link the editor --&gt;</span><br>
+  &lt;<span class="t-tag">script</span> <span class="t-attr">src</span>=<span class="t-str">"https://phinex-org.github.io/X-Code/XCode.js"</span>&gt;&lt;/<span class="t-tag">script</span>&gt;<br>
+
+  &lt;<span class="t-tag">style</span>&gt;<br>
+    <span class="t-cm">/* 2. Size the editor container */</span><br>
+    <span class="t-tag">#code-editor</span> {<br>
+      <span class="t-pr">width</span>:  <span class="t-nm">100%</span>;<br>
+      <span class="t-pr">height</span>: <span class="t-nm">500px</span>;<br>
+
+      <span class="t-cm">/* Optional: custom theme */</span><br>
+      <span class="t-pr">--xce-accent</span>: <span class="t-str">#39ff14</span>;<br>
+      <span class="t-pr">--xce-bg</span>:     <span class="t-str">#1e1e1e</span>;<br>
+    }<br>
+
+    <span class="t-cm">/* Viewer panel height (inside the editor) */</span><br>
+    <span class="t-tag">#code-editor .xce-viewer</span> {<br>
+      <span class="t-pr">height</span>: <span class="t-nm">200px</span>;<br>
+    }<br>
+  &lt;/<span class="t-tag">style</span>&gt;<br>
+&lt;/<span class="t-tag">head</span>&gt;<br>
+&lt;<span class="t-tag">body</span>&gt;<br>
+
+  &lt;<span class="t-tag">header</span>&gt;My Website Header&lt;/<span class="t-tag">header</span>&gt;<br>
+
+  &lt;<span class="t-tag">main</span>&gt;<br>
+    &lt;<span class="t-tag">h1</span>&gt;Code Playground&lt;/<span class="t-tag">h1</span>&gt;<br>
+
+    <span class="t-cm">&lt;!-- 3. Place the editor div --&gt;</span><br>
+    &lt;<span class="t-tag">div</span> <span class="t-attr">id</span>=<span class="t-str">"code-editor"</span>&gt;&lt;/<span class="t-tag">div</span>&gt;<br>
+
+    <span class="t-cm">&lt;!-- Result area your page can control --&gt;</span><br>
+    &lt;<span class="t-tag">div</span> <span class="t-attr">id</span>=<span class="t-str">"output"</span>&gt;&lt;/<span class="t-tag">div</span>&gt;<br>
+  &lt;/<span class="t-tag">main</span>&gt;<br>
+
+  &lt;<span class="t-tag">script</span>&gt;<br>
+    <span class="t-cm">// 4. Initialise</span><br>
+    <span class="t-kw">const</span> <span class="t-pr">editor</span> <span class="t-op">=</span> <span class="t-kw">new</span> <span class="t-ty">XCodeEditor</span>({<br>
+      <span class="t-pr">container</span>:    <span class="t-str">'#code-editor'</span>,<br>
+      <span class="t-pr">language</span>:     <span class="t-str">'javascript'</span>,<br>
+      <span class="t-pr">viewer</span>:       <span class="t-str">'console'</span>,<br>
+      <span class="t-pr">viewerHeight</span>: <span class="t-str">'200px'</span>,<br>
+      <span class="t-pr">aiEnabled</span>:    <span class="t-nm">true</span>,<br>
+      <span class="t-pr">apiKey</span>:       <span class="t-str">'sk-ant-...'</span>,<br>
+      <span class="t-pr">initialCode</span>:  <span class="t-str">'console.log("Hello World!")'</span>,<br>
+
+      <span class="t-cm">// Callbacks</span><br>
+      <span class="t-pr">onChange</span>: code <span class="t-op">=&gt;</span> {<br>
+        <span class="t-fn">localStorage</span>.<span class="t-fn">setItem</span>(<span class="t-str">'saved-code'</span>, code);<br>
+      },<br>
+      <span class="t-pr">onRun</span>: code <span class="t-op">=&gt;</span> {<br>
+        document.<span class="t-fn">getElementById</span>(<span class="t-str">'output'</span>).textContent <span class="t-op">=</span> <span class="t-str">'Running...'</span>;<br>
+      }<br>
+    });<br>
+
+    <span class="t-cm">// Use the API anywhere in your page</span><br>
+    document.<span class="t-fn">getElementById</span>(<span class="t-str">'save-btn'</span>)<br>
+      .<span class="t-fn">addEventListener</span>(<span class="t-str">'click'</span>, () <span class="t-op">=&gt;</span> {<br>
+        <span class="t-kw">const</span> code <span class="t-op">=</span> editor.<span class="t-fn">getValue</span>();<br>
+        <span class="t-fn">fetch</span>(<span class="t-str">'/api/save'</span>, { <span class="t-pr">method</span>: <span class="t-str">'POST'</span>, <span class="t-pr">body</span>: code });<br>
+      });<br>
+  &lt;/<span class="t-tag">script</span>&gt;<br>
+
+&lt;/<span class="t-tag">body</span>&gt;<br>
+&lt;/<span class="t-tag">html</span>&gt;</div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 5 — API QUICK REFERENCE
+══════════════════════════════════════════════════════ -->
+<section class="section" id="api">
+  <div class="section-eyebrow">Reference</div>
+  <h2 class="section-title">API Quick Reference</h2>
+  <p class="section-desc">Everything you can call on the editor instance after initialisation.</p>
+
+  <div class="api-grid">
+    <div class="api-card">
+      <div class="api-card-title">Read / Write</div>
+      <div class="api-method"><span class="api-method-name">editor.getValue()</span><span class="api-method-desc">→ returns current code as string</span></div>
+      <div class="api-method"><span class="api-method-name">editor.setValue(code)</span><span class="api-method-desc">→ replace editor content</span></div>
+      <div class="api-method"><span class="api-method-name">editor.getLanguage()</span><span class="api-method-desc">→ active language string</span></div>
+      <div class="api-method"><span class="api-method-name">editor.setLanguage(lang)</span><span class="api-method-desc">→ switch language + re-highlight</span></div>
+    </div>
+    <div class="api-card">
+      <div class="api-card-title">Viewer</div>
+      <div class="api-method"><span class="api-method-name">editor.getViewerMode()</span><span class="api-method-desc">→ 'page' | 'console' | 'none'</span></div>
+      <div class="api-method"><span class="api-method-name">editor.setViewerMode(m)</span><span class="api-method-desc">→ switch viewer at runtime</span></div>
+      <div class="api-method"><span class="api-method-name">editor.run()</span><span class="api-method-desc">→ execute code (same as ▶ Run)</span></div>
+      <div class="api-method"><span class="api-method-name">editor.log(text, type)</span><span class="api-method-desc">→ add line to console viewer</span></div>
+    </div>
+    <div class="api-card">
+      <div class="api-card-title">Appearance</div>
+      <div class="api-method"><span class="api-method-name">editor.setTheme(tokens)</span><span class="api-method-desc">→ apply CSS tokens at runtime</span></div>
+      <div class="api-method"><span class="api-method-name">editor.focus()</span><span class="api-method-desc">→ focus the textarea</span></div>
+    </div>
+    <div class="api-card">
+      <div class="api-card-title">Events</div>
+      <div class="api-method"><span class="api-method-name">editor.on('change', fn)</span><span class="api-method-desc">→ fires on every keystroke</span></div>
+      <div class="api-method"><span class="api-method-name">editor.on('run', fn)</span><span class="api-method-desc">→ fires when ▶ Run is clicked</span></div>
+      <div class="api-method"><span class="api-method-name">editor.off(event, fn)</span><span class="api-method-desc">→ remove listener</span></div>
+      <div class="api-method"><span class="api-method-name">editor.destroy()</span><span class="api-method-desc">→ remove editor, clear container</span></div>
+    </div>
+  </div>
+
+  <!-- keyboard shortcuts -->
+  <h3 style="font:700 16px var(--ui);color:#fff;margin:36px 0 16px;">Keyboard shortcuts</h3>
+  <div class="code-wrap">
+    <div class="code-body" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 32px;">
+      <div><code>Tab</code> <span style="color:var(--muted);font-size:12px;">Accept AI suggestion (or indent)</span></div>
+      <div><code>Esc</code> <span style="color:var(--muted);font-size:12px;">Dismiss AI suggestion</span></div>
+      <div><code>Ctrl + Enter</code> <span style="color:var(--muted);font-size:12px;">Run code</span></div>
+      <div><code>( [ { " '</code> <span style="color:var(--muted);font-size:12px;">Auto-close bracket/quote</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer class="footer">
+  <div class="footer-logo">
+    <div class="footer-logo-icon">X</div>
+    <strong style="color:var(--accent);font-family:var(--mono);letter-spacing:2px;">X CODE</strong>
+  </div>
+  <p>PhineX Group &nbsp;·&nbsp; Embeddable code editor &nbsp;·&nbsp; AI-powered by Gemini</p>
+  <p style="margin-top:6px;">
+    <a href="https://phinex-org.github.io/X-Code/">X Code</a> &nbsp;·&nbsp;
+    <a href="#link">Link</a> &nbsp;·&nbsp;
+    <a href="#style">Style</a> &nbsp;·&nbsp;
+    <a href="#demos">Demos</a>
+  </p>
+</footer>
+
+
+<!-- ════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════ -->
+<script>
+/* ── Utility: copy to clipboard ── */
+function copy(text, btn) {
+  // strip HTML entities for plain text
+  const plain = text
+    .replace(/&quot;/g, '"').replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  navigator.clipboard.writeText(plain).then(() => showToast()).catch(() => {});
+}
+
+function copyBlock(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const plain = el.innerText || el.textContent;
+  navigator.clipboard.writeText(plain).then(() => {
+    if (btn) { btn.textContent = '✓ Copied'; setTimeout(() => btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy', 1800); }
+    showToast();
+  }).catch(() => {});
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ── Theme definitions ── */
+const THEMES = {
+  default: {
+    name: 'VS Dark',
+    css: `#my-editor {
+  /* Default VS Code Dark theme — no overrides needed */
+  /* All --xce-* defaults match VS Dark already       */
+}`,
+    tokens: {}
+  },
+  ocean: {
+    name: 'Material Ocean',
+    css: `#my-editor {
+  --xce-bg:      #0a0a0f;
+  --xce-bg2:     #111118;
+  --xce-bg3:     #16161e;
+  --xce-border:  #1e1e2e;
+  --xce-text:    #a6accd;
+  --xce-muted:   #4a4f6a;
+  --xce-accent:  #00d4ff;
+  --xce-accent-dim: rgba(0,212,255,.1);
+  --xce-kw:   #c792ea;
+  --xce-str:  #c3e88d;
+  --xce-cmt:  #546e7a;
+  --xce-fn:   #82aaff;
+  --xce-num:  #f78c6c;
+  --xce-type: #ffcb6b;
+  --xce-prop: #89ddff;
+}`,
+    tokens: { bg:'#0a0a0f', bg2:'#111118', bg3:'#16161e', border:'#1e1e2e', text:'#a6accd', muted:'#4a4f6a', accent:'#00d4ff', 'accent-dim':'rgba(0,212,255,.1)', kw:'#c792ea', str:'#c3e88d', cmt:'#546e7a', fn:'#82aaff', num:'#f78c6c', type:'#ffcb6b', prop:'#89ddff' }
+  },
+  midnight: {
+    name: 'Midnight',
+    css: `#my-editor {
+  --xce-bg:      #1a1a2e;
+  --xce-bg2:     #16213e;
+  --xce-bg3:     #0f3460;
+  --xce-border:  #1e3a5f;
+  --xce-text:    #e0e0e0;
+  --xce-muted:   #4d4d8a;
+  --xce-accent:  #e94560;
+  --xce-accent-dim: rgba(233,69,96,.1);
+  --xce-kw:   #ff6b9d;
+  --xce-str:  #ffd93d;
+  --xce-cmt:  #4d4d8a;
+  --xce-fn:   #6bcb77;
+  --xce-num:  #4d96ff;
+  --xce-type: #4d96ff;
+  --xce-prop: #fff;
+}`,
+    tokens: { bg:'#1a1a2e', bg2:'#16213e', bg3:'#0f3460', border:'#1e3a5f', text:'#e0e0e0', muted:'#4d4d8a', accent:'#e94560', 'accent-dim':'rgba(233,69,96,.1)', kw:'#ff6b9d', str:'#ffd93d', cmt:'#4d4d8a', fn:'#6bcb77', num:'#4d96ff', type:'#4d96ff', prop:'#fff' }
+  },
+  light: {
+    name: 'VS Light',
+    css: `#my-editor {
+  --xce-bg:      #ffffff;
+  --xce-bg2:     #f3f3f3;
+  --xce-bg3:     #f5f5f5;
+  --xce-border:  #e0e0e0;
+  --xce-text:    #000000;
+  --xce-muted:   #888888;
+  --xce-accent:  #0066cc;
+  --xce-accent-dim: rgba(0,102,204,.08);
+  --xce-ghost:   rgba(100,100,120,.45);
+  --xce-kw:   #0000ff;
+  --xce-str:  #a31515;
+  --xce-cmt:  #008000;
+  --xce-fn:   #795e26;
+  --xce-num:  #098658;
+  --xce-type: #267f99;
+  --xce-prop: #001080;
+}`,
+    tokens: { bg:'#ffffff', bg2:'#f3f3f3', bg3:'#f5f5f5', border:'#e0e0e0', text:'#000000', muted:'#888888', accent:'#0066cc', 'accent-dim':'rgba(0,102,204,.08)', ghost:'rgba(100,100,120,.45)', kw:'#0000ff', str:'#a31515', cmt:'#008000', fn:'#795e26', num:'#098658', type:'#267f99', prop:'#001080' }
+  },
+  dracula: {
+    name: 'Dracula',
+    css: `#my-editor {
+  --xce-bg:      #282a36;
+  --xce-bg2:     #21222c;
+  --xce-bg3:     #1e1f28;
+  --xce-border:  #44475a;
+  --xce-text:    #f8f8f2;
+  --xce-muted:   #6272a4;
+  --xce-accent:  #bd93f9;
+  --xce-accent-dim: rgba(189,147,249,.1);
+  --xce-kw:   #ff79c6;
+  --xce-str:  #f1fa8c;
+  --xce-cmt:  #6272a4;
+  --xce-fn:   #50fa7b;
+  --xce-num:  #bd93f9;
+  --xce-type: #8be9fd;
+  --xce-prop: #66d9e8;
+}`,
+    tokens: { bg:'#282a36', bg2:'#21222c', bg3:'#1e1f28', border:'#44475a', text:'#f8f8f2', muted:'#6272a4', accent:'#bd93f9', 'accent-dim':'rgba(189,147,249,.1)', kw:'#ff79c6', str:'#f1fa8c', cmt:'#6272a4', fn:'#50fa7b', num:'#bd93f9', type:'#8be9fd', prop:'#66d9e8' }
+  },
+  monokai: {
+    name: 'Monokai',
+    css: `#my-editor {
+  --xce-bg:      #272822;
+  --xce-bg2:     #1e1f1c;
+  --xce-bg3:     #1a1b18;
+  --xce-border:  #3e3d32;
+  --xce-text:    #f8f8f2;
+  --xce-muted:   #75715e;
+  --xce-accent:  #a6e22e;
+  --xce-accent-dim: rgba(166,226,46,.1);
+  --xce-kw:   #f92672;
+  --xce-str:  #e6db74;
+  --xce-cmt:  #75715e;
+  --xce-fn:   #a6e22e;
+  --xce-num:  #ae81ff;
+  --xce-type: #66d9e8;
+  --xce-prop: #fd971f;
+}`,
+    tokens: { bg:'#272822', bg2:'#1e1f1c', bg3:'#1a1b18', border:'#3e3d32', text:'#f8f8f2', muted:'#75715e', accent:'#a6e22e', 'accent-dim':'rgba(166,226,46,.1)', kw:'#f92672', str:'#e6db74', cmt:'#75715e', fn:'#a6e22e', num:'#ae81ff', type:'#66d9e8', prop:'#fd971f' }
+  }
 };
 
-let state;
-try {
-  const saved=localStorage.getItem('xcode-v3');
-  if(saved){
-    const p=JSON.parse(saved);
-    state={...DEFAULT_STATE,...p,expandedFolders:p.expandedFolders||[],diagnostics:p.diagnostics||{},aiChatHistory:p.aiChatHistory||[]};
-  } else { state={...DEFAULT_STATE}; }
-} catch(e){ state={...DEFAULT_STATE}; }
-
-// Runtime-only state (not persisted)
-state.contextMenu=null;
-state.aiSuggestion='';
-state.aiLoading=false;
-state.aiCursorPos=0;
-state.drawings=[];
-state.previewWin=null;
-state.terminalInput='';
-state.creatingIn=null;
-state.renamingPath=null;
-state.newItemName='';
-state.quickFixPanel=null; // {x,y,lineIdx,fixes:[],loading}
-state.aiChatLoading=false;
-state.aiChatInput='';
-state.errTooltip=null;
-
-function saveState(){
-  try {
-    const s={
-      files:state.files,openTabs:state.openTabs,activeTab:state.activeTab,
-      fileTree:state.fileTree,expandedFolders:Array.from(state.expandedFolders||[]),
-      autoSave:state.autoSave,activePanel:state.activePanel,showSidebar:state.showSidebar,
-      showTerminal:state.showTerminal,editorZoom:state.editorZoom,splitView:state.splitView,
-      modified:state.modified,theme:state.theme,aiChatHistory:state.aiChatHistory.slice(-30),
-      diagnostics:state.diagnostics
-    };
-    localStorage.setItem('xcode-v3',JSON.stringify(s));
-  } catch(e){}
+/* Update the theme CSS preview block */
+function renderThemeCSS(key) {
+  const t = THEMES[key];
+  document.getElementById('theme-css-fname').textContent = t.name + ' — CSS';
+  document.getElementById('theme-css-body').textContent = t.css;
 }
 
-window.addEventListener('beforeunload',saveState);
-
-/* ================================================================
-   SYNTAX HIGHLIGHTER
-================================================================ */
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function sp(cls,txt){ return `<span class="tk-${cls}">${txt}</span>`; }
-
-/* ---- HTML TOKENIZER (raw input, handles quoted attrs correctly) ---- */
-function hlHTML(raw){
-  if(!raw) return '';
-  let out='', i=0, N=raw.length;
-
-  while(i<N){
-    // Script block
-    if(/^<script[\s>/]/i.test(raw.slice(i))){
-      const r=processEmbeddedBlock(raw,i,'script','javascript');
-      out+=r.html; i=r.end; continue;
-    }
-    // Style block
-    if(/^<style[\s>/]/i.test(raw.slice(i))){
-      const r=processEmbeddedBlock(raw,i,'style','css');
-      out+=r.html; i=r.end; continue;
-    }
-    // Comment
-    if(raw.slice(i,i+4)==='<!--'){
-      const end=raw.indexOf('-->',i+4);
-      const chunk=end<0?raw.slice(i):raw.slice(i,end+3);
-      out+=sp('cmt',esc(chunk)); i+=chunk.length; continue;
-    }
-    // DOCTYPE / processing instruction
-    if(raw[i]==='<'&&raw[i+1]==='!'){
-      const end=raw.indexOf('>',i);
-      const chunk=end<0?raw.slice(i):raw.slice(i,end+1);
-      out+=sp('kw',esc(chunk)); i+=chunk.length; continue;
-    }
-    // HTML Tag
-    if(raw[i]==='<'){
-      const end=findTagClose(raw,i);
-      out+=hlHTMLTag(raw.slice(i,end+1)); i=end+1; continue;
-    }
-    // Text node
-    const next=raw.indexOf('<',i);
-    const text=next<0?raw.slice(i):raw.slice(i,next);
-    out+=esc(text); i+=text.length;
-  }
-  return out;
-}
-
-function findTagClose(code,start){
-  let i=start+1, inStr=false, q='';
-  while(i<code.length){
-    const c=code[i];
-    if(inStr){ if(c===q)inStr=false; }
-    else if(c==='"'||c==="'"){ inStr=true; q=c; }
-    else if(c==='>') return i;
-    i++;
-  }
-  return code.length-1;
-}
-
-function processEmbeddedBlock(code,start,tagName,lang){
-  const closeTag='</'+tagName+'>';
-  const tagEnd=findTagClose(code,start);
-  const contentStart=tagEnd+1;
-  const closeIdx=code.toLowerCase().indexOf(closeTag.toLowerCase(),contentStart);
-  if(closeIdx<0) return {html:esc(code.slice(start)),end:code.length};
-  const openTag=code.slice(start,tagEnd+1);
-  const content=code.slice(contentStart,closeIdx);
-  const closeTagRaw=code.slice(closeIdx,closeIdx+closeTag.length);
-  const highlightedContent = lang==='javascript'?hlJS(esc(content)):hlCSS(esc(content));
-  return {
-    html:hlHTMLTag(openTag)+sp('plain',highlightedContent)+hlHTMLTag(closeTagRaw),
-    end:closeIdx+closeTag.length
-  };
-}
-
-function hlHTMLTag(raw){
-  // raw = complete tag string like <div class="foo" id="bar">
-  let out='', i=0;
-  if(!raw.startsWith('<')) return esc(raw);
-  out+='&lt;'; i=1;
-  if(raw[i]==='/'){ out+='/'; i++; }
-
-  // Tag name
-  let j=i;
-  while(j<raw.length&&/[\w:-]/.test(raw[j]))j++;
-  if(j>i) out+=sp('kw',esc(raw.slice(i,j)));
-  i=j;
-
-  // Attributes
-  while(i<raw.length){
-    const c=raw[i];
-    if(c==='>'){out+='&gt;';break;}
-    if(c==='/'&&raw[i+1]==='>'){out+='/&gt;';break;}
-    if(/\s/.test(c)){out+=c;i++;continue;}
-    // Attribute name
-    let k=i;
-    while(k<raw.length&&raw[k]!=='='&&raw[k]!=='>'&&!/\s/.test(raw[k]))k++;
-    if(k>i){out+=sp('prop',esc(raw.slice(i,k)));i=k;}
-    if(raw[i]==='='){
-      out+='='; i++;
-      if(i<raw.length&&(raw[i]==='"'||raw[i]==="'")){
-        const q=raw[i];
-        let end=raw.indexOf(q,i+1);
-        if(end<0)end=raw.length-1;
-        out+=sp('str',esc(raw.slice(i,end+1)));
-        i=end+1;
+/* Apply theme to the live demo editors */
+let liveEditors = {};
+function setThemeOnLive(key, card) {
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  renderThemeCSS(key);
+  const tokens = THEMES[key].tokens;
+  // Apply to all live demo editors
+  Object.values(liveEditors).forEach(ed => {
+    if (ed && ed.setTheme) {
+      if (Object.keys(tokens).length) {
+        ed.setTheme(tokens);
       } else {
-        // Unquoted value
-        let k=i;
-        while(k<raw.length&&raw[k]!=='>'&&!/\s/.test(raw[k]))k++;
-        out+=sp('str',esc(raw.slice(i,k))); i=k;
+        // default — reset
+        const root = ed._root;
+        if (root) root.removeAttribute('style');
       }
     }
-  }
-  return out;
-}
-
-/* ---- JS/TS HIGHLIGHTER ---- */
-function hlJS(h){
-  // h is pre-escaped HTML
-  const P=[]; const p=s=>{P.push(s);return`\x01${P.length-1}\x01`;};
-  // Template literals (backtick)
-  h=h.replace(/`[\s\S]*?`/g,m=>p(sp('str',m)));
-  // Multi-line comments
-  h=h.replace(/\/\*[\s\S]*?\*\//g,m=>p(sp('cmt',m)));
-  // Single-line comments
-  h=h.replace(/\/\/.*/g,m=>p(sp('cmt',m)));
-  // Strings
-  h=h.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,m=>p(sp('str',m)));
-  // Keywords
-  h=h.replace(/\b(const|let|var|function|class|if|else|for|while|do|switch|case|break|continue|return|import|export|default|from|as|new|this|super|extends|typeof|instanceof|in|of|async|await|try|catch|finally|throw|delete|void|null|undefined|true|false|static|get|set|yield|interface|type|enum|implements|abstract|declare|readonly|namespace|module)\b/g,
-    m=>sp('kw',m));
-  // Built-in types/globals
-  h=h.replace(/\b(string|number|boolean|object|any|void|never|unknown|Array|Promise|Map|Set|Object|Function|Date|RegExp|Error|Symbol|BigInt|console|window|document|Math|JSON|parseInt|parseFloat|isNaN|isFinite|NaN|Infinity|fetch|setTimeout|setInterval|clearTimeout|clearInterval|localStorage|sessionStorage)\b/g,
-    m=>sp('type',m));
-  // Numbers
-  h=h.replace(/\b(0x[\da-fA-F]+|0b[01]+|0o[0-7]+|\d+\.?\d*(?:[eE][+-]?\d+)?n?)\b/g,
-    m=>sp('num',m));
-  // Decorators
-  h=h.replace(/@[\w.]+/g,m=>sp('fn',m));
-  // Function names (before parens)
-  h=h.replace(/\b([A-Za-z_$][\w$]*)(?=\s*\()/g,m=>sp('fn',m));
-  // Property access (after dot, not before paren — avoid double-span)
-  h=h.replace(/(?<=\.)([A-Za-z_$][\w$]*)(?!\s*\()/g,m=>sp('prop',m));
-  return h.replace(/\x01(\d+)\x01/g,(_,i)=>P[+i]);
-}
-
-/* ---- CSS HIGHLIGHTER ---- */
-function hlCSS(h){
-  const P=[]; const p=s=>{P.push(s);return`\x01${P.length-1}\x01`;};
-  h=h.replace(/\/\*[\s\S]*?\*\//g,m=>p(sp('cmt',m)));
-  h=h.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,m=>p(sp('str',m)));
-  h=h.replace(/@[\w-]+/g,m=>sp('kw',m));
-  h=h.replace(/([^{};,\n]+)(?=\s*\{)/g,m=>{ if(m.trim().startsWith('//'))return m; return sp('sel',m); });
-  h=h.replace(/\b([\w-]+)\s*(?=:)/g,m=>sp('prop',m));
-  h=h.replace(/:\s*([^;{}\n]+)/g,(_,v)=>': '+sp('str',v));
-  h=h.replace(/\b(\d+(?:\.\d+)?)(px|em|rem|vh|vw|%|s|ms|deg|fr|ch|ex|dvh|svh|cqw)?\b/g,
-    (_,n,u)=>sp('num',n)+(u?sp('type',u):''));
-  return h.replace(/\x01(\d+)\x01/g,(_,i)=>P[+i]);
-}
-
-/* ---- PYTHON HIGHLIGHTER ---- */
-function hlPY(h){
-  const P=[]; const p=s=>{P.push(s);return`\x01${P.length-1}\x01`;};
-  h=h.replace(/("""[\s\S]*?"""|'''[\s\S]*?''')/g,m=>p(sp('str',m)));
-  h=h.replace(/#.*/g,m=>p(sp('cmt',m)));
-  h=h.replace(/(?:r|b|f)?("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/gi,m=>p(sp('str',m)));
-  h=h.replace(/\b(def|class|if|elif|else|for|while|with|return|import|from|as|try|except|finally|raise|pass|break|continue|global|nonlocal|lambda|yield|del|assert|and|or|not|in|is|async|await|None|True|False)\b/g,
-    m=>sp('kw',m));
-  h=h.replace(/\b(print|len|range|list|dict|set|tuple|int|float|str|bool|type|isinstance|issubclass|hasattr|getattr|setattr|input|open|super|property|staticmethod|classmethod|enumerate|zip|map|filter|sorted|reversed|sum|min|max|abs|round|format)\b/g,
-    m=>sp('type',m));
-  h=h.replace(/@[\w.]+/g,m=>sp('fn',m));
-  h=h.replace(/\b(\d+\.?\d*(?:[eE][+-]?\d+)?|0x[\da-fA-F]+|0b[01]+|0o[0-7]+)\b/g,
-    m=>sp('num',m));
-  h=h.replace(/\b(def)\s+([A-Za-z_]\w*)/g,(_,k,n)=>sp('kw',k)+' '+sp('fn',n));
-  h=h.replace(/\b(class)\s+([A-Za-z_]\w*)/g,(_,k,n)=>sp('kw',k)+' '+sp('type',n));
-  h=h.replace(/\b([A-Za-z_]\w*)(?=\s*\()/g,m=>sp('fn',m));
-  return h.replace(/\x01(\d+)\x01/g,(_,i)=>P[+i]);
-}
-
-/* ---- JSON HIGHLIGHTER ---- */
-function hlJSON(h){
-  const P=[]; const p=s=>{P.push(s);return`\x01${P.length-1}\x01`;};
-  h=h.replace(/("(?:[^"\\]|\\.)*")\s*(?=:)/g,m=>p(sp('prop',m)));
-  h=h.replace(/("(?:[^"\\]|\\.)*")/g,m=>p(sp('str',m)));
-  h=h.replace(/\b(-?\d+\.?\d*(?:[eE][+-]?\d+)?)\b/g,m=>p(sp('num',m)));
-  h=h.replace(/\b(true|false|null)\b/g,m=>p(sp('kw',m)));
-  return h.replace(/\x01(\d+)\x01/g,(_,i)=>P[+i]);
-}
-
-/* ---- DISPATCH ---- */
-function highlight(code,lang){
-  if(!code)return '';
-  try {
-    switch(lang){
-      case 'javascript':case 'typescript': return hlJS(esc(code));
-      case 'html':case 'htm': return hlHTML(code); // raw input!
-      case 'css':case 'scss': return hlCSS(esc(code));
-      case 'python': return hlPY(esc(code));
-      case 'json': return hlJSON(esc(code));
-      default: return esc(code);
-    }
-  } catch(e){ return esc(code); }
-}
-
-/* ---- GHOST TEXT ---- */
-function buildHighlight(content,language,aiSuggestion,cursorPos){
-  if(!aiSuggestion) return highlight(content,language);
-  const before=content.substring(0,cursorPos);
-  const after=content.substring(cursorPos);
-  const lines=before.split('\n');
-  const curLine=lines.length-1;
-  const curCol=lines[curLine].length;
-  const allLines=content.split('\n');
-  if(curCol<allLines[curLine].length) return highlight(content,language);
-  const ghostFirstLine=aiSuggestion.split('\n')[0];
-  const ghostRest=aiSuggestion.split('\n').slice(1,3).join('\n'); // up to 3 ghost lines
-  const hlBefore=highlight(before,language);
-  const hlAfter=highlight(after,language);
-  let ghost=`<span class="ghost-text">${esc(ghostFirstLine)}</span>`;
-  if(ghostRest) ghost+=`<span class="ghost-text">${esc('\n'+ghostRest)}</span>`;
-  return hlBefore+ghost+hlAfter;
-}
-
-/* ================================================================
-   FILE LANGUAGE / ICONS
-================================================================ */
-function getLang(name){
-  const e=(name.split('.').pop()||'').toLowerCase();
-  const m={js:'javascript',jsx:'javascript',ts:'typescript',tsx:'typescript',
-    html:'html',htm:'html',css:'css',scss:'css',less:'css',
-    py:'python',json:'json',md:'markdown',
-    java:'java',cpp:'cpp',c:'c',rs:'rust',go:'go',rb:'ruby',php:'php',
-    sh:'shell',bash:'shell',yml:'yaml',yaml:'yaml',sql:'sql',
-    svg:'image',png:'image',jpg:'image',jpeg:'image',gif:'image',webp:'image'};
-  return m[e]||'plaintext';
-}
-
-function getIcon(name,isFolder=false,open=false){
-  if(isFolder){
-    return open
-      ?`<svg width="15" height="15" viewBox="0 0 24 24" fill="#e8a87c"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><path d="M2 10h20" stroke="#000" stroke-width="2"/></svg>`
-      :`<svg width="15" height="15" viewBox="0 0 24 24" fill="#e8a87c"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-  }
-  const e=(name.split('.').pop()||'').toLowerCase();
-  const colors={js:'#f1e05a',jsx:'#61dafb',ts:'#3178c6',tsx:'#61dafb',
-    html:'#e44d26',css:'#264de4',scss:'#c6538c',
-    py:'#3572A5',json:'#292929',md:'#083fa1',
-    png:'#89d185',jpg:'#89d185',jpeg:'#89d185',gif:'#89d185',webp:'#89d185',svg:'#89d185'};
-  const c=colors[e]||'var(--muted)';
-  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="${c}"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6m4 18H6V4h7v5h5v11z"/></svg>`;
-}
-
-function isImageFile(name){ return /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(name); }
-
-/* ================================================================
-   FILE OPERATIONS
-================================================================ */
-function openFile(path){
-  if(!state.files[path])return;
-  if(!state.openTabs.find(t=>t.path===path))
-    state.openTabs.push({path,name:state.files[path].name});
-  state.activeTab=path; state.aiSuggestion='';
-  saveState(); render();
-  setTimeout(()=>{ restoreScroll(path); setupEditorListeners(); },50);
-}
-
-function closeTab(path){
-  const idx=state.openTabs.findIndex(t=>t.path===path);
-  if(idx<0)return;
-  state.openTabs.splice(idx,1);
-  if(state.activeTab===path)
-    state.activeTab=state.openTabs[idx]?.path||state.openTabs[idx-1]?.path||null;
-  saveState(); render(); setTimeout(setupEditorListeners,50);
-}
-
-function deleteFilePath(path){
-  if(!confirm(`Delete "${path}"?`))return;
-  delete state.files[path]; delete (state.diagnostics||{})[path];
-  closeTab(path); rebuildTree(); saveState(); render();
-}
-
-function startCreate(type,parent=''){
-  state.creatingIn={type,parent}; state.newItemName='';
-  render(); setTimeout(()=>document.getElementById('new-item-inp')?.focus(),50);
-}
-function confirmCreate(){
-  const name=state.newItemName.trim();
-  if(!name){cancelCreate();return;}
-  const{type,parent}=state.creatingIn;
-  const fullPath=parent?`${parent}/${name}`:name;
-  if(type==='file'){
-    state.files[fullPath]={name,content:'',language:getLang(name),path:fullPath};
-    rebuildTree(); openFile(fullPath);
-  } else {
-    state.files[`${fullPath}/.keep`]={name:'.keep',content:'',language:'plaintext',path:`${fullPath}/.keep`};
-    rebuildTree();
-    if(!state.expandedFolders.includes(fullPath)) state.expandedFolders.push(fullPath);
-  }
-  cancelCreate(); saveState();
-}
-function cancelCreate(){ state.creatingIn=null; state.newItemName=''; render(); }
-
-function startRename(path){
-  state.renamingPath=path;
-  state.newItemName=state.files[path]?.name||path.split('/').pop();
-  hideCtx(); render();
-  setTimeout(()=>{ const el=document.getElementById('rename-inp'); if(el){el.focus();el.select();} },50);
-}
-function confirmRename(){
-  const newName=state.newItemName.trim();
-  if(!newName||!state.renamingPath){cancelRename();return;}
-  const oldPath=state.renamingPath;
-  const parts=oldPath.split('/'); parts[parts.length-1]=newName;
-  const newPath=parts.join('/');
-  if(newPath!==oldPath){
-    state.files[newPath]={...state.files[oldPath],name:newName,path:newPath,language:getLang(newName)};
-    delete state.files[oldPath];
-    const ti=state.openTabs.findIndex(t=>t.path===oldPath);
-    if(ti>=0) state.openTabs[ti]={path:newPath,name:newName};
-    if(state.activeTab===oldPath) state.activeTab=newPath;
-    rebuildTree(); saveState();
-  }
-  cancelRename();
-}
-function cancelRename(){ state.renamingPath=null; state.newItemName=''; render(); }
-
-function rebuildTree(){
-  const tree=[];
-  Object.values(state.files).forEach(f=>{
-    const parts=f.path.split('/'); let cur=tree; let cp='';
-    parts.forEach((part,i)=>{
-      cp=cp?`${cp}/${part}`:part;
-      if(i===parts.length-1){
-        cur.push({name:part,path:f.path,type:'file',language:f.language});
-      } else {
-        let folder=cur.find(x=>x.name===part&&x.type==='folder');
-        if(!folder){folder={name:part,path:cp,type:'folder',children:[]};cur.push(folder);}
-        cur=folder.children;
-      }
-    });
-  });
-  function sortTree(arr){
-    arr.sort((a,b)=>a.type===b.type?a.name.localeCompare(b.name):a.type==='folder'?-1:1);
-    arr.forEach(x=>x.children&&sortTree(x.children));
-    return arr;
-  }
-  state.fileTree=sortTree(tree);
-}
-
-async function uploadFolder(){
-  try {
-    if('showDirectoryPicker' in window){
-      const dir=await window.showDirectoryPicker();
-      await readDir(dir,''); rebuildTree(); saveState(); render();
-    } else {
-      const inp=document.createElement('input');
-      inp.type='file'; inp.multiple=true; inp.webkitdirectory=true;
-      inp.onchange=async e=>{
-        for(const f of e.target.files){
-          const content=await f.text();
-          const path=f.webkitRelativePath||f.name;
-          state.files[path]={name:f.name,content,language:getLang(f.name),path};
-        }
-        rebuildTree(); saveState(); render();
-      };
-      inp.click();
-    }
-  } catch(e){ if(e.name!=='AbortError') console.error(e); }
-}
-
-async function readDir(handle,prefix){
-  for await(const entry of handle.values()){
-    const path=prefix?`${prefix}/${entry.name}`:entry.name;
-    if(entry.kind==='file'){
-      const f=await entry.getFile();
-      const content=isImageFile(entry.name)?await readAsDataURL(f):await f.text();
-      state.files[path]={name:entry.name,content,language:getLang(entry.name),path};
-    } else { await readDir(entry,path); }
-  }
-}
-
-async function uploadFiles(){
-  const inp=document.createElement('input'); inp.type='file'; inp.multiple=true;
-  inp.onchange=async e=>{
-    for(const f of e.target.files){
-      const content=isImageFile(f.name)?await readAsDataURL(f):await f.text();
-      state.files[f.name]={name:f.name,content,language:getLang(f.name),path:f.name};
-    }
-    rebuildTree(); saveState(); render();
-  };
-  inp.click();
-}
-
-function readAsDataURL(file){
-  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(file); });
-}
-
-async function saveFileToDisk(path){
-  const file=state.files[path]; if(!file)return;
-  try {
-    const handle=await window.showSaveFilePicker({suggestedName:file.name});
-    const w=await handle.createWritable();
-    await w.write(file.content); await w.close();
-    if(state.modified) state.modified[path]=false;
-    addTermLine(`Saved: ${file.name}`); render();
-  } catch(e){ if(e.name!=='AbortError') addTermLine(`Error saving: ${e.message}`); }
-}
-
-function handleFileUpload(){ uploadFiles(); }
-
-/* ================================================================
-   AUTOSAVE
-================================================================ */
-let autoSaveTimer=null;
-function scheduleAutoSave(){
-  if(!state.autoSave)return;
-  clearTimeout(autoSaveTimer);
-  autoSaveTimer=setTimeout(()=>{
-    saveState();
-    const si=document.getElementById('status-save-time');
-    if(si) si.textContent=new Date().toLocaleTimeString();
-  },1500);
-}
-
-/* ================================================================
-   AI INLINE COMPLETIONS (smarter with workspace context)
-================================================================ */
-let aiTimer=null, aiController=null;
-const AI_ENDPOINT='https://super-paper-1cd0.ahmedelgoharymessi.workers.dev/';
-
-function getWorkspaceContext(){
-  // Pass brief context of other files so AI understands the project
-  const entries=Object.entries(state.files)
-    .filter(([p,f])=>!isImageFile(f.name)&&p!==state.activeTab&&f.content.trim())
-    .map(([p,f])=>`// === ${p} ===\n${f.content.slice(0,300)}`)
-    .join('\n\n').slice(0,1200);
-  return entries;
-}
-
-function scheduleAI(content,lang,cursorPos){
-  clearTimeout(aiTimer);
-  if(aiController)aiController.abort();
-  state.aiSuggestion='';
-  // Adaptive delay based on file size
-  const lineCount=content.split('\n').length;
-  const delay=lineCount<100?600:lineCount<500?900:1200;
-  aiTimer=setTimeout(()=>fetchAI(content,lang,cursorPos),delay);
-}
-
-async function fetchAI(content,lang,cursorPos){
-  if(!content.trim())return;
-  aiController=new AbortController();
-  state.aiLoading=true; updateStatusBar();
-
-  const textBefore=content.substring(Math.max(0,cursorPos-800),cursorPos);
-  const workspaceCtx=getWorkspaceContext();
-
-  const systemPrompt=`You are an expert ${lang} code completion AI assistant (like GitHub Copilot). Your ONLY job is to complete the code at the cursor. Rules:
-- Output ONLY the raw completion text — no explanation, no markdown, no code fences
-- Complete just the current expression/statement (1-2 lines max)
-- Be syntactically correct for ${lang}
-- Consider the workspace context provided
-${workspaceCtx?`\nWorkspace context:\n${workspaceCtx}\n`:''}`;
-
-  try {
-    const res=await fetch(AI_ENDPOINT,{
-      method:'POST',headers:{'Content-Type':'application/json'},signal:aiController.signal,
-      body:JSON.stringify({
-        contents:[{parts:[{
-          text:`${systemPrompt}\n\nComplete this ${lang} code at the cursor position (marked with [CURSOR]):\n\n${textBefore}[CURSOR]`
-        }]}]
-      })
-    });
-    const data=await res.json();
-    let s=data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'';
-    // Strip markdown fences and [CURSOR] artifacts
-    s=s.replace(/```[\w]*\n?/g,'').replace(/```/g,'').replace(/\[CURSOR\]/g,'').trim();
-    // Limit to 3 lines
-    const lines=s.split('\n');
-    s=lines.slice(0,3).join('\n');
-    state.aiSuggestion=s;
-    state.aiCursorPos=cursorPos;
-  } catch(e){ /* aborted */ }
-  state.aiLoading=false; updateStatusBar(); updateHighlight();
-}
-
-function acceptAI(){
-  if(!state.aiSuggestion||!state.activeTab)return;
-  const ta=document.getElementById('main-textarea'); if(!ta)return;
-  const pos=ta.selectionStart;
-  const suggestion=state.aiSuggestion;
-  const content=state.files[state.activeTab].content;
-  const newContent=content.substring(0,pos)+suggestion+content.substring(pos);
-  state.files[state.activeTab].content=newContent;
-  ta.value=newContent;
-  state.aiSuggestion='';
-  const newPos=pos+suggestion.length;
-  updateHighlight();
-  setTimeout(()=>ta.setSelectionRange(newPos,newPos),10);
-  scheduleAutoSave();
-}
-
-/* ================================================================
-   ERROR DETECTION — AI code analysis
-================================================================ */
-let diagTimer=null;
-
-function scheduleDiagnostics(content,lang,path){
-  clearTimeout(diagTimer);
-  // Only run for supported languages, debounced 3s
-  if(!['javascript','typescript','html','css','python'].includes(lang))return;
-  diagTimer=setTimeout(()=>fetchDiagnostics(content,lang,path),3000);
-}
-
-async function fetchDiagnostics(content,lang,path){
-  if(!content.trim()||content.length>50000)return; // skip huge files
-  try {
-    const res=await fetch(AI_ENDPOINT,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[{
-          text:`Analyze this ${lang} code for errors, bugs, and issues. 
-Return ONLY a JSON array (no markdown, no explanation) with objects like:
-[{"line":1,"severity":"error","msg":"description"},{"line":5,"severity":"warning","msg":"description"}]
-severity can be: "error", "warning", "info"
-Only include real issues, max 8. If no issues return [].
-Return ONLY the JSON array, nothing else.
-
-Code:
-${content.slice(0,4000)}`
-        }]}]
-      })
-    });
-    const data=await res.json();
-    let txt=data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'[]';
-    txt=txt.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-    let diags=[];
-    try { diags=JSON.parse(txt); if(!Array.isArray(diags))diags=[]; } catch(e){ diags=[]; }
-    if(!state.diagnostics)state.diagnostics={};
-    state.diagnostics[path]=diags.filter(d=>d.line&&d.msg).slice(0,8);
-    renderGutterMarkers();
-    updateStatusBar();
-    saveState();
-  } catch(e){}
-}
-
-function renderGutterMarkers(){
-  const gutter=document.getElementById('gutter-wrap');
-  if(!gutter||!state.activeTab)return;
-  // Remove old markers
-  gutter.querySelectorAll('.err-marker').forEach(el=>el.remove());
-  const diags=(state.diagnostics||{})[state.activeTab]||[];
-  if(!diags.length)return;
-  const lineH=Math.round(21*state.editorZoom);
-  const sc=document.getElementById('editor-scroll-main');
-  const scrollTop=sc?sc.scrollTop:0;
-  diags.forEach(d=>{
-    const marker=document.createElement('div');
-    marker.className=`err-marker ${d.severity||'error'}`;
-    marker.style.top=`${16+(d.line-1)*lineH-scrollTop}px`;
-    marker.title=d.msg;
-    marker.onmouseenter=e=>showErrTooltip(e,d);
-    marker.onmouseleave=()=>hideErrTooltip();
-    marker.onclick=()=>jumpToLine(d.line);
-    gutter.appendChild(marker);
   });
 }
-
-function showErrTooltip(e,d){
-  let tt=document.getElementById('err-tt');
-  if(!tt){tt=document.createElement('div');tt.id='err-tt';tt.className='err-tooltip';document.body.appendChild(tt);}
-  tt.style.cssText=`display:block;left:${e.clientX+16}px;top:${e.clientY-8}px;border-color:var(--${d.severity==='error'?'err':d.severity==='warning'?'warn':'info'});`;
-  tt.textContent=`${d.severity?.toUpperCase()||'ERROR'} (line ${d.line}): ${d.msg}`;
-}
-function hideErrTooltip(){
-  const tt=document.getElementById('err-tt'); if(tt)tt.style.display='none';
-}
-
-function jumpToLine(line){
-  const ta=document.getElementById('main-textarea'); if(!ta)return;
-  const content=state.files[state.activeTab]?.content||'';
-  const lines=content.split('\n');
-  let pos=0; for(let i=0;i<line-1&&i<lines.length;i++)pos+=lines[i].length+1;
-  ta.focus(); ta.setSelectionRange(pos,pos+lines[line-1]?.length||0);
-  const sc=document.getElementById('editor-scroll-main');
-  if(sc) sc.scrollTop=Math.max(0,(line-5)*Math.round(21*state.editorZoom));
-}
-
-/* ================================================================
-   QUICK FIX PANEL
-================================================================ */
-function showQuickFix(lineNum){
-  const diags=(state.diagnostics||{})[state.activeTab]||[];
-  const d=diags.find(x=>x.line===lineNum)||diags.find(x=>Math.abs(x.line-lineNum)<=2);
-  if(!d)return;
-  const ta=document.getElementById('main-textarea'); if(!ta)return;
-  const lineH=Math.round(21*state.editorZoom);
-  const sc=document.getElementById('editor-scroll-main');
-  const y=16+(d.line-1)*lineH-(sc?.scrollTop||0)+lineH+52;
-  const x=60;
-  state.quickFixPanel={x,y,lineNum:d.line,diag:d,fixes:[],loading:true};
-  render();
-  // Fetch fix suggestions
-  fetchQuickFixes(d);
-}
-
-async function fetchQuickFixes(d){
-  const file=state.files[state.activeTab]; if(!file)return;
-  const lines=file.content.split('\n');
-  const context=lines.slice(Math.max(0,d.line-4),d.line+3).join('\n');
-  try {
-    const res=await fetch(AI_ENDPOINT,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[{
-          text:`Fix this ${file.language} error. Return ONLY JSON array of fixes, no explanation:
-[{"label":"Fix description","code":"corrected line content"},...]
-Max 3 fixes. Return ONLY the JSON array.
-
-Error at line ${d.line}: ${d.msg}
-Code context:
-${context}`
-        }]}]
-      })
-    });
-    const data=await res.json();
-    let txt=data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'[]';
-    txt=txt.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-    let fixes=[]; try{fixes=JSON.parse(txt);if(!Array.isArray(fixes))fixes=[];}catch(e){fixes=[];}
-    if(state.quickFixPanel){
-      state.quickFixPanel.fixes=fixes.slice(0,3);
-      state.quickFixPanel.loading=false;
-      render();
-    }
-  } catch(e){ if(state.quickFixPanel){state.quickFixPanel.loading=false;render();} }
-}
-
-function applyQuickFix(fixCode,lineNum){
-  const file=state.files[state.activeTab]; if(!file)return;
-  const lines=file.content.split('\n');
-  const indent=lines[lineNum-1]?.match(/^\s*/)?.[0]||'';
-  lines[lineNum-1]=indent+fixCode.trimStart();
-  const newContent=lines.join('\n');
-  state.files[state.activeTab].content=newContent;
-  const ta=document.getElementById('main-textarea');
-  if(ta) ta.value=newContent;
-  state.quickFixPanel=null;
-  // Clear this diagnostic
-  if(state.diagnostics?.[state.activeTab]){
-    state.diagnostics[state.activeTab]=state.diagnostics[state.activeTab].filter(d=>d.line!==lineNum);
-  }
-  updateHighlight(); updateStatusBar(); scheduleAutoSave(); render();
-}
-
-function closeQuickFix(){ state.quickFixPanel=null; render(); }
-
-/* ================================================================
-   AI CHAT PANEL
-================================================================ */
-async function sendAIChat(){
-  const inp=document.getElementById('ai-chat-inp'); if(!inp)return;
-  const msg=inp.value.trim(); if(!msg)return;
-  inp.value=''; state.aiChatInput='';
-  const file=state.activeTab?state.files[state.activeTab]:null;
-  const workspaceCtx=getWorkspaceContext();
-  state.aiChatHistory.push({role:'user',content:msg});
-  state.aiChatLoading=true;
-  render();
-  scrollChatToBottom();
-
-  const systemCtx=`You are an expert coding assistant integrated in X Code editor (PhineX Group).
-${file?`Active file: ${file.path} (${file.language})\nFile content:\n${file.content.slice(0,3000)}\n`:'No file open.'}
-${workspaceCtx?`\nOther workspace files:\n${workspaceCtx}\n`:''}
-Be concise, helpful and code-focused. Use markdown for code blocks.`;
-
-  try {
-    const res=await fetch(AI_ENDPOINT,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[
-          {role:'user',parts:[{text:systemCtx}]},
-          ...state.aiChatHistory.slice(-10).map(m=>({
-            role:m.role==='user'?'user':'model',
-            parts:[{text:m.content}]
-          }))
-        ]
-      })
-    });
-    const data=await res.json();
-    const reply=data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'(no response)';
-    state.aiChatHistory.push({role:'assistant',content:reply});
-  } catch(e){
-    state.aiChatHistory.push({role:'assistant',content:'Error connecting to AI. Please try again.'});
-  }
-  state.aiChatLoading=false;
-  render(); scrollChatToBottom(); saveState();
-}
-
-function sendAIChatQuick(prompt){
-  const inp=document.getElementById('ai-chat-inp');
-  if(inp){inp.value=prompt; state.aiChatInput=prompt;}
-  else state.aiChatInput=prompt;
-  sendAIChat();
-}
-
-function scrollChatToBottom(){
-  setTimeout(()=>{
-    const msgs=document.getElementById('ai-chat-msgs');
-    if(msgs) msgs.scrollTop=msgs.scrollHeight;
-  },50);
-}
-
-function clearAIChat(){ state.aiChatHistory=[]; saveState(); render(); }
-
-/* ================================================================
-   SEARCH
-================================================================ */
-function performSearch(q){
-  state.searchQuery=q;
-  if(!q){state.searchResults=[];render();return;}
-  const results=[];
-  Object.entries(state.files).forEach(([path,f])=>{
-    if(isImageFile(f.name))return;
-    const lines=f.content.split('\n');
-    lines.forEach((line,i)=>{
-      let idx=0; const lq=q.toLowerCase(); const ll=line.toLowerCase();
-      while((idx=ll.indexOf(lq,idx))!==-1){
-        results.push({path,lineNum:i,col:idx,line:line.trim()});
-        idx+=q.length; break;
-      }
-    });
-  });
-  state.searchResults=results; state.searchIdx=0; render();
-}
-
-function jumpToResult(idx){
-  if(idx<0||idx>=state.searchResults.length)return;
-  state.searchIdx=idx;
-  const r=state.searchResults[idx];
-  openFile(r.path);
-  setTimeout(()=>{
-    const ta=document.getElementById('main-textarea'); if(!ta)return;
-    const content=state.files[r.path]?.content||'';
-    const lines=content.split('\n');
-    let charIdx=0; for(let i=0;i<r.lineNum;i++) charIdx+=lines[i].length+1;
-    charIdx+=r.col;
-    ta.focus(); ta.setSelectionRange(charIdx,charIdx+state.searchQuery.length);
-    const sc=document.getElementById('editor-scroll-main');
-    if(sc) sc.scrollTop=Math.max(0,r.lineNum*Math.round(21*state.editorZoom)-100);
-    updateHighlight();
-  },100);
-}
-
-/* ================================================================
-   LIVE PREVIEW
-================================================================ */
-function openPreview(){
-  const html=Object.values(state.files).find(f=>f.name.endsWith('.html'));
-  if(!html){addTermLine('No HTML file found for preview');return;}
-  state.previewWin=window.open('','XCodePreview','width=1200,height=800');
-  updatePreview(); addTermLine('Live preview opened');
-}
-function updatePreview(){
-  if(!state.previewWin||state.previewWin.closed)return;
-  const html=Object.values(state.files).find(f=>f.name.endsWith('.html')); if(!html)return;
-  state.previewWin.document.open(); state.previewWin.document.write(html.content); state.previewWin.document.close();
-}
-
-/* ================================================================
-   DRAWING MODE
-================================================================ */
-let drawCanvas=null,drawCtx=null,isDrawing=false;
-
-function initDraw(){
-  if(drawCanvas){drawCanvas.remove();drawCanvas=null;drawCtx=null;}
-  if(!state.drawMode)return;
-  drawCanvas=document.createElement('canvas');
-  drawCanvas.className='draw-canvas';
-  drawCanvas.width=window.innerWidth; drawCanvas.height=window.innerHeight;
-  drawCtx=drawCanvas.getContext('2d'); document.body.appendChild(drawCanvas);
-  replayDraw();
-  drawCanvas.addEventListener('mousedown',onDrawStart);
-  drawCanvas.addEventListener('mousemove',onDrawMove);
-  drawCanvas.addEventListener('mouseup',onDrawEnd);
-  drawCanvas.addEventListener('mouseleave',onDrawEnd);
-  drawCanvas.addEventListener('touchstart',e=>{e.preventDefault();onDrawStart(e.touches[0]);},{passive:false});
-  drawCanvas.addEventListener('touchmove',e=>{e.preventDefault();onDrawMove(e.touches[0]);},{passive:false});
-  drawCanvas.addEventListener('touchend',onDrawEnd);
-}
-
-function replayDraw(){
-  if(!drawCtx||!state.drawings)return;
-  drawCtx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
-  state.drawings.forEach(d=>{
-    if(!d.points||d.points.length<2)return;
-    drawCtx.save();
-    if(d.tool==='eraser') drawCtx.globalCompositeOperation='destination-out';
-    else if(d.tool==='highlighter'){drawCtx.globalAlpha=0.4;drawCtx.globalCompositeOperation='source-over';}
-    else{drawCtx.globalAlpha=1;drawCtx.globalCompositeOperation='source-over';}
-    drawCtx.strokeStyle=d.color; drawCtx.lineWidth=d.size; drawCtx.lineCap='round'; drawCtx.lineJoin='round';
-    drawCtx.beginPath(); drawCtx.moveTo(d.points[0].x,d.points[0].y);
-    d.points.forEach(pt=>drawCtx.lineTo(pt.x,pt.y)); drawCtx.stroke(); drawCtx.restore();
-  });
-}
-
-function onDrawStart(e){
-  const toolbar=document.querySelector('.draw-toolbar');
-  if(toolbar&&toolbar.contains(e.target))return;
-  isDrawing=true; const r=drawCanvas.getBoundingClientRect();
-  state.drawings.push({tool:state.drawTool,color:state.drawColor,size:state.drawTool==='highlighter'?state.drawSize*4:state.drawSize,points:[{x:e.clientX-r.left,y:e.clientY-r.top}]});
-}
-function onDrawMove(e){
-  if(!isDrawing||!state.drawings.length)return;
-  const r=drawCanvas.getBoundingClientRect();
-  const cur=state.drawings[state.drawings.length-1];
-  const pt={x:e.clientX-r.left,y:e.clientY-r.top}; cur.points.push(pt);
-  if(!drawCtx)return;
-  const prev=cur.points[cur.points.length-2]; drawCtx.save();
-  if(cur.tool==='eraser'){drawCtx.globalCompositeOperation='destination-out';drawCtx.globalAlpha=1;}
-  else if(cur.tool==='highlighter'){drawCtx.globalAlpha=0.4;drawCtx.globalCompositeOperation='source-over';}
-  else{drawCtx.globalAlpha=1;drawCtx.globalCompositeOperation='source-over';}
-  drawCtx.strokeStyle=cur.color; drawCtx.lineWidth=cur.size; drawCtx.lineCap='round'; drawCtx.lineJoin='round';
-  drawCtx.beginPath(); drawCtx.moveTo(prev.x,prev.y); drawCtx.lineTo(pt.x,pt.y); drawCtx.stroke(); drawCtx.restore();
-}
-function onDrawEnd(){isDrawing=false;}
-
-/* ================================================================
-   TERMINAL
-================================================================ */
-function addTermLine(text,isCmd=false){
-  if(!state.terminalHistory) state.terminalHistory=[];
-  state.terminalHistory.push({text,cmd:isCmd,time:new Date().toLocaleTimeString()});
-  const out=document.getElementById('term-out');
-  if(out){ out.innerHTML+=`<div style="color:${isCmd?'var(--accent)':'var(--text)'}">${esc(text)}</div>`; out.scrollTop=out.scrollHeight; }
-}
-
-function runCommand(cmd){
-  addTermLine(`$ ${cmd}`,true);
-  const parts=cmd.trim().split(/\s+/); const c=parts[0]; const args=parts.slice(1);
-  switch(c){
-    case 'clear': state.terminalHistory=[]; const out=document.getElementById('term-out'); if(out)out.innerHTML=''; break;
-    case 'ls': addTermLine(Object.keys(state.files).join('  ')||'(empty)'); break;
-    case 'help': addTermLine('Commands: clear  ls  stats  save  echo  theme [color]  diag'); break;
-    case 'stats':{
-      const n=Object.keys(state.files).length;
-      const l=Object.values(state.files).reduce((a,f)=>a+f.content.split('\n').length,0);
-      addTermLine(`${n} files  •  ${l} total lines`); break;
-    }
-    case 'save': saveState(); addTermLine('Workspace saved'); break;
-    case 'echo': addTermLine(args.join(' ')); break;
-    case 'theme': if(args[0]){state.theme.accent=args[0];applyTheme();saveState();addTermLine(`Accent: ${args[0]}`);} else addTermLine(`Accent: ${state.theme.accent}`); break;
-    case 'diag':{
-      if(state.activeTab){
-        const d=(state.diagnostics||{})[state.activeTab]||[];
-        addTermLine(d.length?d.map(x=>`L${x.line} [${x.severity}] ${x.msg}`).join('\n'):'No diagnostics for current file.');
-      } else addTermLine('No file open.'); break;
-    }
-    default: addTermLine(`Command not found: ${c}`);
-  }
-  state.terminalInput='';
-}
-
-function applyTheme(){
-  document.documentElement.style.setProperty('--accent',state.theme.accent);
-  document.documentElement.style.setProperty('--accent-dim',hexToRgba(state.theme.accent,0.12));
-  document.documentElement.style.setProperty('--accent-glow',hexToRgba(state.theme.accent,0.3));
-  document.documentElement.style.setProperty('--sel',hexToRgba(state.theme.accent,0.18));
-  if(state.theme.status){
-    document.documentElement.style.setProperty('--status-bg',state.theme.status);
-  }
-}
-function hexToRgba(hex,a){
-  const r=parseInt(hex.slice(1,3),16)||57;const g=parseInt(hex.slice(3,5),16)||255;const b=parseInt(hex.slice(5,7),16)||20;
-  return `rgba(${r},${g},${b},${a})`;
-}
-applyTheme();
-
-/* ================================================================
-   SCROLL PERSISTENCE
-================================================================ */
-const scrollPositions={};
-function saveScroll(path){ const sc=document.getElementById('editor-scroll-main'); if(sc) scrollPositions[path]={x:sc.scrollLeft,y:sc.scrollTop}; }
-function restoreScroll(path){ const sc=document.getElementById('editor-scroll-main'); if(sc&&scrollPositions[path]){sc.scrollLeft=scrollPositions[path].x;sc.scrollTop=scrollPositions[path].y;} }
-
-/* ================================================================
-   CONTEXT MENU
-================================================================ */
-function showCtx(e,path){ e.preventDefault(); state.contextMenu={x:Math.min(e.clientX,window.innerWidth-180),y:Math.min(e.clientY,window.innerHeight-120),path}; render(); }
-function hideCtx(){ state.contextMenu=null; render(); }
-
-/* ================================================================
-   HIGHLIGHT UPDATES (performance-optimized)
-================================================================ */
-let hlRafId=null, lastHighlightedContent=null, lastHighlightedLang=null;
-
-function highlightWithSearch(content,lang,q,activeIdx,results,activePath){
-  let h=highlight(content,lang); if(!q||!results.length)return h;
-  const activeResult=results[activeIdx];
-  const escaped=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const re=new RegExp(`(${escaped})`,'gi');
-  let matchCount=0;
-  h=h.replace(re,(_,m)=>{
-    const isActive=(activeResult&&activeResult.path===activePath&&matchCount===0);
-    matchCount++;
-    return `<span class="${isActive?'hl-match-active':'hl-match'}">${m}</span>`;
-  });
-  return h;
-}
-
-function updateHighlight(){
-  if(!state.activeTab)return;
-  const file=state.files[state.activeTab];
-  if(!file||isImageFile(file.name))return;
-  const hl=document.getElementById('hl-main');
-  const ta=document.getElementById('main-textarea');
-  const gutter=document.getElementById('gutter-main');
-  if(!hl||!ta||!gutter)return;
-
-  const content=file.content;
-  const lang=file.language;
-  const cursorPos=ta.selectionStart;
-
-  // Skip re-highlighting if content hasn't changed (only cursor moved)
-  const contentChanged = content!==lastHighlightedContent || lang!==lastHighlightedLang;
-
-  if(contentChanged||state.aiSuggestion){
-    let highlighted;
-    if(state.searchQuery&&state.activePanel==='search'){
-      highlighted=highlightWithSearch(content,lang,state.searchQuery,state.searchIdx,state.searchResults,state.activeTab);
-    } else {
-      highlighted=buildHighlight(content,lang,state.aiSuggestion,cursorPos);
-    }
-    hl.innerHTML=highlighted;
-    lastHighlightedContent=content;
-    lastHighlightedLang=lang;
-  }
-
-  // Update line numbers
-  const lineCount=content.split('\n').length;
-  const gutterContent=Array.from({length:lineCount},(_,i)=>i+1).join('\n');
-  gutter.innerHTML=gutterContent;
-
-  // Resize inner and textarea to match highlight layer
-  const sc=document.getElementById('editor-scroll-main');
-  const inner=document.getElementById('editor-inner-main');
-  requestAnimationFrame(()=>{
-    const h_px=Math.max(hl.scrollHeight,300);
-    const w_px=Math.max(hl.scrollWidth,100);
-    if(inner){ inner.style.height=h_px+'px'; inner.style.width=w_px+'px'; }
-    if(ta){ ta.style.height=h_px+'px'; ta.style.width=w_px+'px'; }
-    // Sync gutter scroll
-    if(sc) gutter.scrollTop=sc.scrollTop;
-  });
-  renderGutterMarkers();
-}
-
-function scheduleHighlight(content,lang,cursorPos){
-  if(hlRafId) cancelAnimationFrame(hlRafId);
-  const lineCount=content.split('\n').length;
-  if(lineCount>1500){
-    // Large file — debounce more aggressively
-    clearTimeout(window._hlTimer);
-    window._hlTimer=setTimeout(updateHighlight, lineCount>3000?500:250);
-  } else {
-    hlRafId=requestAnimationFrame(()=>{ hlRafId=null; updateHighlight(); });
-  }
-}
-
-function updateStatusBar(){
-  const bar=document.getElementById('status-bar'); if(!bar)return;
-  const file=state.activeTab?state.files[state.activeTab]:null;
-  const lang=file?file.language:'plaintext';
-  const ta=document.getElementById('main-textarea');
-  let line=1,col=1;
-  if(ta){ const txt=ta.value.substring(0,ta.selectionStart); const lines=txt.split('\n'); line=lines.length; col=lines[lines.length-1].length+1; }
-  const diags=(state.diagnostics||{})[state.activeTab||'']||[];
-  const errCount=diags.filter(d=>d.severity==='error').length;
-  const warnCount=diags.filter(d=>d.severity==='warning').length;
-  const lineCount=file?file.content.split('\n').length:0;
-  bar.innerHTML=`
-    <span class="status-item" onclick="handleFileUpload()">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      ${file?esc(file.path):'No file'}
-    </span>
-    <span class="status-item status-ai" title="AI: ${state.aiLoading?'Thinking...':'Ready — Tab to accept'}">
-      ${state.aiLoading?`<span class="ai-dot"></span>`:'⚡'} AI${state.aiLoading?' ...':''}
-    </span>
-    ${errCount>0?`<span class="status-item status-errors" title="${errCount} error(s)" onclick="togglePanel('ai')">⊘ ${errCount} error${errCount>1?'s':''}</span>`:''}
-    ${warnCount>0?`<span class="status-item" style="color:#cca700" title="${warnCount} warning(s)">⚠ ${warnCount}</span>`:''}
-    ${lineCount>1500?`<span class="large-file-badge">LARGE FILE</span>`:''}
-    <span class="status-right">
-      <span class="status-item">${lang}</span>
-      <span class="status-item">Ln ${line}, Col ${col}</span>
-      <span class="status-item" id="status-save-time">UTF-8</span>
-      <span class="status-item" onclick="toggleTerminal()">⌨ Terminal</span>
-      <span class="status-item" onclick="openPreview()">◉ Preview</span>
-    </span>`;
-}
-
-/* ================================================================
-   EDITOR LISTENERS
-================================================================ */
-function setupEditorListeners(){
-  const ta=document.getElementById('main-textarea');
-  const sc=document.getElementById('editor-scroll-main');
-  const gutter=document.getElementById('gutter-main');
-  if(!ta||!sc)return;
-
-  ta.addEventListener('input',()=>{
-    if(!state.activeTab)return;
-    const content=ta.value;
-    const file=state.files[state.activeTab];
-    if(!file)return;
-    file.content=content;
-    if(!state.modified)state.modified={};
-    state.modified[state.activeTab]=true;
-    state.aiSuggestion='';
-    scheduleHighlight(content,file.language,ta.selectionStart);
-    updateStatusBar();
-    scheduleAutoSave();
-    updatePreview();
-    scheduleAI(content,file.language,ta.selectionStart);
-    scheduleDiagnostics(content,file.language,state.activeTab);
-  },{passive:true});
-
-  ta.addEventListener('keydown',(e)=>{
-    if(e.key==='Tab'){
-      e.preventDefault();
-      if(state.aiSuggestion){ acceptAI(); return; }
-      const start=ta.selectionStart,end=ta.selectionEnd;
-      ta.value=ta.value.substring(0,start)+'  '+ta.value.substring(end);
-      ta.setSelectionRange(start+2,start+2);
-      ta.dispatchEvent(new Event('input'));
-    }
-    if(e.key==='Escape'){
-      state.aiSuggestion='';
-      if(state.quickFixPanel){state.quickFixPanel=null;render();}
-      else updateHighlight();
-    }
-    if((e.ctrlKey||e.metaKey)&&e.key==='s'){
-      e.preventDefault();
-      // Trigger diagnostics on save
-      const file=state.files[state.activeTab];
-      if(file) fetchDiagnostics(file.content,file.language,state.activeTab);
-      saveFileToDisk(state.activeTab);
-    }
-    if((e.ctrlKey||e.metaKey)&&e.key==='='){e.preventDefault();state.editorZoom=Math.min(state.editorZoom+0.1,3);applyZoom();}
-    if((e.ctrlKey||e.metaKey)&&e.key==='-'){e.preventDefault();state.editorZoom=Math.max(state.editorZoom-0.1,0.5);applyZoom();}
-    // Ctrl+. to show quick fix
-    if((e.ctrlKey||e.metaKey)&&e.key==='.'){
-      e.preventDefault();
-      const txt=ta.value.substring(0,ta.selectionStart);
-      const lineNum=txt.split('\n').length;
-      showQuickFix(lineNum);
-    }
-    updateStatusBar();
-  });
-
-  ta.addEventListener('click',()=>{ state.aiSuggestion=''; updateHighlight(); updateStatusBar(); });
-  ta.addEventListener('keyup',()=>updateStatusBar());
-
-  sc.addEventListener('scroll',()=>{
-    if(gutter) gutter.scrollTop=sc.scrollTop;
-    renderGutterMarkers();
-    if(state.activeTab) saveScroll(state.activeTab);
-  },{passive:true});
-}
-
-function applyZoom(){
-  const sc=document.getElementById('editor-scroll-main');
-  const hl=document.getElementById('hl-main');
-  const ta=document.getElementById('main-textarea');
-  const gutter=document.getElementById('gutter-main');
-  const z=state.editorZoom;
-  const fs=`${Math.round(14*z)}px`;
-  const lh=`${Math.round(21*z)}px`;
-  if(hl){hl.style.fontSize=fs;hl.style.lineHeight=lh;}
-  if(ta){ta.style.fontSize=fs;ta.style.lineHeight=lh;}
-  if(gutter){gutter.style.fontSize=fs;gutter.style.lineHeight=lh;}
-  updateStatusBar(); saveState();
-}
-
-function toggleTerminal(){state.showTerminal=!state.showTerminal;render();}
-
-/* ================================================================
-   SPLIT EDITOR
-================================================================ */
-function onSplitInput(ta,path){
-  state.files[path].content=ta.value;
-  const hl=ta.previousElementSibling;
-  if(hl) hl.innerHTML=highlight(ta.value,state.files[path].language);
-  scheduleAutoSave(); updatePreview();
-}
-function onSplitKey(e,path){
-  if(e.key==='Tab'){
-    e.preventDefault();
-    const ta=e.target; const s=ta.selectionStart;
-    ta.value=ta.value.substring(0,s)+'  '+ta.value.substring(ta.selectionEnd);
-    ta.setSelectionRange(s+2,s+2); onSplitInput(ta,path);
-  }
-  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveFileToDisk(path);}
-}
-
-/* ================================================================
-   SIDEBAR RESIZE
-================================================================ */
-function initSidebarResize(e){
-  const start=e.clientX; const sidebar=document.querySelector('.sidebar'); const startW=sidebar?sidebar.offsetWidth:260;
-  const move=ev=>{const w=Math.max(160,Math.min(600,startW+(ev.clientX-start)));if(sidebar)sidebar.style.width=w+'px';};
-  const up=()=>{document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);};
-  document.addEventListener('mousemove',move); document.addEventListener('mouseup',up);
-}
-
-/* ================================================================
-   DRAW TOOLBAR DRAG
-================================================================ */
-function setupDrawToolbarDrag(){
-  const toolbar=document.getElementById('draw-toolbar'); const handle=document.getElementById('draw-drag');
-  if(!toolbar||!handle)return;
-  let ox=0,oy=0;
-  handle.addEventListener('mousedown',e=>{
-    e.preventDefault(); ox=e.clientX-toolbar.offsetLeft; oy=e.clientY-toolbar.offsetTop;
-    const move=ev=>{toolbar.style.left=(ev.clientX-ox)+'px';toolbar.style.top=(ev.clientY-oy)+'px';toolbar.style.right='auto';};
-    const up=()=>{document.removeEventListener('mousemove',move);document.removeEventListener('mouseup',up);};
-    document.addEventListener('mousemove',move); document.addEventListener('mouseup',up);
-  });
-}
-
-/* ================================================================
-   KEYBOARD SHORTCUTS
-================================================================ */
-document.addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==='b'){e.preventDefault();state.showSidebar=!state.showSidebar;saveState();render();}
-  if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();togglePanel('search');}
-  if((e.ctrlKey||e.metaKey)&&e.key==='`'){e.preventDefault();toggleTerminal();}
-  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();startCreate('file','');}
-  if((e.ctrlKey||e.metaKey)&&e.key==='w'){e.preventDefault();if(state.activeTab)closeTab(state.activeTab);}
-  if(e.key==='Escape'){if(state.contextMenu)hideCtx();if(state.quickFixPanel){state.quickFixPanel=null;render();}}
-});
-window.addEventListener('resize',()=>{if(drawCanvas){drawCanvas.width=window.innerWidth;drawCanvas.height=window.innerHeight;replayDraw();}});
-
-/* ================================================================
-   RENDER — FILE TREE
-================================================================ */
-function renderTree(items,level=0){
-  if(!items||!items.length)return '';
-  return items.map(item=>{
-    const pl=`${level*14+6}px`;
-    const isExpanded=state.expandedFolders&&state.expandedFolders.includes(item.path);
-    if(item.type==='folder'){
-      const isCreatingHere=state.creatingIn&&state.creatingIn.parent===item.path;
-      return `<div class="ftree-item" style="padding-left:${pl}" onclick="toggleFolder('${item.path}')" oncontextmenu="showCtx(event,'${item.path}')">
-        <div class="ftree-inner">
-          <span class="ftree-chevron ${isExpanded?'open':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l8 7-8 7"/></svg></span>
-          ${getIcon(item.name,true,isExpanded)}
-          ${item.name===state.renamingPath?`<input id="rename-inp" class="inline-inp" value="${esc(state.newItemName)}" oninput="state.newItemName=this.value" onkeydown="if(event.key==='Enter')confirmRename();else if(event.key==='Escape')cancelRename()" onblur="confirmRename()" />`:`<span class="ftree-name">${esc(item.name)}</span>`}
-          <span class="ftree-actions" onclick="event.stopPropagation()">
-            <button class="ftree-act" title="New File" onclick="startCreate('file','${item.path}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6m0 0v5h5"/><line x1="12" y1="13" x2="12" y2="19"/><line x1="9" y1="16" x2="15" y2="16"/></svg></button>
-            <button class="ftree-act" title="New Folder" onclick="startCreate('folder','${item.path}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></button>
-          </span>
-        </div>
-      </div>
-      ${isExpanded?`<div>${isCreatingHere?renderInlineCreate(level+1):''}${renderTree(item.children,level+1)}</div>`:''}`;
-    } else {
-      const isActive=state.activeTab===item.path;
-      const isRenaming=state.renamingPath===item.path;
-      const diagCount=((state.diagnostics||{})[item.path]||[]).length;
-      return `<div class="ftree-item ${isActive?'active-file':''}" style="padding-left:${pl}" onclick="openFile('${item.path}')" oncontextmenu="showCtx(event,'${item.path}')">
-        <div class="ftree-inner">
-          <span style="width:16px;flex-shrink:0"></span>
-          ${getIcon(item.name)}
-          ${isRenaming?`<input id="rename-inp" class="inline-inp" value="${esc(state.newItemName)}" oninput="state.newItemName=this.value" onkeydown="if(event.key==='Enter')confirmRename();else if(event.key==='Escape')cancelRename()" onblur="confirmRename()" />`:`<span class="ftree-name">${esc(item.name)}</span>`}
-          ${diagCount?`<span style="color:var(--err);font-size:10px;margin-left:auto;padding-right:4px;" title="${diagCount} issue(s)">●</span>`:''}
-          <span class="ftree-actions" onclick="event.stopPropagation()">
-            <button class="ftree-act" title="Rename" onclick="startRename('${item.path}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-            <button class="ftree-act" title="Delete" onclick="deleteFilePath('${item.path}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
-          </span>
-        </div>
-      </div>`;
-    }
-  }).join('');
-}
-
-function renderInlineCreate(level){
-  const pl=`${level*14+6}px`;
-  const icon=state.creatingIn?.type==='file'
-    ?`<svg width="13" height="13" viewBox="0 0 24 24" fill="var(--prop)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6m0 0v5h5"/></svg>`
-    :`<svg width="13" height="13" viewBox="0 0 24 24" fill="#e8a87c"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-  return `<div class="inline-row" style="padding-left:${pl}">
-    ${icon}
-    <input id="new-item-inp" class="inline-inp" placeholder="${state.creatingIn?.type==='file'?'filename.ext':'folder name'}" value="${esc(state.newItemName)}" oninput="state.newItemName=this.value" onkeydown="if(event.key==='Enter')confirmCreate();else if(event.key==='Escape')cancelCreate()" onblur="cancelCreate()" />
-  </div>`;
-}
-
-function highlightMatch(text,q){
-  if(!q)return text;
-  const re=new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');
-  return text.replace(re,'<span class="s-match">$1</span>');
-}
-
-/* ================================================================
-   PANEL / SIDEBAR CONTROLS
-================================================================ */
-function togglePanel(panel){
-  if(state.activePanel===panel&&state.showSidebar){state.showSidebar=false;}
-  else{state.activePanel=panel;state.showSidebar=true;}
-  saveState(); render();
-  if(panel==='search') setTimeout(()=>document.getElementById('search-inp')?.focus(),50);
-}
-
-function toggleFolder(path){
-  if(!state.expandedFolders) state.expandedFolders=[];
-  const i=state.expandedFolders.indexOf(path);
-  if(i>=0) state.expandedFolders.splice(i,1); else state.expandedFolders.push(path);
-  saveState(); render(); setTimeout(setupEditorListeners,0);
-}
-
-function collapseAll(){ state.expandedFolders=[]; saveState(); render(); }
-
-function switchTab(path){
-  if(state.activeTab) saveScroll(state.activeTab);
-  state.activeTab=path; state.aiSuggestion=''; lastHighlightedContent=null;
-  saveState(); render();
-  setTimeout(()=>{restoreScroll(path);setupEditorListeners();},50);
-}
-
-function toggleSplit(){
-  state.splitView=state.splitView===2?1:2;
-  saveState(); render(); setTimeout(setupEditorListeners,50);
-}
-
-function toggleDraw(){ state.drawMode=!state.drawMode; render(); setTimeout(()=>initDraw(),50); }
-
-function clearWorkspace(){
-  if(!confirm('Clear all files and workspace?'))return;
-  state.files={};state.openTabs=[];state.activeTab=null;state.fileTree=[];
-  state.modified={};state.terminalHistory=[];state.diagnostics={};state.aiChatHistory=[];
-  saveState(); render();
-}
-
-/* ================================================================
-   MAIN RENDER
-================================================================ */
-function render(){
-  const app=document.getElementById('app'); if(!app)return;
-  const file=state.activeTab?state.files[state.activeTab]:null;
-  const isImg=file&&isImageFile(file.name);
-  const lineCount=file?file.content.split('\n').length:0;
-
-  app.innerHTML=`
-    <!-- TITLE BAR -->
-    <div class="titlebar">
-      <div class="titlebar-brand">
-        <img class="brand-logo" src="X-Code.png" alt="X Code">
-        <span class="brand-name">X CODE</span>
-      </div>
-      <span class="titlebar-title">${file?esc(file.path):'X Code — PhineX Group'}</span>
-    </div>
-
-    <!-- MAIN -->
-    <div class="main-area">
-
-      <!-- ACTIVITY BAR -->
-      <div class="activity-bar">
-        <button class="act-btn ${state.activePanel==='explorer'&&state.showSidebar?'active':''}" title="Explorer (Ctrl+B)" onclick="togglePanel('explorer')">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        </button>
-        <button class="act-btn ${state.activePanel==='search'&&state.showSidebar?'active':''}" title="Search (Ctrl+F)" onclick="togglePanel('search')">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </button>
-        <button class="act-btn ${state.activePanel==='ai'&&state.showSidebar?'active':''}" title="AI Chat" onclick="togglePanel('ai')">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>
-        </button>
-        <div class="act-sep"></div>
-        <button class="act-btn ${state.drawMode?'active':''}" title="Draw Mode" onclick="toggleDraw()">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
-        </button>
-        <button class="act-btn" title="Upload Files" onclick="uploadFiles()">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        </button>
-        <button class="act-btn" title="Open Folder" onclick="uploadFolder()">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
-        </button>
-        <div class="act-sep"></div>
-        <button class="act-btn act-bottom" title="Settings" onclick="togglePanel('settings')">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
-      </div>
-
-      <!-- SIDEBAR -->
-      ${state.showSidebar?`
-      <div class="sidebar">
-        ${state.activePanel==='explorer'?`
-          <div class="sidebar-head">
-            <span>Explorer</span>
-            <div class="sidebar-acts">
-              <button class="sact" title="New File" onclick="startCreate('file','')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6m0 0v5h5"/><line x1="12" y1="13" x2="12" y2="19"/><line x1="9" y1="16" x2="15" y2="16"/></svg></button>
-              <button class="sact" title="New Folder" onclick="startCreate('folder','')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></button>
-              <button class="sact" title="Open Folder" onclick="uploadFolder()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
-              <button class="sact" title="Collapse All" onclick="collapseAll()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="21" y2="3"/><line x1="3" y1="21" x2="14" y2="10"/></svg></button>
-            </div>
-          </div>
-          <div class="file-tree">
-            ${state.creatingIn&&state.creatingIn.parent===''?renderInlineCreate(0):''}
-            ${state.fileTree.length?renderTree(state.fileTree):`<div style="padding:20px 12px;color:var(--muted);font-size:12px;text-align:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 8px;display:block;opacity:.4"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>No files yet<br><span style="font-size:11px;opacity:.7">Open a folder or create a new file</span></div>`}
-          </div>
-        `:state.activePanel==='search'?`
-          <div class="sidebar-head"><span>Search</span></div>
-          <div class="search-panel">
-            <div class="search-box"><input class="search-inp" id="search-inp" type="text" placeholder="Search in files..." value="${esc(state.searchQuery)}" oninput="performSearch(this.value)" onkeydown="if(event.key==='Enter')jumpToResult(state.searchIdx+1);if(event.key==='Escape'){state.searchQuery='';state.searchResults=[];render();}" autofocus /></div>
-            ${state.searchResults.length?`
-              <div class="search-info">${state.searchResults.length} result${state.searchResults.length===1?'':'s'}</div>
-              <div class="search-results">
-                ${state.searchResults.map((r,i)=>`<div class="sresult ${i===state.searchIdx?'active-result':''}" onclick="jumpToResult(${i})"><div class="sresult-path">${esc(r.path)}: ${r.lineNum+1}</div><div class="sresult-text">${highlightMatch(esc(r.line),state.searchQuery)}</div></div>`).join('')}
-              </div>`:state.searchQuery?`<div style="padding:12px;font-size:12px;color:var(--muted)">No results</div>`:''}
-          </div>
-        `:state.activePanel==='ai'?`
-          <div class="sidebar-head">
-            <span>AI Assistant</span>
-            <div class="sidebar-acts">
-              <button class="sact" title="Clear chat" onclick="clearAIChat()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg></button>
-            </div>
-          </div>
-          <div class="ai-chat-panel">
-            <div id="ai-chat-msgs" class="ai-chat-msgs">
-              ${state.aiChatHistory.length===0?`<div class="ai-msg system">Ask me anything about your code. I have full access to your workspace files.</div>`:''}
-              ${state.aiChatHistory.map(m=>`<div class="ai-msg ${m.role}">${esc(m.content)}</div>`).join('')}
-              ${state.aiChatLoading?`<div class="ai-msg system"><span class="ai-dot"></span> Thinking...</div>`:''}
-            </div>
-            <div class="ai-chat-actions">
-              <button class="ai-quick-btn" onclick="sendAIChatQuick('Explain this file')">Explain</button>
-              <button class="ai-quick-btn" onclick="sendAIChatQuick('Find bugs in this file')">Find bugs</button>
-              <button class="ai-quick-btn" onclick="sendAIChatQuick('How can I improve this code?')">Improve</button>
-              <button class="ai-quick-btn" onclick="sendAIChatQuick('Add comments to this code')">Comments</button>
-            </div>
-            <div class="ai-chat-input-row">
-              <textarea class="ai-chat-inp" id="ai-chat-inp" placeholder="Ask about your code..." onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){sendAIChat();event.preventDefault()}">${esc(state.aiChatInput)}</textarea>
-              <button class="ai-send-btn" onclick="sendAIChat()" title="Send (Ctrl+Enter)"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
-            </div>
-          </div>
-        `:state.activePanel==='settings'?`
-          <div class="sidebar-head"><span>Settings</span></div>
-          <div style="padding:12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;">
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Accent Color</div><input type="color" value="${state.theme.accent}" oninput="state.theme.accent=this.value;applyTheme();saveState()" style="width:100%;height:32px;border:none;cursor:pointer;background:transparent;" /></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Status Bar Color</div><input type="color" value="${state.theme.status||'#007acc'}" oninput="state.theme.status=this.value;applyTheme();saveState()" style="width:100%;height:32px;border:none;cursor:pointer;background:transparent;" /></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Zoom: ${Math.round(state.editorZoom*100)}%</div><input type="range" min="50" max="300" value="${state.editorZoom*100}" oninput="state.editorZoom=this.value/100;applyZoom()" style="width:100%;accent-color:var(--accent);" /></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Auto Save</div><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;"><input type="checkbox" ${state.autoSave?'checked':''} onchange="state.autoSave=this.checked;saveState()" style="accent-color:var(--accent);" /> Enabled</label></div>
-            <div style="font-size:11px;color:var(--muted);padding:6px 0;border-top:1px solid var(--border);">
-              <strong>AI Features</strong><br>
-              <span style="opacity:.7;">Error detection runs 3s after typing stops</span><br>
-              <span style="opacity:.7;">Ctrl+. for quick fix at cursor</span>
-            </div>
-            <button onclick="clearWorkspace()" style="padding:6px;background:transparent;border:1px solid #662222;color:#ff5555;font:11px var(--font);cursor:pointer;">Clear Workspace</button>
-            <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:auto;padding-top:12px;">X Code by <span style="color:var(--accent)">PhineX Group</span><br><span style="opacity:.6;">AMG · v3.0</span></div>
-          </div>
-        `:''}
-      </div>
-      <div class="resize-handle" onmousedown="initSidebarResize(event)"></div>`:''}
-
-      <!-- EDITOR CONTAINER -->
-      <div class="editor-container">
-
-        <!-- TAB BAR -->
-        <div class="tab-bar">
-          ${state.openTabs.map(t=>{
-            const d=(state.diagnostics||{})[t.path]||[];
-            const hasErr=d.some(x=>x.severity==='error');
-            return `<div class="tab ${state.activeTab===t.path?'active-tab':''}" onclick="switchTab('${t.path}')">
-              ${getIcon(t.name)}
-              <span class="tab-name" style="${hasErr?'color:var(--err)':''}">${esc(t.name)}</span>
-              ${(state.modified&&state.modified[t.path])?`<span class="unsaved-dot modified" title="Unsaved changes"></span>`:''}
-              <button class="tab-close" onclick="event.stopPropagation();closeTab('${t.path}')" title="Close"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>`;
-          }).join('')}
-          ${state.openTabs.length>0?`<div class="tab-toolbar">
-            <button class="tb-btn" onclick="toggleSplit()" title="Split view"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v18H3V3m2 2v14h6V5H5m8 0v14h6V5h-6z"/></svg>${state.splitView===2?'1':'2'}</button>
-            <button class="tb-btn" onclick="openPreview()" title="Live preview"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>
-            <button class="tb-btn" onclick="saveFileToDisk('${state.activeTab}')" title="Save (Ctrl+S)"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save</button>
-          </div>`:''}
-        </div>
-
-        <!-- EDITOR PANELS -->
-        <div class="editor-panels">
-          ${!file?`<div class="welcome">
-            <div class="welcome-logo">X</div>
-            <div class="welcome-title">X CODE</div>
-            <div class="welcome-sub">Advanced Code Editor — PhineX Group</div>
-            <div class="welcome-actions">
-              <button class="welcome-btn" onclick="startCreate('file','')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6m0 0v5h5"/></svg>New File</button>
-              <button class="welcome-btn" onclick="uploadFolder()"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Open Folder</button>
-              <button class="welcome-btn" onclick="uploadFiles()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Files</button>
-            </div>
-            <div class="welcome-keys">
-              <span class="k">Ctrl+B</span><span style="font-size:11px;color:var(--muted)">Toggle Sidebar</span>
-              <span class="k">Tab</span><span style="font-size:11px;color:var(--muted)">Accept AI suggestion (up to 3 lines)</span>
-              <span class="k">Ctrl+.</span><span style="font-size:11px;color:var(--muted)">Quick Fix at cursor</span>
-              <span class="k">Ctrl+S</span><span style="font-size:11px;color:var(--muted)">Save + run diagnostics</span>
-              <span class="k">Ctrl+=/-</span><span style="font-size:11px;color:var(--muted)">Zoom in/out</span>
-            </div>
-          </div>`
-          :isImg?`<div class="img-preview"><img src="${file.content}" alt="${esc(file.name)}" /><div class="img-meta">${esc(file.name)}</div></div>`
-          :state.splitView===2?`${[state.activeTab,state.openTabs.find(t=>t.path!==state.activeTab)?.path||state.activeTab].map((tabPath,i)=>{
-            const f=state.files[tabPath]; if(!f)return '';
-            return `<div class="code-editor" style="flex:1;border-${i===0?'right':'left'}:1px solid var(--border);">
-              <div class="gutter"><div class="gutter-inner" id="gutter-${i}">${Array.from({length:f.content.split('\n').length},(_,j)=>j+1).join('\n')}</div></div>
-              <div class="editor-scroll" id="editor-scroll-${i}" onscroll="document.getElementById('gutter-${i}').scrollTop=this.scrollTop">
-                <div style="position:relative;width:max-content;min-width:100%;" id="editor-inner-${i}">
-                  <pre class="hl-layer" id="hl-${i}">${highlight(f.content,f.language)}</pre>
-                  <textarea class="ed-textarea" id="ed-ta-${i}" spellcheck="false" oninput="onSplitInput(this,'${tabPath}')" onkeydown="onSplitKey(event,'${tabPath}')">${esc(f.content)}</textarea>
-                </div>
-              </div>
-            </div>`;
-          }).join('')}`
-          :`<div class="code-editor">
-            <div class="gutter" id="gutter-wrap">
-              <div class="gutter-inner" id="gutter-main" style="font-size:${Math.round(14*state.editorZoom)}px;line-height:${Math.round(21*state.editorZoom)}px;">${Array.from({length:lineCount},(_,i)=>i+1).join('\n')}</div>
-            </div>
-            <div class="editor-scroll" id="editor-scroll-main">
-              <div id="editor-inner-main" style="position:relative;width:max-content;min-width:100%;">
-                <pre class="hl-layer" id="hl-main" style="font-size:${Math.round(14*state.editorZoom)}px;line-height:${Math.round(21*state.editorZoom)}px;">${buildHighlight(file.content,file.language,state.aiSuggestion,state.aiCursorPos)}</pre>
-                <textarea class="ed-textarea" id="main-textarea" spellcheck="false" style="font-size:${Math.round(14*state.editorZoom)}px;line-height:${Math.round(21*state.editorZoom)}px;"></textarea>
-              </div>
-            </div>
-          </div>`}
-
-          <!-- QUICK FIX PANEL -->
-          ${state.quickFixPanel?`<div class="quick-fix-panel" style="top:${state.quickFixPanel.y}px;left:${state.quickFixPanel.x}px;">
-            <div class="qf-head"><span>⚡ Quick Fix — Line ${state.quickFixPanel.lineNum}</span><button onclick="closeQuickFix()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">×</button></div>
-            ${state.quickFixPanel.diag?`<div class="qf-error">${esc(state.quickFixPanel.diag.msg)}</div>`:''}
-            ${state.quickFixPanel.loading?`<div class="qf-loading"><span class="ai-dot"></span> AI is analyzing...</div>`:''}
-            ${(state.quickFixPanel.fixes||[]).map((f,i)=>`<div class="qf-fix" onclick="applyQuickFix('${esc(f.code||'')}',${state.quickFixPanel.lineNum})"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2z"/></svg>${esc(f.label||'Apply fix')}</div>`).join('')}
-            ${!state.quickFixPanel.loading&&!(state.quickFixPanel.fixes||[]).length?`<div class="qf-loading" style="color:var(--muted)">No automated fixes available — check the AI Chat panel.</div>`:''}
-          </div>`:''}
-        </div>
-
-        <!-- TERMINAL -->
-        ${state.showTerminal?`<div class="terminal" style="height:200px;">
-          <div class="term-head">
-            <div class="term-tabs"><div class="term-tab active-term">Terminal</div></div>
-            <button onclick="toggleTerminal()" style="background:transparent;border:none;cursor:pointer;color:var(--muted);">×</button>
-          </div>
-          <div class="term-out" id="term-out">
-            ${(state.terminalHistory||[]).map(l=>`<div style="color:${l.cmd?'var(--accent)':'var(--text)'}">${esc(l.text)}</div>`).join('')}
-          </div>
-          <div class="term-in-row">
-            <span class="term-prompt">$</span>
-            <input class="term-inp" id="term-inp" type="text" spellcheck="false" value="${esc(state.terminalInput)}" oninput="state.terminalInput=this.value" onkeydown="if(event.key==='Enter'){runCommand(this.value);this.value='';}" placeholder="Enter command..." />
-          </div>
-        </div>`:''}
-      </div>
-    </div>
-
-    <!-- STATUS BAR -->
-    <div class="statusbar" id="status-bar"></div>
-
-    <!-- CONTEXT MENU -->
-    ${state.contextMenu?`<div class="ctx-menu" id="ctx-menu" style="top:${state.contextMenu.y}px;left:${state.contextMenu.x}px">
-      <div class="ctx-item" onclick="startRename('${state.contextMenu.path}');hideCtx()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Rename</div>
-      <div class="ctx-item" onclick="startCreate('file','${state.contextMenu.path}');hideCtx()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6m0 0v5h5"/></svg>New File</div>
-      <div class="ctx-item" onclick="startCreate('folder','${state.contextMenu.path}');hideCtx()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>New Folder</div>
-      <div class="ctx-sep"></div>
-      <div class="ctx-item" onclick="openFile('${state.contextMenu.path}');togglePanel('ai');setTimeout(()=>sendAIChatQuick('Explain this file: ${state.contextMenu.path}'),200);hideCtx()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>Explain with AI</div>
-      <div class="ctx-sep"></div>
-      <div class="ctx-item" style="color:#ff5555;" onclick="deleteFilePath('${state.contextMenu.path}');hideCtx()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete</div>
-    </div>`:''}
-
-    <!-- DRAW TOOLBAR -->
-    ${state.drawMode?`<div class="draw-toolbar" id="draw-toolbar">
-      <div class="draw-toolbar-drag" id="draw-drag"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg></div>
-      <div class="dtool-row">
-        <button class="dtool ${state.drawTool==='pen'?'active-tool':''}" title="Pen" onclick="state.drawTool='pen';render()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></button>
-        <button class="dtool ${state.drawTool==='highlighter'?'active-tool':''}" title="Highlighter" onclick="state.drawTool='highlighter';render()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3l-6 6 10.5 10.5 6-6z"/></svg></button>
-        <button class="dtool ${state.drawTool==='eraser'?'active-tool':''}" title="Eraser" onclick="state.drawTool='eraser';render()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16l10-10 7 7"/></svg></button>
-      </div>
-      <div class="dtool-label">Color</div>
-      <input type="color" class="draw-color" value="${state.drawColor}" oninput="state.drawColor=this.value" />
-      <div class="dtool-label">Size: ${state.drawSize}px</div>
-      <input type="range" class="draw-range" min="1" max="30" value="${state.drawSize}" oninput="state.drawSize=parseInt(this.value);this.previousElementSibling.textContent='Size: '+state.drawSize+'px'" />
-      <button class="draw-act" onclick="state.drawings=[];replayDraw()">Clear</button>
-      <button class="draw-act draw-exit" onclick="toggleDraw()">Exit Draw</button>
-    </div>`:''}`;
-
-  // Post-render setup
-  updateStatusBar();
-  setTimeout(()=>{
-    setupEditorListeners();
-    setupDrawToolbarDrag();
-    const ta=document.getElementById('main-textarea');
-    const hl=document.getElementById('hl-main');
-    if(ta&&file&&!isImg){
-      ta.value=file.content; // Set raw content (not escaped)
-      if(hl){
-        ta.style.height=Math.max(hl.scrollHeight,300)+'px';
-        ta.style.width=Math.max(hl.scrollWidth,100)+'%';
-      }
-    }
-    restoreScroll(state.activeTab);
-    if(state.activePanel==='search') document.getElementById('search-inp')?.focus();
-    if(state.activePanel==='ai') scrollChatToBottom();
-    renderGutterMarkers();
-  },0);
-
-  document.addEventListener('click',hideCtxOnce,{once:true});
-}
-
-function hideCtxOnce(){ if(state.contextMenu){state.contextMenu=null;render();} }
-
-/* ================================================================
-   EXPOSE GLOBALS
-================================================================ */
-Object.assign(window,{
-  openFile,closeTab,switchTab,toggleFolder,collapseAll,
-  startCreate,confirmCreate,cancelCreate,
-  startRename,confirmRename,cancelRename,
-  deleteFilePath,uploadFiles,uploadFolder,
-  saveFileToDisk,handleFileUpload,
-  performSearch,jumpToResult,
-  togglePanel,toggleDraw,toggleSplit,toggleTerminal,
-  openPreview,updatePreview,addTermLine,runCommand,
-  showCtx,hideCtx,
-  applyTheme,applyZoom,
-  initSidebarResize,clearWorkspace,
-  onSplitInput,onSplitKey,
-  acceptAI,replayDraw,
-  sendAIChat,sendAIChatQuick,clearAIChat,
-  showQuickFix,applyQuickFix,closeQuickFix,
-  jumpToLine,state
+renderThemeCSS('default');
+
+/* ════════════════════════════════════════
+   INITIALISE LIVE DEMO EDITORS
+════════════════════════════════════════ */
+
+// Demo 1 — JS + Console
+liveEditors.js = new XCodeEditor({
+  container:   '#demo-js',
+  language:    'javascript',
+  viewer:      'console',
+  aiEnabled:   true,
+  initialCode: `// FizzBuzz — press ▶ Run
+for (let i = 1; i <= 15; i++) {
+  if (i % 15 === 0)     console.log('FizzBuzz');
+  else if (i % 3 === 0) console.log('Fizz');
+  else if (i % 5 === 0) console.log('Buzz');
+  else                  console.log(i);
+}`
 });
 
-/* ================================================================
-   INIT
-================================================================ */
-render();
-setTimeout(setupEditorListeners,100);
-setInterval(()=>{ if(Object.keys(state.files).length) saveState(); },30000);
+// Demo 2 — HTML + Page viewer
+liveEditors.html = new XCodeEditor({
+  container:   '#demo-html',
+  language:    'html',
+  viewer:      'page',
+  aiEnabled:   true,
+  initialCode: `<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body{background:#0a0a0f;display:flex;
+    justify-content:center;align-items:center;
+    height:100vh;margin:0;font-family:monospace;}
+  .box{
+    padding:20px 36px;border:2px solid #00d4ff;
+    color:#00d4ff;border-radius:8px;font-size:18px;
+    animation:glow 2s ease-in-out infinite alternate;
+  }
+  @keyframes glow{
+    from{box-shadow:0 0 8px #00d4ff;}
+    to{box-shadow:0 0 30px #00d4ff,0 0 60px #00d4ff44;}
+  }
+</style>
+</head>
+<body>
+  <div class="box">✦ XCode Editor</div>
+</body></html>`
+});
+
+// Demo 3 — Python, editor only
+liveEditors.py = new XCodeEditor({
+  container:   '#demo-py',
+  language:    'python',
+  viewer:      'none',
+  aiEnabled:   true,
+  initialCode: `# Python — no viewer mode
+def quicksort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left   = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right  = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)
+
+nums = [3, 6, 8, 10, 1, 2, 1]
+print(quicksort(nums))`
+});
+
+// Demo 4 — CSS + Page viewer
+liveEditors.css = new XCodeEditor({
+  container:   '#demo-css',
+  language:    'css',
+  viewer:      'page',
+  aiEnabled:   true,
+  initialCode: `body {
+  background: #282a36;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  font-family: monospace;
+  gap: 16px;
+}
+.dot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #bd93f9;
+  animation: bounce .8s ease-in-out infinite alternate;
+}
+.dot:nth-child(2){ animation-delay:.15s; background:#ff79c6; }
+.dot:nth-child(3){ animation-delay:.30s; background:#50fa7b; }
+@keyframes bounce{
+  to{ transform: translateY(-24px); }
+}`
+});
+
+// Mockup editor (inside the website preview)
+liveEditors.mockup = new XCodeEditor({
+  container:   '#mockup-editor',
+  language:    'javascript',
+  viewer:      'console',
+  aiEnabled:   true,
+  initialCode: `// This editor is embedded in a website layout
+const greet = name => \`Hello, \${name}!\`;
+console.log(greet('World'));
+console.log('Editor ready ✓');`
+});
 </script>
+
 </body>
 </html>
