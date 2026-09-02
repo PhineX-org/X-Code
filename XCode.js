@@ -40,7 +40,7 @@
   /* ══════════════════════════════════════════════════════
      AI WORKER  (Gemini — internal, do not change)
   ══════════════════════════════════════════════════════ */
-  const AI_WORKER = 'https://super-paper-1cd0.ahmedelgoharymessi.workers.dev/';
+  const AI_WORKER = 'https://xcode.ahmedelgoharymessi.workers.dev/';
 
   /* ══════════════════════════════════════════════════════
      CSS — injected once into <head>
