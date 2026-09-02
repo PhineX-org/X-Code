@@ -489,21 +489,94 @@
   }
 
   /* ── CSS / SCSS ── */
-  function hlCSS(h) {
-    const P = [];
-    const stash = s => { P.push(s); return '\x00' + (P.length - 1) + '\x00'; };
+  function hlCSS(raw) {
+    // Rewritten as a single left-to-right scan that tracks whether we're inside a
+    // declaration block ({ ... }) or in selector/at-rule position, instead of five
+    // chained global regexes each re-scanning the HTML the previous one produced.
+    // The old chain broke on any selector containing a colon (:hover, :focus,
+    // ::before, @media (max-width:) — i.e. most real CSS): the "grab everything
+    // after this colon up to the next delimiter" value-regex would run straight
+    // through markup left by the earlier keyword/selector steps and emit
+    // mismatched <span> tags. Tracking block-depth explicitly makes that
+    // structurally impossible instead of patching symptoms.
+    let out = '', i = 0;
+    const N = raw.length;
+    let blockDepth = 0;
 
-    h = h.replace(/\/\*[\s\S]*?\*\//g, m => stash(sp('cmt', m)));
-    h = h.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, m => stash(sp('str', m)));
-    h = h.replace(/@[\w-]+/g, m => sp('kw', m));
-    h = h.replace(/([^{};,\n\x00]+?)(?=\s*\{)/g,
-      m => m.trim().startsWith('@') ? m : sp('sel', m));
-    h = h.replace(/([\w-]+)\s*(?=:(?!:))/g, m => sp('prop', m));
-    h = h.replace(/:\s*([^;{}\n\x00]+)/g, (_, v) => ': ' + sp('val', v));
-    h = h.replace(/\b(\d+(?:\.\d+)?)(px|em|rem|vh|vw|%|s|ms|deg|fr|ch|dvh|svh|cqw)\b/g,
-      (_, n, u) => sp('num', n) + sp('type', u));
+    while (i < N) {
+      const c = raw[i];
+      if (/\s/.test(c)) { out += c; i++; continue; }
+      if (c === '/' && raw[i + 1] === '*') {
+        let j = raw.indexOf('*/', i + 2);
+        j = j < 0 ? N : j + 2;
+        out += sp('cmt', esc(raw.slice(i, j)));
+        i = j; continue;
+      }
+      if (c === '"' || c === "'") {
+        const q = c; let j = i + 1;
+        while (j < N && raw[j] !== q) { if (raw[j] === '\\') j += 2; else j++; }
+        j = Math.min(j + 1, N);
+        out += sp('str', esc(raw.slice(i, j)));
+        i = j; continue;
+      }
+      if (c === '{') { out += c; blockDepth++; i++; continue; }
+      if (c === '}') { out += c; blockDepth = Math.max(0, blockDepth - 1); i++; continue; }
+      if (c === ';') { out += ';'; i++; continue; } // stray/separator semicolon -- never re-enter chunk scanning on it
 
-    return h.replace(/\x00(\d+)\x00/g, (_, i) => P[+i]);
+      if (blockDepth === 0) {
+        let j = i;
+        while (j < N && raw[j] !== '{' && raw[j] !== '}' && raw[j] !== ';' && raw[j] !== '"' && raw[j] !== "'" && !(raw[j] === '/' && raw[j + 1] === '*')) j++;
+        out += highlightSelectorChunk(raw.slice(i, j));
+        i = j;
+        continue;
+      } else {
+        let j = i;
+        while (j < N && raw[j] !== ':' && raw[j] !== ';' && raw[j] !== '}' && raw[j] !== '{' && raw[j] !== '"' && raw[j] !== "'" && !(raw[j] === '/' && raw[j + 1] === '*')) j++;
+        if (j < N && raw[j] === ':') {
+          // Tentatively "property:value" -- but a colon also introduces pseudo-classes/
+          // elements in a nested (SCSS-style) selector, e.g. "&:hover { ... }". Look
+          // ahead: if a "{" appears before a proper ";"/"}" terminator, this was really
+          // a selector, not a declaration -- rewind and highlight the whole span as one.
+          let v = j + 1;
+          while (v < N && raw[v] !== ';' && raw[v] !== '}' && raw[v] !== '{' && raw[v] !== '"' && raw[v] !== "'" && !(raw[v] === '/' && raw[v + 1] === '*')) v++;
+          if (v < N && raw[v] === '{') {
+            out += highlightSelectorChunk(raw.slice(i, v));
+            i = v;
+            continue;
+          }
+          const propText = raw.slice(i, j);
+          out += propText.trim() ? sp('prop', esc(propText)) : esc(propText);
+          out += ':';
+          out += highlightValueChunk(raw.slice(j + 1, v));
+          i = v;
+          continue;
+        } else {
+          out += highlightSelectorChunk(raw.slice(i, j));
+          i = j;
+          continue;
+        }
+      }
+    }
+    return out;
+
+    function highlightSelectorChunk(chunk) {
+      if (!chunk.trim()) return esc(chunk);
+      const lead = chunk.match(/^\s*/)[0];
+      const trail = chunk.match(/\s*$/)[0];
+      const body = chunk.slice(lead.length, chunk.length - trail.length);
+      if (!body) return esc(chunk);
+      if (body.startsWith('@')) {
+        const m = body.match(/^(@[\w-]+)([\s\S]*)$/);
+        if (m) return esc(lead) + sp('kw', esc(m[1])) + esc(m[2]) + esc(trail);
+      }
+      return esc(lead) + sp('sel', esc(body)) + esc(trail);
+    }
+    function highlightValueChunk(text) {
+      let r = esc(text);
+      r = r.replace(/\b(\d+(?:\.\d+)?)(px|em|rem|vh|vw|%|s|ms|deg|fr|ch|dvh|svh|cqw)?\b/g,
+        (_, n, u) => sp('num', n) + (u ? sp('type', u) : ''));
+      return sp('val', r);
+    }
   }
 
   /* ── HTML ── */
@@ -564,7 +637,7 @@
     if (ci < 0) return { html: esc(src.slice(start)), end: src.length };
     const cnt = src.slice(cs, ci);
     const ctr = src.slice(ci, ci + close.length + 1);
-    const inner = lang === 'js' ? hlJS(esc(cnt)) : hlCSS(esc(cnt));
+    const inner = lang === 'js' ? hlJS(esc(cnt)) : hlCSS(cnt);
     return {
       html: _tokenTag(src.slice(start, te + 1)) + inner + _tokenTag(ctr),
       end: ci + ctr.length
@@ -686,7 +759,7 @@
         case 'html': case 'htm': case 'xml': case 'svg':
           return hlHTML(code);
         case 'css': case 'scss': case 'sass': case 'less':
-          return hlCSS(esc(code));
+          return hlCSS(code);
         case 'python': case 'py':
           return hlPY(esc(code));
         case 'json': case 'jsonc':
