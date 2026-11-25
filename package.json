@@ -1,0 +1,108 @@
+{
+  "name": "xcode-editor",
+  "productName": "X Code",
+  "version": "1.0.0",
+  "description": "X Code \u2014 a VS Code-style desktop editor with AI autocomplete, built by PhineX Group",
+  "main": "main.js",
+  "author": {
+    "name": "PhineX Group",
+    "email": "PhineX-org@users.noreply.github.com"
+  },
+  "license": "MIT",
+  "homepage": "https://phinex-org.github.io/X-Code/",
+  "scripts": {
+    "sync": "node -e \"const f=require('fs');f.mkdirSync('src',{recursive:true});f.copyFileSync('../XCode.html','src/XCode.html')\"",
+    "prestart": "npm run sync",
+    "start": "electron .",
+    "prebuild": "npm run sync",
+    "build": "electron-builder",
+    "prebuild:win": "npm run sync",
+    "build:win": "electron-builder --win",
+    "prebuild:mac": "npm run sync",
+    "build:mac": "electron-builder --mac",
+    "prebuild:linux": "npm run sync",
+    "build:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "org.phinex.xcode",
+    "productName": "X Code",
+    "copyright": "Copyright \u00a9 PhineX Group",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "build/icon.png",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "X-Code-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "X Code",
+      "artifactName": "X-Code-Setup.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "artifactName": "X-Code-mac-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "category": "Development",
+      "artifactName": "X-Code-linux.${ext}"
+    },
+    "dmg": {
+      "artifactName": "X-Code-mac-${arch}.${ext}"
+    },
+    "appImage": {
+      "artifactName": "X-Code-linux.${ext}"
+    },
+    "deb": {
+      "artifactName": "X-Code-linux.${ext}"
+    }
+  }
+}

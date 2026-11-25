@@ -1,1452 +1,426 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="x-dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XCode Editor</title>
-<meta name="description" content="Learn how to embed the XCode Editor into your website with this step-by-step integration guide.">
-<link rel="icon" href="X-Code.png" type="image/x-icon">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-<!-- ╔══════════════════════════════════════╗
-     ║   LINK THE EDITOR — Step 1           ║
-     ╚══════════════════════════════════════╝ -->
-<script src="https://phinex-org.github.io/X-Code/XCode.js"></script>
-
+<title>X Code — A fast, calm code editor for Windows, macOS & Linux</title>
+<meta name="description" content="X Code is a free desktop code editor with AI autocomplete, a real terminal, split panes, eye-friendly themes, and instant large-file handling. Download for Windows, macOS or Linux.">
+<link rel="icon" href="X-Code.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
-/* ════════════════════════════════════════
-   RESET & ROOT
-════════════════════════════════════════ */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07090d;--bg2:#0d1117;--bg3:#141a23;--card:#0f141c;--border:#1e2735;
+  --text:#e6edf3;--muted:#8b98a9;--accent:#39ff14;--accent2:#00c8ff;
+  --accent-dim:rgba(57,255,20,.10);--accent-glow:rgba(57,255,20,.35);
+  --code-bg:#11161f;--kw:#79b8ff;--str:#f0a67a;--cmt:#5f8a58;--fn:#e6d58b;--num:#9ed49a;--type:#5fd1bd;--prop:#9fd0ff;
+  --font:'Exo 2',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,Consolas,monospace;--display:'Orbitron','Exo 2',sans-serif;
+}
+html[data-theme="soft-night"]{--bg:#16181d;--bg2:#1c1f26;--bg3:#232830;--card:#1c1f26;--border:#2f3540;--text:#c9cdd5;--muted:#7f8794;--accent:#8fd694;--accent2:#7aa2d6;--accent-dim:rgba(143,214,148,.12);--accent-glow:rgba(143,214,148,.28);--code-bg:#1f2227;--kw:#7aa2d6;--str:#d4a07f;--cmt:#6f8a68;--fn:#d8cfa0;--num:#a9c4a0;--type:#6fc0b0;--prop:#8fc4e6;}
+html[data-theme="dusk"]{--bg:#161a26;--bg2:#1c2130;--bg3:#232939;--card:#1c2130;--border:#323a52;--text:#c9cee3;--muted:#7a82a0;--accent:#e6b455;--accent2:#8aa8f0;--accent-dim:rgba(230,180,85,.13);--accent-glow:rgba(230,180,85,.28);--code-bg:#1e2230;--kw:#8aa8f0;--str:#e0a27a;--cmt:#69809a;--fn:#e6d28f;--num:#a8cfa0;--type:#72c7c0;--prop:#9fc7f0;}
+html[data-theme="paper"]{--bg:#f4efe4;--bg2:#ece6d8;--bg3:#e4ddcc;--card:#faf6ec;--border:#d3cab6;--text:#3d3b36;--muted:#7d786a;--accent:#1f8a4c;--accent2:#2f5fa8;--accent-dim:rgba(31,138,76,.10);--accent-glow:rgba(31,138,76,.25);--code-bg:#f7f3ea;--kw:#2f5fa8;--str:#a2552b;--cmt:#7b8a6a;--fn:#7a6410;--num:#2e7d5b;--type:#1f7a78;--prop:#2a6f97;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;transition:background .35s,color .35s;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px;}
+.bg-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(900px 500px at 78% -5%,var(--accent-dim),transparent 60%),
+  radial-gradient(700px 500px at 5% 35%,rgba(0,200,255,.06),transparent 60%),
+  linear-gradient(var(--border) 1px,transparent 1px) 0 0/64px 64px,
+  linear-gradient(90deg,var(--border) 1px,transparent 1px) 0 0/64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 0%,#000 25%,transparent 75%);mask-image:radial-gradient(ellipse at 50% 0%,#000 25%,transparent 75%);opacity:.55;}
 
-:root {
-  --bg:       #040605;
-  --bg1:      #080c09;
-  --bg2:      #0d120e;
-  --bg3:      #111a12;
-  --border:   #1a2e1c;
-  --border2:  #233327;
-  --text:     #c8d9c9;
-  --muted:    #4a6b4d;
-  --dim:      #2a3d2c;
-  --accent:   #39ff14;
-  --accent2:  #00ff88;
-  --accentd:  rgba(57,255,20,.08);
-  --accentg:  rgba(57,255,20,.18);
-  --accentb:  rgba(57,255,20,.35);
-  --blue:     #00d4ff;
-  --orange:   #ff8c00;
-  --red:      #ff4466;
-  --yellow:   #ffd700;
-  --mono:     'JetBrains Mono', monospace;
-  --ui:       'Syne', sans-serif;
-  --r:        8px;
-  --glow:     0 0 40px rgba(57,255,20,.15);
-  --glow2:    0 0 80px rgba(57,255,20,.08);
-}
+/* NAV */
+nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:64px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:900;font-size:17px;letter-spacing:.5px;}
+.brand img{width:30px;height:30px;border-radius:7px;box-shadow:0 0 18px var(--accent-glow);}
+.brand b{color:var(--accent);}
+.nav-links{display:flex;align-items:center;gap:26px;font-size:14.5px;color:var(--muted);}
+.nav-links a:hover{color:var(--text);}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:10px;padding:11px 20px;font-weight:600;font-size:15px;border:1px solid var(--border);background:var(--bg3);color:var(--text);transition:.18s;}
+.btn:hover{transform:translateY(-2px);border-color:var(--accent);}
+.btn.primary{background:var(--accent);color:#04120a;border-color:var(--accent);box-shadow:0 8px 34px var(--accent-glow);}
+html[data-theme="paper"] .btn.primary{color:#fff;}
+.btn.primary:hover{filter:brightness(1.08);box-shadow:0 12px 44px var(--accent-glow);}
+.btn.sm{padding:8px 16px;font-size:14px;}
+.btn svg{flex-shrink:0;}
 
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--ui);
-  line-height: 1.6;
-  overflow-x: hidden;
-}
+/* HERO */
+.hero{padding:76px 0 40px;text-align:center;}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);font-size:13px;color:var(--muted);margin-bottom:26px;}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,6.2vw,68px);line-height:1.08;letter-spacing:-.5px;}
+h1 em{font-style:normal;color:var(--accent);text-shadow:0 0 36px var(--accent-glow);}
+.hero p.lead{max-width:640px;margin:22px auto 0;color:var(--muted);font-size:clamp(16px,2vw,19px);}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:34px;}
+.hero-cta .btn{font-size:17px;padding:15px 28px;}
+.hero-meta{margin-top:16px;font-size:13px;color:var(--muted);}
+.hero-meta a{color:var(--accent);border-bottom:1px dashed var(--accent);}
 
-/* ════════════════════════════════════════
-   SCANLINE OVERLAY (aesthetic texture)
-════════════════════════════════════════ */
-.xce-scanline-overlay,
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0,0,0,.03) 0px,
-    rgba(0,0,0,.03) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  pointer-events: none;
-  z-index: 1000;
-}
+/* EDITOR MOCKUP */
+.mock{max-width:1000px;margin:54px auto 0;border:1px solid var(--border);border-radius:14px;background:var(--code-bg);box-shadow:0 40px 120px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.02),0 0 80px var(--accent-dim);overflow:hidden;text-align:left;transition:background .35s;}
+.mock-bar{display:flex;align-items:center;gap:8px;padding:11px 14px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);}
+.mock-bar i{width:11px;height:11px;border-radius:50%;display:block;}
+.mock-bar i:nth-child(1){background:#ff5f57}.mock-bar i:nth-child(2){background:#febc2e}.mock-bar i:nth-child(3){background:#28c840}
+.mock-bar span{margin:0 auto;}
+.mock-body{display:grid;grid-template-columns:190px 1fr;min-height:330px;}
+.mock-side{background:var(--bg2);border-right:1px solid var(--border);padding:12px 0;font-size:12.5px;}
+.mock-side div{padding:5px 18px;color:var(--muted);display:flex;gap:8px;align-items:center;}
+.mock-side div.on{background:var(--accent-dim);color:var(--accent);}
+.mock-side .dot{width:7px;height:7px;border-radius:2px;background:var(--kw);}
+.mock-code{padding:18px 4px;font-family:var(--mono);font-size:13.5px;line-height:1.75;white-space:pre;overflow:hidden;position:relative;}
+.mock-code .ln{display:inline-block;width:42px;text-align:right;padding-right:16px;color:var(--muted);opacity:.6;user-select:none;}
+.k{color:var(--kw)}.s{color:var(--str)}.c{color:var(--cmt);font-style:italic}.f{color:var(--fn)}.n{color:var(--num)}.t{color:var(--type)}.p{color:var(--prop)}
+.ghost{color:var(--muted);opacity:.7;}
+.caret{display:inline-block;width:2px;height:1.15em;background:var(--accent);vertical-align:text-bottom;animation:blink 1s steps(2) infinite;}
+@keyframes blink{50%{opacity:0}}
+.tab-hint{display:inline-block;margin-left:10px;font-size:10.5px;padding:1px 7px;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-family:var(--font);}
+.mock-status{display:flex;gap:18px;padding:5px 14px;background:var(--accent2);color:#04101a;font-size:11.5px;font-weight:600;}
+html[data-theme="paper"] .mock-status{color:#fff;}
 
-/* ════════════════════════════════════════
-   SCROLLBAR
-════════════════════════════════════════ */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+/* SECTIONS */
+section{padding:90px 0;}
+.eyebrow{font-size:12.5px;letter-spacing:2.2px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:12px;}
+h2{font-family:var(--display);font-size:clamp(26px,4vw,40px);font-weight:900;line-height:1.15;margin-bottom:14px;}
+.sub{color:var(--muted);max-width:620px;font-size:17px;}
+.center{text-align:center;}.center .sub{margin:0 auto;}
 
-/* ════════════════════════════════════════
-   NAV
-════════════════════════════════════════ */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
-  height: 52px;
-  background: rgba(4,6,5,.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-  padding: 0 32px; gap: 32px;
-}
-.nav-logo {
-  display: flex; align-items: center; gap: 10px;
-  text-decoration: none;
-}
-.nav-logo-icon {
-  width: 28px; height: 28px;
-  background: linear-gradient(135deg, var(--accent), #00bb33);
-  border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  font: 800 14px var(--mono); color: #000;
-  box-shadow: 0 0 16px rgba(57,255,20,.4);
-  flex-shrink: 0;
-}
-.nav-logo-text {
-  font: 700 13px var(--mono);
-  color: var(--accent); letter-spacing: 2px; text-transform: uppercase;
-}
-.nav-links { display: flex; gap: 4px; margin-left: auto; }
-.nav-link {
-  padding: 5px 14px;
-  font: 600 11px var(--mono); letter-spacing: .8px; text-transform: uppercase;
-  color: var(--muted); text-decoration: none;
-  border-radius: 4px; transition: color .15s, background .15s;
-}
-.nav-link:hover { color: var(--text); background: rgba(255,255,255,.04); }
-.nav-link.cta {
-  color: var(--accent);
-  border: 1px solid var(--accentb);
-  background: var(--accentd);
-}
-.nav-link.cta:hover { background: var(--accentg); }
+/* DOWNLOAD */
+.dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:46px;}
+.dl-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:14px;transition:.2s;position:relative;}
+.dl-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.25);}
+.dl-card.rec{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 20px 60px var(--accent-dim);}
+.rec-tag{position:absolute;top:-11px;right:20px;background:var(--accent);color:#04120a;font-size:11px;font-weight:700;padding:3px 11px;border-radius:999px;letter-spacing:.5px;display:none;}
+html[data-theme="paper"] .rec-tag{color:#fff;}
+.dl-card.rec .rec-tag{display:block;}
+.os-ic{width:46px;height:46px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;color:var(--accent);}
+.dl-card h3{font-size:21px;font-weight:700;}
+.dl-card p{color:var(--muted);font-size:14px;}
+.dl-card .btn{justify-content:center;width:100%;}
+.alt-links{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);}
+.alt-links a{color:var(--accent);border-bottom:1px dashed var(--accent);}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px;counter-reset:s;}
+.step{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 24px 24px 24px;position:relative;}
+.step::before{counter-increment:s;content:counter(s);display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#04120a;font-weight:800;margin-bottom:14px;font-family:var(--display);}
+html[data-theme="paper"] .step::before{color:#fff;}
+.step h4{font-size:17px;margin-bottom:6px;}
+.step p{font-size:14px;color:var(--muted);}
+.note{margin-top:26px;padding:16px 20px;border-radius:12px;border:1px solid var(--border);border-left:3px solid #e6b455;background:var(--card);font-size:13.5px;color:var(--muted);}
+.note b{color:var(--text);}
+.dl-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,120px);background:var(--card);border:1px solid var(--accent);color:var(--text);padding:13px 22px;border-radius:12px;box-shadow:0 14px 50px rgba(0,0,0,.45);z-index:90;transition:transform .35s;font-size:14.5px;}
+.dl-toast.show{transform:translate(-50%,0);}
 
-/* ════════════════════════════════════════
-   HERO
-════════════════════════════════════════ */
-.hero {
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 100px 32px 60px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.hero-grid {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(57,255,20,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(57,255,20,.04) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 100%);
-}
-.hero-glow {
-  position: absolute; top: 20%; left: 50%;
-  transform: translateX(-50%);
-  width: 600px; height: 300px;
-  background: radial-gradient(ellipse, rgba(57,255,20,.12) 0%, transparent 70%);
-  pointer-events: none;
-}
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  font: 700 10px var(--mono); letter-spacing: 2px; text-transform: uppercase;
-  color: var(--accent); border: 1px solid var(--accentb);
-  background: var(--accentd); border-radius: 20px;
-  padding: 5px 14px; margin-bottom: 28px;
-}
-.hero-badge-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+/* FEATURES */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px;}
+.feat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;transition:.2s;}
+.feat:hover{border-color:var(--accent);transform:translateY(-3px);}
+.feat .ic{font-size:24px;width:46px;height:46px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.feat h3{font-size:17px;margin-bottom:6px;}
+.feat p{font-size:14px;color:var(--muted);}
+.feat kbd,.keys kbd{font-family:var(--mono);font-size:11.5px;padding:1px 7px;border-radius:5px;border:1px solid var(--border);border-bottom-width:2px;background:var(--bg3);color:var(--text);}
 
-.hero-title {
-  font: 800 72px/1 var(--ui);
-  letter-spacing: -2px;
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #ffffff 30%, var(--accent) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.hero-title span { color: var(--accent); -webkit-text-fill-color: var(--accent); }
-.hero-sub {
-  font-size: 17px; color: var(--muted); max-width: 540px;
-  margin: 0 auto 40px; line-height: 1.7;
-}
-.hero-install {
-  display: inline-flex; align-items: center; gap: 0;
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-radius: var(--r); overflow: hidden;
-  font-family: var(--mono); font-size: 12px;
-  max-width: 100%;
-}
-.hero-install-label {
-  padding: 10px 14px;
-  background: var(--accentd);
-  color: var(--accent); font-weight: 700; font-size: 10px;
-  letter-spacing: 1px; text-transform: uppercase; border-right: 1px solid var(--border2);
-  flex-shrink: 0;
-}
-.hero-install-code {
-  padding: 10px 16px; color: var(--text); flex: 1;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.hero-install-code .hl-tag { color: #569cd6; }
-.hero-install-code .hl-attr { color: #9cdcfe; }
-.hero-install-code .hl-str { color: #ce9178; }
-.hero-copy {
-  padding: 0 14px; height: 100%;
-  background: transparent; border: none; border-left: 1px solid var(--border2);
-  color: var(--muted); font: 11px var(--mono); cursor: pointer;
-  display: flex; align-items: center; gap: 5px;
-  transition: color .15s, background .15s; flex-shrink: 0;
-}
-.hero-copy:hover { color: var(--accent); background: var(--accentd); }
-.hero-scroll {
-  position: absolute; bottom: 40px; left: 50%;
-  transform: translateX(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  color: var(--muted); font: 10px var(--mono); letter-spacing: 2px;
-  text-transform: uppercase; animation: float 3s ease-in-out infinite;
-}
-@keyframes float { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
-.hero-scroll svg { opacity: .5; }
+/* PERFORMANCE */
+.perf{display:grid;grid-template-columns:1.1fr 1fr;gap:50px;align-items:center;}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;}
+.stat b{display:block;font-family:var(--display);font-size:30px;color:var(--accent);line-height:1.1;}
+.stat span{font-size:13px;color:var(--muted);}
+.fine{margin-top:16px;font-size:12.5px;color:var(--muted);}
 
-/* ════════════════════════════════════════
-   SECTION LAYOUT
-════════════════════════════════════════ */
-.section {
-  max-width: 1120px; margin: 0 auto;
-  padding: 80px 32px;
-}
-.section + .section { border-top: 1px solid var(--border); }
-.section-eyebrow {
-  font: 700 10px var(--mono); letter-spacing: 3px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 10px;
-  display: flex; align-items: center; gap: 10px;
-}
-.section-eyebrow::before {
-  content: ''; display: block;
-  width: 24px; height: 2px; background: var(--accent);
-  border-radius: 2px;
-}
-.section-title {
-  font: 800 40px/1.1 var(--ui); letter-spacing: -1px;
-  color: #fff; margin-bottom: 12px;
-}
-.section-desc {
-  font-size: 15px; color: var(--muted); max-width: 600px;
-  line-height: 1.75; margin-bottom: 44px;
-}
+/* THEMES */
+.theme-row{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:40px;}
+.theme-btn{width:230px;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;color:var(--text);transition:.2s;}
+.theme-btn:hover{transform:translateY(-3px);}
+.theme-btn.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+.theme-btn .sw{display:flex;border-radius:8px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);}
+.theme-btn .sw i{flex:1;height:38px;display:block;}
+.theme-btn b{font-size:15px;display:block;}
+.theme-btn span{font-size:12.5px;color:var(--muted);}
 
-/* ════════════════════════════════════════
-   STEPS
-════════════════════════════════════════ */
-.steps { display: flex; flex-direction: column; gap: 48px; }
-.step {
-  display: grid; grid-template-columns: 64px 1fr;
-  gap: 0 28px; align-items: start;
-}
-.step-num {
-  width: 48px; height: 48px;
-  border: 2px solid var(--accentb);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font: 700 18px var(--mono); color: var(--accent);
-  background: var(--accentd);
-  flex-shrink: 0;
-  box-shadow: 0 0 20px rgba(57,255,20,.1);
-}
-.step-body { padding-top: 8px; }
-.step-title {
-  font: 700 20px var(--ui); color: #fff;
-  margin-bottom: 8px;
-}
-.step-desc {
-  font-size: 14px; color: var(--muted); line-height: 1.7;
-  margin-bottom: 18px; max-width: 600px;
-}
-.step-connector {
-  width: 2px; height: 32px;
-  background: linear-gradient(to bottom, var(--accentb), transparent);
-  margin: 4px 0 4px 23px;
-}
+/* HOW TO */
+.how{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:46px;}
+.how-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;}
+.how-card h3{font-size:18px;margin-bottom:14px;}
+.keys{display:grid;gap:10px;font-size:14px;}
+.keys div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);padding-bottom:9px;}
+.keys div span{color:var(--muted);}
+.how-card ol{padding-left:20px;display:grid;gap:10px;color:var(--muted);font-size:14.5px;}
+.how-card ol b{color:var(--text);}
 
-/* ════════════════════════════════════════
-   CODE BLOCKS
-════════════════════════════════════════ */
-.code-wrap {
-  background: var(--bg1);
-  border: 1px solid var(--border2);
-  border-radius: var(--r);
-  overflow: hidden;
-  font-family: var(--mono);
-  position: relative;
-}
-.code-header {
-  display: flex; align-items: center;
-  padding: 0 16px;
-  height: 36px;
-  background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-  gap: 10px;
-}
-.code-dots { display: flex; gap: 6px; }
-.code-dot { width: 10px; height: 10px; border-radius: 50%; }
-.code-dot.r { background: #ff5f57; }
-.code-dot.y { background: #febc2e; }
-.code-dot.g { background: #28c840; }
-.code-fname {
-  font-size: 11px; color: var(--muted); font-weight: 500;
-  letter-spacing: .5px;
-}
-.code-copy {
-  margin-left: auto;
-  background: transparent; border: 1px solid var(--border2);
-  color: var(--muted); font: 10px var(--mono); letter-spacing: .5px;
-  text-transform: uppercase; padding: 3px 10px; border-radius: 3px;
-  cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 4px;
-}
-.code-copy:hover { border-color: var(--accent); color: var(--accent); }
-.code-copy.copied { border-color: var(--accent); color: var(--accent); }
-.code-body {
-  padding: 20px 24px;
-  font-size: 12.5px; line-height: 1.8;
-  overflow-x: auto; color: var(--text);
-}
-.code-body::-webkit-scrollbar { height: 4px; }
-.code-body::-webkit-scrollbar-thumb { background: var(--border2); }
+/* EMBED CTA */
+.cta-box{border:1px solid var(--border);border-radius:22px;padding:56px 40px;text-align:center;background:radial-gradient(600px 260px at 50% 0%,var(--accent-dim),transparent 70%),var(--card);}
+.cta-box .hero-cta{margin-top:26px;}
 
-/* Inline syntax */
-.t-tag  { color: #569cd6; }
-.t-attr { color: #9cdcfe; }
-.t-str  { color: #ce9178; }
-.t-kw   { color: #569cd6; }
-.t-fn   { color: #dcdcaa; }
-.t-cm   { color: #6a9955; font-style: italic; }
-.t-nm   { color: #b5cea8; }
-.t-ty   { color: #4ec9b0; }
-.t-pr   { color: #9cdcfe; }
-.t-op   { color: #d4d4d4; }
-.t-pu   { color: #d4d4d4; }
+footer{border-top:1px solid var(--border);padding:34px 0;color:var(--muted);font-size:13.5px;}
+.foot-in{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.foot-in a:hover{color:var(--accent);}
 
-/* ════════════════════════════════════════
-   INLINE BADGE
-════════════════════════════════════════ */
-code {
-  font-family: var(--mono); font-size: 12px;
-  background: var(--bg2); border: 1px solid var(--border2);
-  padding: 2px 7px; border-radius: 4px;
-  color: var(--accent);
-}
-
-/* ════════════════════════════════════════
-   LIVE EDITOR DEMOS
-════════════════════════════════════════ */
-.demo-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-@media(max-width:800px){ .demo-grid{ grid-template-columns:1fr; } }
-
-.demo-card {
-  background: var(--bg1);
-  border: 1px solid var(--border2);
-  border-radius: var(--r);
-  overflow: hidden;
-}
-.demo-card-head {
-  padding: 14px 18px;
-  background: var(--bg2); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px;
-}
-.demo-card-title { font: 700 13px var(--ui); color: #fff; }
-.demo-card-badge {
-  font: 700 9px var(--mono); letter-spacing: 1px; text-transform: uppercase;
-  padding: 2px 8px; border-radius: 3px;
-}
-.badge-console { background: rgba(57,255,20,.12); color: var(--accent); border: 1px solid var(--accentb); }
-.badge-page    { background: rgba(0,212,255,.1);  color: #00d4ff; border: 1px solid rgba(0,212,255,.3); }
-.badge-noview  { background: rgba(255,140,0,.1);  color: #ff8c00; border: 1px solid rgba(255,140,0,.3); }
-.badge-split   { background: rgba(255,68,102,.1); color: #ff4466; border: 1px solid rgba(255,68,102,.3); }
-
-/* The actual editor containers */
-.demo-editor {
-  height: 340px;
-}
-.demo-editor .xce-viewer { height: 130px !important; }
-
-/* ════════════════════════════════════════
-   THEME GALLERY
-════════════════════════════════════════ */
-.theme-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-}
-.theme-card {
-  border-radius: var(--r); overflow: hidden;
-  border: 2px solid transparent;
-  cursor: pointer; transition: border-color .2s, transform .15s;
-}
-.theme-card:hover { transform: translateY(-2px); }
-.theme-card.active { border-color: var(--accent); }
-.theme-preview {
-  height: 100px;
-  font: 11px var(--mono); padding: 12px 14px;
-  line-height: 1.6; overflow: hidden;
-}
-.theme-footer {
-  padding: 10px 14px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.theme-name { font: 700 12px var(--ui); }
-.theme-dot { width: 12px; height: 12px; border-radius: 50%; }
-
-/* ════════════════════════════════════════
-   CSS VARIABLES TABLE
-════════════════════════════════════════ */
-.var-table {
-  width: 100%; border-collapse: collapse;
-  font-family: var(--mono); font-size: 12px;
-}
-.var-table th {
-  text-align: left; padding: 10px 14px;
-  font: 700 10px var(--mono); letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--muted); border-bottom: 1px solid var(--border2);
-}
-.var-table td {
-  padding: 9px 14px;
-  border-bottom: 1px solid rgba(255,255,255,.03);
-  vertical-align: top;
-}
-.var-table tr:last-child td { border-bottom: none; }
-.var-table td:nth-child(1) { color: var(--accent); }
-.var-table td:nth-child(2) { color: #ce9178; }
-.var-table td:nth-child(3) { color: var(--muted); font-family: var(--ui); font-size: 12px; }
-.var-swatch {
-  display: inline-flex; align-items: center; gap: 8px;
-}
-.var-swatch-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.2); flex-shrink: 0;
-}
-
-/* ════════════════════════════════════════
-   WEBSITE INTEGRATION SHOWCASE
-════════════════════════════════════════ */
-.website-mockup {
-  border: 1px solid var(--border2);
-  border-radius: 10px; overflow: hidden;
-  background: #fff;
-  box-shadow: 0 24px 80px rgba(0,0,0,.6);
-}
-.mockup-bar {
-  height: 36px; background: #e8e8e8;
-  display: flex; align-items: center; padding: 0 14px; gap: 10px;
-}
-.mockup-dots { display: flex; gap: 6px; }
-.mockup-dot { width: 12px; height: 12px; border-radius: 50%; }
-.mockup-dot.r { background: #ff5f57; }
-.mockup-dot.y { background: #febc2e; }
-.mockup-dot.g { background: #28c840; }
-.mockup-url {
-  flex: 1; height: 22px; background: #fff;
-  border-radius: 4px; margin: 0 10px;
-  display: flex; align-items: center; padding: 0 10px;
-  font: 11px sans-serif; color: #555;
-}
-.mockup-body {
-  background: #f5f5f5;
-  padding: 24px;
-  display: flex; flex-direction: column; gap: 16px;
-}
-.mockup-header {
-  background: #1e1e1e;
-  height: 48px; border-radius: 6px;
-  display: flex; align-items: center; padding: 0 18px; gap: 8px;
-}
-.mockup-logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-.mockup-logo-text { font: 700 12px var(--mono); color: var(--accent); letter-spacing: 2px; }
-.mockup-nav { display: flex; gap: 16px; margin-left: auto; }
-.mockup-nav span { font: 11px sans-serif; color: #888; }
-.mockup-content { display: flex; gap: 16px; }
-.mockup-sidebar {
-  width: 140px; flex-shrink: 0;
-  background: #fff; border-radius: 6px; padding: 12px;
-  border: 1px solid #e0e0e0;
-}
-.mockup-sidebar div {
-  height: 10px; background: #e8e8e8; border-radius: 3px;
-  margin-bottom: 8px;
-}
-.mockup-sidebar div.active { background: var(--accentg); }
-.mockup-main { flex: 1; }
-.mockup-editor-slot {
-  border-radius: 6px; overflow: hidden;
-  border: 1px solid var(--border2);
-  height: 260px;
-}
-/* The live editor inside the mockup */
-#mockup-editor {
-  height: 260px;
-  --xce-font-size: 11px;
-  --xce-line-h: 18px;
-}
-#mockup-editor .xce-viewer { height: 90px !important; }
-
-/* ════════════════════════════════════════
-   API QUICK REF
-════════════════════════════════════════ */
-.api-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-@media(max-width:700px){ .api-grid{ grid-template-columns:1fr; } }
-.api-card {
-  background: var(--bg1); border: 1px solid var(--border2);
-  border-radius: var(--r); padding: 18px 20px;
-}
-.api-card-title {
-  font: 700 11px var(--mono); color: var(--accent);
-  letter-spacing: 1px; text-transform: uppercase;
-  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
-}
-.api-card-title::after { content:''; flex:1; height:1px; background:var(--border2); }
-.api-method {
-  display: flex; align-items: baseline; gap: 10px;
-  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.03);
-  font-size: 12px;
-}
-.api-method:last-child { border-bottom: none; }
-.api-method-name { color: #dcdcaa; font-family: var(--mono); flex-shrink: 0; }
-.api-method-desc { color: var(--muted); font-size: 11px; }
-
-/* ════════════════════════════════════════
-   FOOTER
-════════════════════════════════════════ */
-.footer {
-  border-top: 1px solid var(--border);
-  padding: 40px 32px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 12px;
-}
-.footer a { color: var(--accent); text-decoration: none; }
-.footer-logo {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-bottom: 16px;
-}
-.footer-logo-icon {
-  width: 24px; height: 24px;
-  background: linear-gradient(135deg, var(--accent), #00bb33);
-  border-radius: 5px; display: flex; align-items: center; justify-content: center;
-  font: 800 12px var(--mono); color: #000;
-}
-
-/* ════════════════════════════════════════
-   UTILITIES
-════════════════════════════════════════ */
-.flex { display: flex; }
-.gap-12 { gap: 12px; }
-.mt-8  { margin-top: 8px; }
-.mt-16 { margin-top: 16px; }
-.mt-24 { margin-top: 24px; }
-.mb-0  { margin-bottom: 0; }
-
-/* Highlight a specific line in code block */
-.line-hl {
-  display: block;
-  background: rgba(57,255,20,.06);
-  border-left: 2px solid var(--accent);
-  margin: 0 -24px; padding: 0 24px 0 22px;
-}
-.line-num {
-  display: inline-block; width: 28px;
-  color: var(--dim); text-align: right;
-  margin-right: 16px; user-select: none; font-size: 11px;
-}
-
-/* Tooltip for copy */
-.copied-msg {
-  position: fixed; bottom: 28px; right: 28px;
-  background: var(--accent); color: #000;
-  font: 700 12px var(--mono); padding: 8px 18px;
-  border-radius: 6px; z-index: 9999;
-  opacity: 0; transform: translateY(10px);
-  transition: all .25s;
-  pointer-events: none;
-}
-.copied-msg.show { opacity: 1; transform: translateY(0); }
-
-/* ════════════════════════════════════════
-   RESPONSIVE
-════════════════════════════════════════ */
-@media(max-width:600px){
-  .hero-title { font-size: 42px; }
-  .section-title { font-size: 28px; }
-  .step { grid-template-columns: 1fr; }
-  .step-num { display: none; }
-  .nav-links .nav-link:not(.cta) { display: none; }
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s;}
+.reveal.in{opacity:1;transform:none;}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}.caret{animation:none;}html{scroll-behavior:auto;}}
+@media (max-width:900px){
+  .dl-grid,.steps,.feat-grid,.how,.perf{grid-template-columns:1fr;}
+  .nav-links a.hide-m{display:none;}
+  .mock-body{grid-template-columns:1fr;}.mock-side{display:none;}
+  section{padding:64px 0;}
 }
 </style>
 </head>
 <body>
+<div class="bg-fx"></div>
 
-<!-- ════════════ COPIED TOAST ════════════ -->
-<div class="copied-msg" id="toast">✓ Copied!</div>
-
-<!-- ════════════ NAV ════════════ -->
-<nav class="nav">
-  <a href="#" class="nav-logo">
-    <div class="nav-logo-icon">X</div>
-    <span class="nav-logo-text">X Code</span>
-  </a>
-  <div class="nav-links">
-    <a href="#link"      class="nav-link">Link</a>
-    <a href="#style"     class="nav-link">Style</a>
-    <a href="#demos"     class="nav-link">Demos</a>
-    <a href="#integrate" class="nav-link">Integrate</a>
-    <a href="#api"       class="nav-link">API</a>
-    <a href="XCode.html" class="nav-link cta" target="_blank">X Code</a>
+<nav>
+  <div class="wrap nav-in">
+    <a class="brand" href="#top"><img src="X-Code.png" alt="X Code logo"><span>X <b>Code</b></span></a>
+    <div class="nav-links">
+      <a class="hide-m" href="#features">Features</a>
+      <a class="hide-m" href="#speed">Large files</a>
+      <a class="hide-m" href="#themes">Themes</a>
+      <a class="hide-m" href="#how">How to use</a>
+      <a class="hide-m" href="embed.html">Embed in your site</a>
+      <a class="btn primary sm" href="#download">Download</a>
+    </div>
   </div>
 </nav>
 
-<!-- ════════════ HERO ════════════ -->
-<section class="hero">
-  <div class="hero-grid"></div>
-  <div class="hero-glow"></div>
-
-  <div class="hero-badge">
-    <div class="hero-badge-dot"></div>
-    Embeddable · Zero dependencies · AI-powered
+<header class="hero wrap" id="top">
+  <div class="pill reveal"><i></i> Free desktop editor · Windows · macOS · Linux</div>
+  <h1 class="reveal">The editor that <em>stays out</em><br>of your way.</h1>
+  <p class="lead reveal">X Code is a fast, calm code editor with AI autocomplete, a real terminal, split panes and eye-friendly themes — made to be simple on day one and powerful on day one hundred.</p>
+  <div class="hero-cta reveal">
+    <a class="btn primary" id="hero-dl" href="#download"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg><span id="hero-dl-label">Download X Code</span></a>
+    <a class="btn" href="XCode.html">Try it in your browser</a>
   </div>
+  <div class="hero-meta reveal" id="hero-meta">Free forever · no account needed · <a href="#download">other platforms</a></div>
 
-  <h1 class="hero-title">XCode <span>Window</span><br>Previewer</h1>
-  <p class="hero-sub">
-    Drop a full-featured code editor — with syntax highlighting, inline AI completions,
-    and a live page or console viewer — into any website with a single script tag.
-  </p>
-
-  <!-- CDN link snippet -->
-  <div class="hero-install">
-    <div class="hero-install-label">CDN</div>
-    <div class="hero-install-code">
-      <span class="hl-tag">&lt;script</span>
-      <span class="hl-attr"> src</span>=<span class="hl-str">"https://phinex-org.github.io/X-Code/XCode.js"</span>
-      <span class="hl-tag">&gt;&lt;/script&gt;</span>
+  <div class="mock reveal" aria-label="X Code editor preview">
+    <div class="mock-bar"><i></i><i></i><i></i><span>app.js — my-project — X Code</span></div>
+    <div class="mock-body">
+      <div class="mock-side">
+        <div><span style="opacity:.7">▾</span> my-project</div>
+        <div class="on"><span class="dot" style="background:var(--fn)"></span> app.js</div>
+        <div><span class="dot" style="background:var(--str)"></span> index.html</div>
+        <div><span class="dot" style="background:var(--kw)"></span> style.css</div>
+        <div><span class="dot" style="background:var(--num)"></span> utils.js</div>
+        <div><span class="dot" style="background:var(--muted)"></span> README.md</div>
+      </div>
+      <div class="mock-code" id="mock-code"><span class="ln">1</span><span class="c">// type a comment, get the code — press Tab to accept</span>
+<span class="ln">2</span><span class="k">const</span> total = items.<span class="f">reduce</span>((sum, i) =&gt; sum + i.price, <span class="n">0</span>);
+<span class="ln">3</span>
+<span class="ln">4</span><span class="c">// function to format a price</span>
+<span class="ln">5</span><span class="k">function</span> <span class="f">formatPrice</span>(<span class="p">value</span>) {
+<span class="ln">6</span>  <span id="typed"></span><span class="caret"></span><span class="ghost" id="ghost"></span>
+<span class="ln">7</span>}</div>
     </div>
-    <button class="hero-copy" onclick="copy('<script src=&quot;https://phinex-org.github.io/X-Code/XCode.js&quot;></script>',this)">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-      </svg> Copy
-    </button>
+    <div class="mock-status"><span>● my-project</span><span>JavaScript</span><span>Ln 6, Col 3</span><span style="margin-left:auto">⚡ AI ready</span></div>
   </div>
+</header>
 
-  <div class="hero-scroll">
-    <span>Scroll to start</span>
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M12 5v14M5 12l7 7 7-7"/>
-    </svg>
+<section id="download">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Download</div>
+      <h2>Install it like any other app.</h2>
+      <p class="sub">Click your platform, run the installer, and X Code shows up in your Start menu, Applications folder, or app launcher — just like VS Code.</p>
+    </div>
+
+    <div class="dl-grid">
+      <div class="dl-card reveal" id="card-win">
+        <span class="rec-tag">RECOMMENDED FOR YOU</span>
+        <div class="os-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5l7.5-1v7H3zm8.5-1.2L21 3v8.5h-9.5zM3 12.5h7.5v7L3 18.5zm8.5 0H21V21l-9.5-1.3z"/></svg></div>
+        <h3>Windows</h3>
+        <p>Windows 10 and 11, 64-bit. A standard setup wizard — choose the install folder, get Start menu and desktop shortcuts.</p>
+        <a class="btn primary dl" data-os="Windows" data-file="X-Code-Setup.exe" href="https://github.com/PhineX-org/X-Code/releases/latest/download/X-Code-Setup.exe" download>Download for Windows</a>
+        <div class="alt-links"><span>X-Code-Setup.exe</span></div>
+      </div>
+      <div class="dl-card reveal" id="card-mac">
+        <span class="rec-tag">RECOMMENDED FOR YOU</span>
+        <div class="os-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.700 2.400 2.900 2.300 1.200 0 1.600-.7 3-.7s1.800.7 3 .7c1.300 0 2.100-1.100 2.800-2.200.9-1.300 1.300-2.500 1.300-2.600-.1 0-2.500-1-2.500-3.900zM14.200 5.700c.600-.8 1.100-1.800.9-2.900-.9 0-2 .6-2.700 1.400-.6.700-1.100 1.800-1 2.800 1 .1 2.100-.5 2.800-1.300z"/></svg></div>
+        <h3>macOS</h3>
+        <p>macOS 11 or newer. Open the disk image and drag X Code into Applications. Pick the build that matches your Mac.</p>
+        <a class="btn primary dl" data-os="macOS" data-file="X-Code-mac-arm64.dmg" href="https://github.com/PhineX-org/X-Code/releases/latest/download/X-Code-mac-arm64.dmg" download>Download for Apple Silicon</a>
+        <div class="alt-links"><a class="dl" data-os="macOS" data-file="X-Code-mac-x64.dmg" href="https://github.com/PhineX-org/X-Code/releases/latest/download/X-Code-mac-x64.dmg" download>Intel Macs</a><span>M1 · M2 · M3 · M4 = Apple Silicon</span></div>
+      </div>
+      <div class="dl-card reveal" id="card-linux">
+        <span class="rec-tag">RECOMMENDED FOR YOU</span>
+        <div class="os-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg></div>
+        <h3>Linux</h3>
+        <p>Any 64-bit distribution. The AppImage runs anywhere with no install; the .deb installs on Ubuntu, Debian and Mint.</p>
+        <a class="btn primary dl" data-os="Linux" data-file="X-Code-linux.AppImage" href="https://github.com/PhineX-org/X-Code/releases/latest/download/X-Code-linux.AppImage" download>Download AppImage</a>
+        <div class="alt-links"><a class="dl" data-os="Linux" data-file="X-Code-linux.deb" href="https://github.com/PhineX-org/X-Code/releases/latest/download/X-Code-linux.deb" download>Download .deb</a><span>chmod +x, then run</span></div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step reveal"><h4>Download</h4><p>Press the button for your system. Your browser downloads the installer — it's a normal file, nothing runs yet.</p></div>
+      <div class="step reveal"><h4>Run the installer</h4><p>Open the file you downloaded and follow the setup. On Windows pick a folder and finish; on Mac drag to Applications.</p></div>
+      <div class="step reveal"><h4>Open X Code</h4><p>Launch it from your Start menu or Applications, press <b>Open Folder</b>, and start coding. It remembers where you left off.</p></div>
+    </div>
+
+    <div class="note reveal"><b>Seeing a security warning? That's expected right now.</b> X Code is new and not yet code-signed, so Windows may show “Windows protected your PC” — click <b>More info → Run anyway</b>. On macOS, right-click the app and choose <b>Open</b> the first time. Only download from this page or the official <a href="https://github.com/PhineX-org/X-Code/releases" style="color:var(--accent)">GitHub releases</a>.</div>
   </div>
 </section>
 
-
-<!-- ══════════════════════════════════════════════════════
-     SECTION 1 — HOW TO LINK
-══════════════════════════════════════════════════════ -->
-<section class="section" id="link">
-  <div class="section-eyebrow">Step 1</div>
-  <h2 class="section-title">Link the Editor</h2>
-  <p class="section-desc">
-    Paste one <code>&lt;script&gt;</code> tag inside your <code>&lt;head&gt;</code>.
-    That's the entire installation — no npm, no build step, no dependencies.
-  </p>
-
-  <div class="code-wrap">
-    <div class="code-header">
-      <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
-      <span class="code-fname">index.html</span>
-      <button class="code-copy" onclick="copyBlock('cb1',this)">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        Copy
-      </button>
+<section id="features">
+  <div class="wrap">
+    <div class="center reveal"><div class="eyebrow">Features</div><h2>Simple to start. Deep when you need it.</h2><p class="sub">Everything you reach for every day is one click or one shortcut away — and nothing is in your way until you ask for it.</p></div>
+    <div class="feat-grid">
+      <div class="feat reveal"><div class="ic">⚡</div><h3>Instant large files</h3><p>Huge logs and data dumps open instantly in a smooth, virtualized viewer instead of freezing the app.</p></div>
+      <div class="feat reveal"><div class="ic">✨</div><h3>AI autocomplete</h3><p>Ghost-text suggestions as you type. Press <kbd>Tab</kbd> to accept, <kbd>Esc</kbd> to ignore. Plus an AI chat for questions about your code.</p></div>
+      <div class="feat reveal"><div class="ic">▶️</div><h3>A terminal that runs code</h3><p>Not a toy: <kbd>run app.js</kbd> executes JavaScript, <kbd>python file.py</kbd> runs real Python, and you get <kbd>cd</kbd>, <kbd>ls</kbd>, <kbd>grep</kbd>, history and tab-completion.</p></div>
+      <div class="feat reveal"><div class="ic">🗂️</div><h3>Real folders, real files</h3><p>Open any folder on your computer. Saves go straight to disk, renames and deletes are real, and your last folder reopens automatically.</p></div>
+      <div class="feat reveal"><div class="ic">🪟</div><h3>Split panes</h3><p>Up to four editors side by side or stacked, each with its own file, with draggable dividers.</p></div>
+      <div class="feat reveal"><div class="ic">🔎</div><h3>Find anything fast</h3><p><kbd>Ctrl</kbd>+<kbd>K</kbd> jumps to any file by name, <kbd>Ctrl</kbd>+<kbd>F</kbd> finds and replaces, and project-wide search covers every file.</p></div>
+      <div class="feat reveal"><div class="ic">🧠</div><h3>Writes code with you</h3><p>Auto-closing brackets and quotes, smart indent, bracket matching, one-key comment toggle, and multi-line indent.</p></div>
+      <div class="feat reveal"><div class="ic">🩺</div><h3>Catches mistakes early</h3><p>Squiggly underlines for errors and warnings with an AI quick-fix — hover to read, click to fix.</p></div>
+      <div class="feat reveal"><div class="ic">🌐</div><h3>Live HTML preview</h3><p>Build a web page across HTML, CSS and JS files and preview it in one click, updating as you type.</p></div>
     </div>
-    <div class="code-body" id="cb1">&lt;!DOCTYPE html&gt;<br>
-&lt;<span class="t-tag">html</span> <span class="t-attr">lang</span>=<span class="t-str">"en"</span>&gt;<br>
-&lt;<span class="t-tag">head</span>&gt;<br>
-  &lt;<span class="t-tag">meta</span> <span class="t-attr">charset</span>=<span class="t-str">"UTF-8"</span>&gt;<br>
-  &lt;<span class="t-tag">meta</span> <span class="t-attr">name</span>=<span class="t-str">"viewport"</span> <span class="t-attr">content</span>=<span class="t-str">"width=device-width, initial-scale=1.0"</span>&gt;<br>
-  &lt;<span class="t-tag">title</span>&gt;My Website&lt;/<span class="t-tag">title</span>&gt;<br>
-
-<span class="line-hl">  <span class="t-cm">&lt;!-- ✦ XCode Editor — add this line --&gt;</span><br>
-  &lt;<span class="t-tag">script</span> <span class="t-attr">src</span>=<span class="t-str">"https://phinex-org.github.io/X-Code/XCode.js"</span>&gt;&lt;/<span class="t-tag">script</span>&gt;</span><br>
-
-&lt;/<span class="t-tag">head</span>&gt;<br>
-&lt;<span class="t-tag">body</span>&gt;<br>
-  <span class="t-cm">&lt;!-- your page content --&gt;</span><br>
-&lt;/<span class="t-tag">body</span>&gt;<br>
-&lt;/<span class="t-tag">html</span>&gt;<br></div>
   </div>
 </section>
 
+<section id="speed">
+  <div class="wrap perf">
+    <div class="reveal">
+      <div class="eyebrow">Built for big files</div>
+      <h2>Open a 64&nbsp;MB file.<br>Feel nothing.</h2>
+      <p class="sub">Most editors try to colour and number every line of a file at once. X Code only draws what's on your screen, so file size stops mattering for opening and scrolling.</p>
+      <p class="fine">Measured in our own tests (Chromium, synthetic JavaScript files). Files over 2&nbsp;MB open in a fast read-only view with go-to-line; press <b>Edit anyway</b> to edit them (typing in multi-megabyte files is limited by the platform's text box, so it can feel slower). Real-world speed depends on your machine.</p>
+    </div>
+    <div class="stats reveal">
+      <div class="stat"><b>0.06 s</b><span>to open 1,000,000 lines (64 MB)</span></div>
+      <div class="stat"><b>0.02 s</b><span>to open 100,000 lines (6 MB)</span></div>
+      <div class="stat"><b>~3 ms</b><span>to switch between tabs in a 4,000-file project</span></div>
+      <div class="stat"><b>130×</b><span>faster tab switching than before the rewrite</span></div>
+    </div>
+  </div>
+</section>
 
-<!-- ══════════════════════════════════════════════════════
-     SECTION 2 — STYLE
-══════════════════════════════════════════════════════ -->
-<section class="section" id="style">
-  <div class="section-eyebrow">Step 2</div>
-  <h2 class="section-title">Style the Editor</h2>
-  <p class="section-desc">
-    The editor lives inside any <code>&lt;div&gt;</code> you choose.
-    Control its size with regular CSS and override any colour with <code>--xce-*</code> custom properties.
-  </p>
+<section id="themes">
+  <div class="wrap center">
+    <div class="reveal"><div class="eyebrow">Easy on the eyes</div><h2>Comfortable for long sessions.</h2><p class="sub">Four hand-tuned themes. Soft Night and Dusk lower contrast and glare for late nights; Paper is a warm light theme for bright rooms. Click one — this whole page changes with it.</p></div>
+    <div class="theme-row reveal" id="theme-row">
+      <button class="theme-btn on" data-t="x-dark"><div class="sw"><i style="background:#1e1e1e"></i><i style="background:#39ff14"></i><i style="background:#569cd6"></i></div><b>X Dark</b><span>Classic neon-green on near-black</span></button>
+      <button class="theme-btn" data-t="soft-night"><div class="sw"><i style="background:#1f2227"></i><i style="background:#8fd694"></i><i style="background:#7aa2d6"></i></div><b>Soft Night</b><span>Lowest glare — best after dark</span></button>
+      <button class="theme-btn" data-t="dusk"><div class="sw"><i style="background:#1e2230"></i><i style="background:#e6b455"></i><i style="background:#8aa8f0"></i></div><b>Dusk</b><span>Cool blue-grey, warm amber accents</span></button>
+      <button class="theme-btn" data-t="paper"><div class="sw"><i style="background:#f7f3ea"></i><i style="background:#1f8a4c"></i><i style="background:#2f5fa8"></i></div><b>Paper</b><span>Warm off-white for bright rooms</span></button>
+    </div>
+  </div>
+</section>
 
-  <div class="steps">
-
-    <!-- Step A: Size -->
-    <div class="step">
-      <div class="step-num">A</div>
-      <div class="step-body">
-        <div class="step-title">Set the container size</div>
-        <div class="step-desc">Give your div any <code>width</code> and <code>height</code>. The editor fills it completely.</div>
-        <div class="code-wrap">
-          <div class="code-header">
-            <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
-            <span class="code-fname">style.css</span>
-            <button class="code-copy" onclick="copyBlock('cb2',this)">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
-          </div>
-          <div class="code-body" id="cb2"><span class="t-tag">#my-editor</span> {<br>
-  <span class="t-pr">   width</span>:  <span class="t-nm">100%</span>;         <br><span class="t-cm">/* or 800px, 50vw, etc. */</span><br>
-  <span class="t-pr">   height</span>: <span class="t-nm">480px</span>;        <br><span class="t-cm">/* total editor height   */</span><br>
-  <span class="t-pr">   border-radius</span>: <span class="t-nm">8px</span>;   <br><span class="t-cm">/* optional rounding     */</span><br>
-}
-
-<span class="t-cm">/* Viewer panel height (inside the editor) */</span><br>
-<span class="t-tag">#my-editor .xce-viewer</span> {<br>
-  <span class="t-pr">   height</span>: <span class="t-nm">180px</span>;<br>
-}</div>
+<section id="how">
+  <div class="wrap">
+    <div class="center reveal"><div class="eyebrow">How to use it</div><h2>Learn it in a minute.</h2><p class="sub">Three things to know. Everything else you'll discover as you go.</p></div>
+    <div class="how">
+      <div class="how-card reveal">
+        <h3>Your first five minutes</h3>
+        <ol>
+          <li><b>Open Folder</b> (top bar, or <kbd>Ctrl</kbd>+<kbd>O</kbd>) and pick a project. Or press <b>Try a sample project</b> on the welcome screen.</li>
+          <li><b>Click a file</b> in the sidebar to edit it. Saves are automatic to your session; <kbd>Ctrl</kbd>+<kbd>S</kbd> writes to disk.</li>
+          <li><b>Press ▶</b> in the top bar to preview an HTML page, or open the terminal with <kbd>Ctrl</kbd>+<kbd>`</kbd> and type <kbd>run app.js</kbd>.</li>
+          <li><b>Stuck?</b> Type <kbd>help</kbd> in the terminal, or open the AI chat from the left bar.</li>
+        </ol>
+      </div>
+      <div class="how-card reveal">
+        <h3>Shortcuts worth remembering</h3>
+        <div class="keys">
+          <div><span>Go to any file</span><kbd>Ctrl K</kbd></div>
+          <div><span>Find / Replace in file</span><kbd>Ctrl F</kbd> <kbd>Ctrl H</kbd></div>
+          <div><span>Toggle comment</span><kbd>Ctrl /</kbd></div>
+          <div><span>Show / hide sidebar</span><kbd>Ctrl B</kbd></div>
+          <div><span>Show / hide terminal</span><kbd>Ctrl `</kbd></div>
+          <div><span>Split the editor</span><kbd>Ctrl \</kbd></div>
+          <div><span>Accept AI suggestion</span><kbd>Tab</kbd></div>
+          <div><span>Zoom text</span><kbd>Ctrl +</kbd> <kbd>Ctrl −</kbd></div>
         </div>
+        <p class="fine" style="margin-top:14px">On Mac, use ⌘ instead of Ctrl.</p>
       </div>
-    </div>
-
-    <!-- Step B: Colours -->
-    <div class="step">
-      <div class="step-num">B</div>
-      <div class="step-body">
-        <div class="step-title">Override colours with CSS variables</div>
-        <div class="step-desc">Set any <code>--xce-*</code> token on the container. They cascade down so only your editor is affected.</div>
-        <div class="code-wrap">
-          <div class="code-header">
-            <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
-            <span class="code-fname">style.css — theme tokens</span>
-            <button class="code-copy" onclick="copyBlock('cb3',this)">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
-          </div>
-          <div class="code-body" id="cb3"><span class="t-tag">#my-editor</span> {<br>
-  <span class="t-cm">/* ── Backgrounds ── */</span><br>
-  <span class="t-pr">--xce-bg</span>:      <span class="t-str">#1e1e1e</span>;   <br><span class="t-cm">/* main editor background  */</span><br>
-  <span class="t-pr">--xce-bg2</span>:     <span class="t-str">#252526</span>;   <br><span class="t-cm">/* control bar / gutter    */</span><br>
-  <span class="t-pr">--xce-bg3</span>:     <span class="t-str">#2d2d30</span>;   <br><span class="t-cm">/* viewer background       */</span><br>
-
-  <span class="t-cm">/* ── Borders & text ── */</span><br>
-  <span class="t-pr">--xce-border</span>:  <span class="t-str">#3c3c3c</span>;   <br><span class="t-cm">/* divider / border lines  */</span><br>
-  <span class="t-pr">--xce-text</span>:    <span class="t-str">#d4d4d4</span>;   <br><span class="t-cm">/* default code colour     */</span><br>
-  <span class="t-pr">--xce-muted</span>:   <span class="t-str">#858585</span>;   <br><span class="t-cm">/* gutter numbers / labels */</span><br>
-
-  <span class="t-cm">/* ── Accent (cursor, buttons, AI pulse) ── */</span><br>
-  <span class="t-pr">--xce-accent</span>:  <span class="t-str">#39ff14</span>;   <br><span class="t-cm">/* neon green (default)    */</span><br>
-
-  <span class="t-cm">/* ── Syntax token colours ── */</span><br>
-  <span class="t-pr">--xce-kw</span>:      <span class="t-str">#569cd6</span>;   <br><span class="t-cm">/* keywords                */</span><br>
-  <span class="t-pr">--xce-str</span>:     <span class="t-str">#ce9178</span>;   <br><span class="t-cm">/* strings                 */</span><br>
-  <span class="t-pr">--xce-cmt</span>:     <span class="t-str">#6a9955</span>;   <br><span class="t-cm">/* comments                */</span><br>
-  <span class="t-pr">--xce-fn</span>:      <span class="t-str">#dcdcaa</span>;   <br><span class="t-cm">/* function names          */</span><br>
-  <span class="t-pr">--xce-num</span>:     <span class="t-str">#b5cea8</span>;   <br><span class="t-cm">/* numbers                 */</span><br>
-  <span class="t-pr">--xce-type</span>:    <span class="t-str">#4ec9b0</span>;   <br><span class="t-cm">/* types / builtins        */</span><br>
-  <span class="t-pr">--xce-prop</span>:    <span class="t-str">#9cdcfe</span>;   <br><span class="t-cm">/* properties              */</span><br>
-
-  <span class="t-cm">/* ── Typography ── */</span><br>
-  <span class="t-pr">--xce-font</span>:      <span class="t-str">'JetBrains Mono', monospace</span>;<br>
-  <span class="t-pr">--xce-font-size</span>: <span class="t-nm">13px</span>;<br>
-  <span class="t-pr">--xce-line-h</span>:    <span class="t-nm">20px</span>;<br>
-}</div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /steps -->
-
-  <!-- Theme gallery -->
-  <h3 style="font:700 18px var(--ui);color:#fff;margin:44px 0 20px;">Built-in theme presets</h3>
-  <div class="theme-grid" id="theme-gallery">
-
-    <div class="theme-card active" data-theme="default" onclick="setThemeOnLive('default',this)">
-      <div class="theme-preview" style="background:#1e1e1e;">
-        <span style="color:#569cd6">const</span> <span style="color:#9cdcfe">x</span> <span style="color:#d4d4d4">=</span> <span style="color:#ce9178">"hello"</span><span style="color:#d4d4d4">;</span><br>
-        <span style="color:#6a9955;font-style:italic">// default theme</span><br>
-        <span style="color:#dcdcaa">console</span><span style="color:#d4d4d4">.</span><span style="color:#dcdcaa">log</span><span style="color:#d4d4d4">(</span><span style="color:#9cdcfe">x</span><span style="color:#d4d4d4">);</span>
-      </div>
-      <div class="theme-footer" style="background:#252526;border-top:1px solid #3c3c3c;">
-        <span class="theme-name" style="color:#d4d4d4">VS Dark</span>
-        <div class="theme-dot" style="background:#39ff14"></div>
-      </div>
-    </div>
-
-    <div class="theme-card" data-theme="ocean" onclick="setThemeOnLive('ocean',this)">
-      <div class="theme-preview" style="background:#0a0a0f;">
-        <span style="color:#c792ea">const</span> <span style="color:#89ddff">x</span> <span style="color:#89ddff">=</span> <span style="color:#c3e88d">"ocean"</span><span style="color:#89ddff">;</span><br>
-        <span style="color:#546e7a;font-style:italic">// material ocean</span><br>
-        <span style="color:#82aaff">console</span><span style="color:#89ddff">.</span><span style="color:#82aaff">log</span><span style="color:#89ddff">(</span><span style="color:#89ddff">x</span><span style="color:#89ddff">);</span>
-      </div>
-      <div class="theme-footer" style="background:#111118;border-top:1px solid #1e1e2e;">
-        <span class="theme-name" style="color:#89ddff">Material Ocean</span>
-        <div class="theme-dot" style="background:#00d4ff"></div>
-      </div>
-    </div>
-
-    <div class="theme-card" data-theme="midnight" onclick="setThemeOnLive('midnight',this)">
-      <div class="theme-preview" style="background:#1a1a2e;">
-        <span style="color:#ff6b9d">const</span> <span style="color:#fff">x</span> <span style="color:#fff">=</span> <span style="color:#ffd93d">"night"</span><span style="color:#fff">;</span><br>
-        <span style="color:#4d4d8a;font-style:italic">// midnight</span><br>
-        <span style="color:#6bcb77">console</span><span style="color:#fff">.</span><span style="color:#6bcb77">log</span><span style="color:#fff">(</span><span style="color:#fff">x</span><span style="color:#fff">);</span>
-      </div>
-      <div class="theme-footer" style="background:#16213e;border-top:1px solid #1e3a5f;">
-        <span class="theme-name" style="color:#ff6b9d">Midnight</span>
-        <div class="theme-dot" style="background:#e94560"></div>
-      </div>
-    </div>
-
-    <div class="theme-card" data-theme="light" onclick="setThemeOnLive('light',this)">
-      <div class="theme-preview" style="background:#fafafa;">
-        <span style="color:#0000ff">const</span> <span style="color:#001080">x</span> <span style="color:#000">=</span> <span style="color:#a31515">"light"</span><span style="color:#000">;</span><br>
-        <span style="color:#008000;font-style:italic">// light theme</span><br>
-        <span style="color:#795e26">console</span><span style="color:#000">.</span><span style="color:#795e26">log</span><span style="color:#000">(</span><span style="color:#001080">x</span><span style="color:#000">);</span>
-      </div>
-      <div class="theme-footer" style="background:#f3f3f3;border-top:1px solid #ddd;">
-        <span class="theme-name" style="color:#333">VS Light</span>
-        <div class="theme-dot" style="background:#0066cc"></div>
-      </div>
-    </div>
-
-    <div class="theme-card" data-theme="dracula" onclick="setThemeOnLive('dracula',this)">
-      <div class="theme-preview" style="background:#282a36;">
-        <span style="color:#ff79c6">const</span> <span style="color:#f8f8f2">x</span> <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">"dracula"</span><span style="color:#f8f8f2">;</span><br>
-        <span style="color:#6272a4;font-style:italic">// dracula theme</span><br>
-        <span style="color:#50fa7b">console</span><span style="color:#f8f8f2">.</span><span style="color:#50fa7b">log</span><span style="color:#f8f8f2">(</span><span style="color:#f8f8f2">x</span><span style="color:#f8f8f2">);</span>
-      </div>
-      <div class="theme-footer" style="background:#21222c;border-top:1px solid #44475a;">
-        <span class="theme-name" style="color:#f8f8f2">Dracula</span>
-        <div class="theme-dot" style="background:#bd93f9"></div>
-      </div>
-    </div>
-
-    <div class="theme-card" data-theme="monokai" onclick="setThemeOnLive('monokai',this)">
-      <div class="theme-preview" style="background:#272822;">
-        <span style="color:#f92672">const</span> <span style="color:#f8f8f2">x</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">"monokai"</span><span style="color:#f8f8f2">;</span><br>
-        <span style="color:#75715e;font-style:italic">// monokai</span><br>
-        <span style="color:#a6e22e">console</span><span style="color:#f8f8f2">.</span><span style="color:#a6e22e">log</span><span style="color:#f8f8f2">(</span><span style="color:#f8f8f2">x</span><span style="color:#f8f8f2">);</span>
-      </div>
-      <div class="theme-footer" style="background:#1e1f1c;border-top:1px solid #3e3d32;">
-        <span class="theme-name" style="color:#f8f8f2">Monokai</span>
-        <div class="theme-dot" style="background:#a6e22e"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- CSS for each theme (copy-ready) -->
-  <div id="theme-css-output" style="margin-top:20px;">
-    <div class="code-wrap">
-      <div class="code-header">
-        <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
-        <span class="code-fname" id="theme-css-fname">VS Dark — CSS</span>
-        <button class="code-copy" onclick="copyBlock('theme-css-body',this)">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy
-        </button>
-      </div>
-      <div class="code-body" id="theme-css-body"></div>
     </div>
   </div>
 </section>
 
-
-<!-- ══════════════════════════════════════════════════════
-     SECTION 3 — LIVE DEMOS
-══════════════════════════════════════════════════════ -->
-<section class="section" id="demos">
-  <div class="section-eyebrow">Step 3</div>
-  <h2 class="section-title">Use the Editor</h2>
-  <p class="section-desc">
-    Pass a config object when initialising. Pick a <code>viewer</code> mode,
-    choose your <code>language</code>, and optionally enable <code>aiEnabled</code>
-    for Tab-to-complete ghost text.
-  </p>
-
-  <!-- Full init code -->
-  <div class="code-wrap" style="margin-bottom:40px;">
-    <div class="code-header">
-      <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
-      <span class="code-fname">script.js — full initialisation</span>
-      <button class="code-copy" onclick="copyBlock('cb-init',this)">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
-    </div>
-    <div class="code-body" id="cb-init"><span class="t-kw">const</span> <span class="t-pr">editor</span> <span class="t-op">=</span> <span class="t-kw">new</span> <span class="t-ty">XCodeEditor</span>({
-
-  <span class="t-cm">// ── Required ──────────────────────────────</span><br>
-  <span class="t-pr">container</span>:    <span class="t-str">'#my-editor'</span>,   <br>  <span class="t-cm">// CSS selector or DOM element</span><br>
-
-  <span class="t-cm">// ── Language ──────────────────────────────</span><br>
-  <span class="t-pr">language</span>:     <span class="t-str">'javascript'</span>,    <span class="t-cm">// javascript | typescript | html | css</span>
-                                      <span class="t-cm">// python | json | markdown | shell</span><br>
-
-  <span class="t-cm">// ── Viewer ────────────────────────────────</span><br>
-  <span class="t-pr">viewer</span>:       <span class="t-str">'console'</span>,     <span class="t-cm">// 'console' | 'page' | 'none'</span><br>
-  <span class="t-pr">viewerHeight</span>: <span class="t-str">'180px'</span>,          <span class="t-cm">// initial viewer panel height</span><br>
-
-  <span class="t-cm">// ── AI Suggestions ────────────────────────</span><br>
-  <span class="t-pr">aiEnabled</span>:    <span class="t-nm">true</span>,             <span class="t-cm">// show AI toggle button</span><br>
-  <span class="t-pr">apiKey</span>:       <span class="t-str">'sk-ant-...'</span>,     <span class="t-cm">// Anthropic key (Tab to accept)</span><br>
-
-  <span class="t-cm">// ── Starting code ─────────────────────────</span><br>
-  <span class="t-pr">initialCode</span>:  <span class="t-str">`console.log("Hello!")`</span>,<br>
-
-  <span class="t-cm">// ── Callbacks ─────────────────────────────</span><br>
-  <span class="t-pr">onChange</span>: <span class="t-pr">code</span> <span class="t-op">=&gt;</span> <span class="t-fn">autoSave</span>(code),<br>
-  <span class="t-pr">onRun</span>:    <span class="t-pr">code</span> <span class="t-op">=&gt;</span> <span class="t-fn">console</span>.<span class="t-fn">log</span>(<span class="t-str">'running'</span>),<br>
-});</div>
-  </div>
-
-  <!-- 4 live demos -->
-  <div class="demo-grid">
-
-    <!-- Demo 1: JS Console -->
-    <div class="demo-card">
-      <div class="demo-card-head">
-        <span class="demo-card-title">JavaScript + Console</span>
-        <span class="demo-card-badge badge-console">console</span>
-      </div>
-      <div class="demo-editor" id="demo-js"></div>
-    </div>
-
-    <!-- Demo 2: HTML Page -->
-    <div class="demo-card">
-      <div class="demo-card-head">
-        <span class="demo-card-title">HTML + Page Viewer</span>
-        <span class="demo-card-badge badge-page">page</span>
-      </div>
-      <div class="demo-editor" id="demo-html" style="--xce-accent:#00d4ff;--xce-accent-dim:rgba(0,212,255,.1);"></div>
-    </div>
-
-    <!-- Demo 3: Editor only -->
-    <div class="demo-card">
-      <div class="demo-card-head">
-        <span class="demo-card-title">Editor Only (no viewer)</span>
-        <span class="demo-card-badge badge-noview">none</span>
-      </div>
-      <div class="demo-editor" id="demo-py" style="height:280px;--xce-accent:#ff8c00;--xce-accent-dim:rgba(255,140,0,.1);--xce-kw:#ff8c00;"></div>
-    </div>
-
-    <!-- Demo 4: CSS + Page -->
-    <div class="demo-card">
-      <div class="demo-card-head">
-        <span class="demo-card-title">CSS + Page Viewer</span>
-        <span class="demo-card-badge badge-split">page</span>
-      </div>
-      <div class="demo-editor" id="demo-css" style="--xce-accent:#bd93f9;--xce-accent-dim:rgba(189,147,249,.1);--xce-kw:#ff79c6;--xce-str:#f1fa8c;--xce-fn:#50fa7b;--xce-prop:#8be9fd;"></div>
-    </div>
-
-  </div>
-</section>
-
-
-<!-- ══════════════════════════════════════════════════════
-     SECTION 4 — MERGE INTO YOUR WEBSITE
-══════════════════════════════════════════════════════ -->
-<section class="section" id="integrate">
-  <div class="section-eyebrow">Step 4</div>
-  <h2 class="section-title">Merge Into Your Website</h2>
-  <p class="section-desc">
-    Below is a realistic website mockup with XCode Editor embedded inside a dashboard layout —
-    complete, copy-ready code below the preview.
-  </p>
-
-  <!-- Website mockup -->
-  <div class="website-mockup">
-    <div class="mockup-bar">
-      <div class="mockup-dots">
-        <div class="mockup-dot r"></div>
-        <div class="mockup-dot y"></div>
-        <div class="mockup-dot g"></div>
-      </div>
-      <div class="mockup-url">https://mywebsite.com/editor</div>
-    </div>
-    <div class="mockup-body">
-      <!-- fake header -->
-      <div class="mockup-header">
-        <div class="mockup-logo-dot"></div>
-        <div class="mockup-logo-text">My App</div>
-        <div class="mockup-nav">
-          <span>Dashboard</span><span>Docs</span><span>Settings</span>
-        </div>
-      </div>
-      <!-- fake content layout -->
-      <div class="mockup-content">
-        <div class="mockup-sidebar">
-          <div class="active"></div>
-          <div></div><div></div><div></div>
-          <div style="height:1px;background:#eee;margin:8px 0;"></div>
-          <div></div><div></div>
-        </div>
-        <div class="mockup-main">
-          <div class="mockup-editor-slot">
-            <div id="mockup-editor"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Full integration code -->
-  <div class="code-wrap" style="margin-top:28px;">
-    <div class="code-header">
-      <div class="code-dots"><div class="code-dot r"></div><div class="code-dot y"></div><div class="code-dot g"></div></div>
-      <span class="code-fname">my-page.html — complete integration example</span>
-      <button class="code-copy" onclick="copyBlock('cb-full',this)">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
-    </div>
-    <div class="code-body" id="cb-full">&lt;!DOCTYPE html&gt;<br>
-&lt;<span class="t-tag">html</span> <span class="t-attr">lang</span>=<span class="t-str">"en"</span>&gt;<br>
-&lt;<span class="t-tag">head</span>&gt;<br>
-  &lt;<span class="t-tag">meta</span> <span class="t-attr">charset</span>=<span class="t-str">"UTF-8"</span>&gt;<br>
-  &lt;<span class="t-tag">title</span>&gt;My Website&lt;/<span class="t-tag">title</span>&gt;<br>
-
-  <span class="t-cm">&lt;!-- 1. Link the editor --&gt;</span><br>
-  &lt;<span class="t-tag">script</span> <span class="t-attr">src</span>=<span class="t-str">"https://phinex-org.github.io/X-Code/XCode.js"</span>&gt;&lt;/<span class="t-tag">script</span>&gt;<br>
-
-  &lt;<span class="t-tag">style</span>&gt;<br>
-    <span class="t-cm">/* 2. Size the editor container */</span><br>
-    <span class="t-tag">#code-editor</span> {<br>
-      <span class="t-pr">width</span>:  <span class="t-nm">100%</span>;<br>
-      <span class="t-pr">height</span>: <span class="t-nm">500px</span>;<br>
-
-      <span class="t-cm">/* Optional: custom theme */</span><br>
-      <span class="t-pr">--xce-accent</span>: <span class="t-str">#39ff14</span>;<br>
-      <span class="t-pr">--xce-bg</span>:     <span class="t-str">#1e1e1e</span>;<br>
-    }<br>
-
-    <span class="t-cm">/* Viewer panel height (inside the editor) */</span><br>
-    <span class="t-tag">#code-editor .xce-viewer</span> {<br>
-      <span class="t-pr">height</span>: <span class="t-nm">200px</span>;<br>
-    }<br>
-  &lt;/<span class="t-tag">style</span>&gt;<br>
-&lt;/<span class="t-tag">head</span>&gt;<br>
-&lt;<span class="t-tag">body</span>&gt;<br>
-
-  &lt;<span class="t-tag">header</span>&gt;My Website Header&lt;/<span class="t-tag">header</span>&gt;<br>
-
-  &lt;<span class="t-tag">main</span>&gt;<br>
-    &lt;<span class="t-tag">h1</span>&gt;Code Playground&lt;/<span class="t-tag">h1</span>&gt;<br>
-
-    <span class="t-cm">&lt;!-- 3. Place the editor div --&gt;</span><br>
-    &lt;<span class="t-tag">div</span> <span class="t-attr">id</span>=<span class="t-str">"code-editor"</span>&gt;&lt;/<span class="t-tag">div</span>&gt;<br>
-
-    <span class="t-cm">&lt;!-- Result area your page can control --&gt;</span><br>
-    &lt;<span class="t-tag">div</span> <span class="t-attr">id</span>=<span class="t-str">"output"</span>&gt;&lt;/<span class="t-tag">div</span>&gt;<br>
-  &lt;/<span class="t-tag">main</span>&gt;<br>
-
-  &lt;<span class="t-tag">script</span>&gt;<br>
-    <span class="t-cm">// 4. Initialise</span><br>
-    <span class="t-kw">const</span> <span class="t-pr">editor</span> <span class="t-op">=</span> <span class="t-kw">new</span> <span class="t-ty">XCodeEditor</span>({<br>
-      <span class="t-pr">container</span>:    <span class="t-str">'#code-editor'</span>,<br>
-      <span class="t-pr">language</span>:     <span class="t-str">'javascript'</span>,<br>
-      <span class="t-pr">viewer</span>:       <span class="t-str">'console'</span>,<br>
-      <span class="t-pr">viewerHeight</span>: <span class="t-str">'200px'</span>,<br>
-      <span class="t-pr">aiEnabled</span>:    <span class="t-nm">true</span>,<br>
-      <span class="t-pr">apiKey</span>:       <span class="t-str">'sk-ant-...'</span>,<br>
-      <span class="t-pr">initialCode</span>:  <span class="t-str">'console.log("Hello World!")'</span>,<br>
-
-      <span class="t-cm">// Callbacks</span><br>
-      <span class="t-pr">onChange</span>: code <span class="t-op">=&gt;</span> {<br>
-        <span class="t-fn">localStorage</span>.<span class="t-fn">setItem</span>(<span class="t-str">'saved-code'</span>, code);<br>
-      },<br>
-      <span class="t-pr">onRun</span>: code <span class="t-op">=&gt;</span> {<br>
-        document.<span class="t-fn">getElementById</span>(<span class="t-str">'output'</span>).textContent <span class="t-op">=</span> <span class="t-str">'Running...'</span>;<br>
-      }<br>
-    });<br>
-
-    <span class="t-cm">// Use the API anywhere in your page</span><br>
-    document.<span class="t-fn">getElementById</span>(<span class="t-str">'save-btn'</span>)<br>
-      .<span class="t-fn">addEventListener</span>(<span class="t-str">'click'</span>, () <span class="t-op">=&gt;</span> {<br>
-        <span class="t-kw">const</span> code <span class="t-op">=</span> editor.<span class="t-fn">getValue</span>();<br>
-        <span class="t-fn">fetch</span>(<span class="t-str">'/api/save'</span>, { <span class="t-pr">method</span>: <span class="t-str">'POST'</span>, <span class="t-pr">body</span>: code });<br>
-      });<br>
-  &lt;/<span class="t-tag">script</span>&gt;<br>
-
-&lt;/<span class="t-tag">body</span>&gt;<br>
-&lt;/<span class="t-tag">html</span>&gt;</div>
-  </div>
-</section>
-
-
-<!-- ══════════════════════════════════════════════════════
-     SECTION 5 — API QUICK REFERENCE
-══════════════════════════════════════════════════════ -->
-<section class="section" id="api">
-  <div class="section-eyebrow">Reference</div>
-  <h2 class="section-title">API Quick Reference</h2>
-  <p class="section-desc">Everything you can call on the editor instance after initialisation.</p>
-
-  <div class="api-grid">
-    <div class="api-card">
-      <div class="api-card-title">Read / Write</div>
-      <div class="api-method"><span class="api-method-name">editor.getValue()</span><span class="api-method-desc">→ returns current code as string</span></div>
-      <div class="api-method"><span class="api-method-name">editor.setValue(code)</span><span class="api-method-desc">→ replace editor content</span></div>
-      <div class="api-method"><span class="api-method-name">editor.getLanguage()</span><span class="api-method-desc">→ active language string</span></div>
-      <div class="api-method"><span class="api-method-name">editor.setLanguage(lang)</span><span class="api-method-desc">→ switch language + re-highlight</span></div>
-    </div>
-    <div class="api-card">
-      <div class="api-card-title">Viewer</div>
-      <div class="api-method"><span class="api-method-name">editor.getViewerMode()</span><span class="api-method-desc">→ 'page' | 'console' | 'none'</span></div>
-      <div class="api-method"><span class="api-method-name">editor.setViewerMode(m)</span><span class="api-method-desc">→ switch viewer at runtime</span></div>
-      <div class="api-method"><span class="api-method-name">editor.run()</span><span class="api-method-desc">→ execute code (same as ▶ Run)</span></div>
-      <div class="api-method"><span class="api-method-name">editor.log(text, type)</span><span class="api-method-desc">→ add line to console viewer</span></div>
-    </div>
-    <div class="api-card">
-      <div class="api-card-title">Appearance</div>
-      <div class="api-method"><span class="api-method-name">editor.setTheme(tokens)</span><span class="api-method-desc">→ apply CSS tokens at runtime</span></div>
-      <div class="api-method"><span class="api-method-name">editor.focus()</span><span class="api-method-desc">→ focus the textarea</span></div>
-    </div>
-    <div class="api-card">
-      <div class="api-card-title">Events</div>
-      <div class="api-method"><span class="api-method-name">editor.on('change', fn)</span><span class="api-method-desc">→ fires on every keystroke</span></div>
-      <div class="api-method"><span class="api-method-name">editor.on('run', fn)</span><span class="api-method-desc">→ fires when ▶ Run is clicked</span></div>
-      <div class="api-method"><span class="api-method-name">editor.off(event, fn)</span><span class="api-method-desc">→ remove listener</span></div>
-      <div class="api-method"><span class="api-method-name">editor.destroy()</span><span class="api-method-desc">→ remove editor, clear container</span></div>
-    </div>
-  </div>
-
-  <!-- keyboard shortcuts -->
-  <h3 style="font:700 16px var(--ui);color:#fff;margin:36px 0 16px;">Keyboard shortcuts</h3>
-  <div class="code-wrap">
-    <div class="code-body" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 32px;">
-      <div><code>Tab</code> <span style="color:var(--muted);font-size:12px;">Accept AI suggestion (or indent)</span></div>
-      <div><code>Esc</code> <span style="color:var(--muted);font-size:12px;">Dismiss AI suggestion</span></div>
-      <div><code>Ctrl + Enter</code> <span style="color:var(--muted);font-size:12px;">Run code</span></div>
-      <div><code>( [ { " '</code> <span style="color:var(--muted);font-size:12px;">Auto-close bracket/quote</span></div>
+<section>
+  <div class="wrap">
+    <div class="cta-box reveal">
+      <div class="eyebrow">For developers &amp; course creators</div>
+      <h2>Need a code editor inside your own website?</h2>
+      <p class="sub" style="margin:0 auto">X Code also ships as a tiny embeddable editor and live previewer — drop it into a course page, tutorial or docs site with one script tag.</p>
+      <div class="hero-cta"><a class="btn primary" href="embed.html">See how to embed it</a><a class="btn" href="https://github.com/PhineX-org/X-Code">View on GitHub</a></div>
     </div>
   </div>
 </section>
 
-
-<!-- ════════════ FOOTER ════════════ -->
-<footer class="footer">
-  <div class="footer-logo">
-    <div class="footer-logo-icon">X</div>
-    <strong style="color:var(--accent);font-family:var(--mono);letter-spacing:2px;">X CODE</strong>
+<footer>
+  <div class="wrap foot-in">
+    <span>© PhineX Group · X Code is free software</span>
+    <span><a href="https://github.com/PhineX-org/X-Code">GitHub</a> &nbsp;·&nbsp; <a href="https://github.com/PhineX-org/X-Code/releases">All releases</a> &nbsp;·&nbsp; <a href="https://github.com/PhineX-org/X-Code/issues">Report a problem</a> &nbsp;·&nbsp; <a href="embed.html">Embed docs</a></span>
   </div>
-  <p>PhineX Group &nbsp;·&nbsp; Embeddable code editor &nbsp;·&nbsp; AI-powered by Gemini</p>
-  <p style="margin-top:6px;">
-    <a href="https://phinex-org.github.io/X-Code/XCode.html">X Code</a> &nbsp;·&nbsp;
-    <a href="#link">Link</a> &nbsp;·&nbsp;
-    <a href="#style">Style</a> &nbsp;·&nbsp;
-    <a href="#demos">Demos</a>
-  </p>
 </footer>
 
+<div class="dl-toast" id="dl-toast"></div>
 
-<!-- ════════════════════════════════════════
-     SCRIPTS
-════════════════════════════════════════ -->
 <script>
-/* ── Utility: copy to clipboard ── */
-function copy(text, btn) {
-  // strip HTML entities for plain text
-  const plain = text
-    .replace(/&quot;/g, '"').replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-  navigator.clipboard.writeText(plain).then(() => showToast()).catch(() => {});
-}
-
-function copyBlock(id, btn) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const plain = el.innerText || el.textContent;
-  navigator.clipboard.writeText(plain).then(() => {
-    if (btn) { btn.textContent = '✓ Copied'; setTimeout(() => btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy', 1800); }
-    showToast();
-  }).catch(() => {});
-}
-
-function showToast() {
-  const t = document.getElementById('toast');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-/* ── Theme definitions ── */
-const THEMES = {
-  default: {
-    name: 'VS Dark',
-    css: `#my-editor {
-  /* Default VS Code Dark theme — no overrides needed */
-  /* All --xce-* defaults match VS Dark already       */
-}`,
-    tokens: {}
-  },
-  ocean: {
-    name: 'Material Ocean',
-    css: `#my-editor {
-  --xce-bg:      #0a0a0f;
-  --xce-bg2:     #111118;
-  --xce-bg3:     #16161e;
-  --xce-border:  #1e1e2e;
-  --xce-text:    #a6accd;
-  --xce-muted:   #4a4f6a;
-  --xce-accent:  #00d4ff;
-  --xce-accent-dim: rgba(0,212,255,.1);
-  --xce-kw:   #c792ea;
-  --xce-str:  #c3e88d;
-  --xce-cmt:  #546e7a;
-  --xce-fn:   #82aaff;
-  --xce-num:  #f78c6c;
-  --xce-type: #ffcb6b;
-  --xce-prop: #89ddff;
-}`,
-    tokens: { bg:'#0a0a0f', bg2:'#111118', bg3:'#16161e', border:'#1e1e2e', text:'#a6accd', muted:'#4a4f6a', accent:'#00d4ff', 'accent-dim':'rgba(0,212,255,.1)', kw:'#c792ea', str:'#c3e88d', cmt:'#546e7a', fn:'#82aaff', num:'#f78c6c', type:'#ffcb6b', prop:'#89ddff' }
-  },
-  midnight: {
-    name: 'Midnight',
-    css: `#my-editor {
-  --xce-bg:      #1a1a2e;
-  --xce-bg2:     #16213e;
-  --xce-bg3:     #0f3460;
-  --xce-border:  #1e3a5f;
-  --xce-text:    #e0e0e0;
-  --xce-muted:   #4d4d8a;
-  --xce-accent:  #e94560;
-  --xce-accent-dim: rgba(233,69,96,.1);
-  --xce-kw:   #ff6b9d;
-  --xce-str:  #ffd93d;
-  --xce-cmt:  #4d4d8a;
-  --xce-fn:   #6bcb77;
-  --xce-num:  #4d96ff;
-  --xce-type: #4d96ff;
-  --xce-prop: #fff;
-}`,
-    tokens: { bg:'#1a1a2e', bg2:'#16213e', bg3:'#0f3460', border:'#1e3a5f', text:'#e0e0e0', muted:'#4d4d8a', accent:'#e94560', 'accent-dim':'rgba(233,69,96,.1)', kw:'#ff6b9d', str:'#ffd93d', cmt:'#4d4d8a', fn:'#6bcb77', num:'#4d96ff', type:'#4d96ff', prop:'#fff' }
-  },
-  light: {
-    name: 'VS Light',
-    css: `#my-editor {
-  --xce-bg:      #ffffff;
-  --xce-bg2:     #f3f3f3;
-  --xce-bg3:     #f5f5f5;
-  --xce-border:  #e0e0e0;
-  --xce-text:    #000000;
-  --xce-muted:   #888888;
-  --xce-accent:  #0066cc;
-  --xce-accent-dim: rgba(0,102,204,.08);
-  --xce-ghost:   rgba(100,100,120,.45);
-  --xce-kw:   #0000ff;
-  --xce-str:  #a31515;
-  --xce-cmt:  #008000;
-  --xce-fn:   #795e26;
-  --xce-num:  #098658;
-  --xce-type: #267f99;
-  --xce-prop: #001080;
-}`,
-    tokens: { bg:'#ffffff', bg2:'#f3f3f3', bg3:'#f5f5f5', border:'#e0e0e0', text:'#000000', muted:'#888888', accent:'#0066cc', 'accent-dim':'rgba(0,102,204,.08)', ghost:'rgba(100,100,120,.45)', kw:'#0000ff', str:'#a31515', cmt:'#008000', fn:'#795e26', num:'#098658', type:'#267f99', prop:'#001080' }
-  },
-  dracula: {
-    name: 'Dracula',
-    css: `#my-editor {
-  --xce-bg:      #282a36;
-  --xce-bg2:     #21222c;
-  --xce-bg3:     #1e1f28;
-  --xce-border:  #44475a;
-  --xce-text:    #f8f8f2;
-  --xce-muted:   #6272a4;
-  --xce-accent:  #bd93f9;
-  --xce-accent-dim: rgba(189,147,249,.1);
-  --xce-kw:   #ff79c6;
-  --xce-str:  #f1fa8c;
-  --xce-cmt:  #6272a4;
-  --xce-fn:   #50fa7b;
-  --xce-num:  #bd93f9;
-  --xce-type: #8be9fd;
-  --xce-prop: #66d9e8;
-}`,
-    tokens: { bg:'#282a36', bg2:'#21222c', bg3:'#1e1f28', border:'#44475a', text:'#f8f8f2', muted:'#6272a4', accent:'#bd93f9', 'accent-dim':'rgba(189,147,249,.1)', kw:'#ff79c6', str:'#f1fa8c', cmt:'#6272a4', fn:'#50fa7b', num:'#bd93f9', type:'#8be9fd', prop:'#66d9e8' }
-  },
-  monokai: {
-    name: 'Monokai',
-    css: `#my-editor {
-  --xce-bg:      #272822;
-  --xce-bg2:     #1e1f1c;
-  --xce-bg3:     #1a1b18;
-  --xce-border:  #3e3d32;
-  --xce-text:    #f8f8f2;
-  --xce-muted:   #75715e;
-  --xce-accent:  #a6e22e;
-  --xce-accent-dim: rgba(166,226,46,.1);
-  --xce-kw:   #f92672;
-  --xce-str:  #e6db74;
-  --xce-cmt:  #75715e;
-  --xce-fn:   #a6e22e;
-  --xce-num:  #ae81ff;
-  --xce-type: #66d9e8;
-  --xce-prop: #fd971f;
-}`,
-    tokens: { bg:'#272822', bg2:'#1e1f1c', bg3:'#1a1b18', border:'#3e3d32', text:'#f8f8f2', muted:'#75715e', accent:'#a6e22e', 'accent-dim':'rgba(166,226,46,.1)', kw:'#f92672', str:'#e6db74', cmt:'#75715e', fn:'#a6e22e', num:'#ae81ff', type:'#66d9e8', prop:'#fd971f' }
+(function () {
+  /* ── OS detection: highlight the right card and set the hero button ── */
+  var ua = navigator.userAgent || '', plat = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
+  var os = /Win/i.test(plat + ua) ? 'Windows' : /Mac/i.test(plat) && !/iPhone|iPad/i.test(ua) ? 'macOS' : /Linux|X11/i.test(plat + ua) && !/Android/i.test(ua) ? 'Linux' : null;
+  var map = {
+    Windows: {card: 'card-win', label: 'Download for Windows', href: 'https://github.com/PhineX-org/X-Code/releases/latest/download/X-Code-Setup.exe', file: 'X-Code-Setup.exe'},
+    macOS:   {card: 'card-mac', label: 'Download for macOS', href: 'https://github.com/PhineX-org/X-Code/releases/latest/download/X-Code-mac-arm64.dmg', file: 'X-Code-mac-arm64.dmg'},
+    Linux:   {card: 'card-linux', label: 'Download for Linux', href: 'https://github.com/PhineX-org/X-Code/releases/latest/download/X-Code-linux.AppImage', file: 'X-Code-linux.AppImage'}
+  };
+  var hero = document.getElementById('hero-dl');
+  if (os && map[os]) {
+    document.getElementById(map[os].card).classList.add('rec');
+    document.getElementById('hero-dl-label').textContent = map[os].label;
+    hero.href = map[os].href; hero.setAttribute('download', ''); hero.dataset.os = os; hero.dataset.file = map[os].file; hero.classList.add('dl');
+    document.getElementById('hero-meta').innerHTML = 'Free forever · no account needed · ' + (os === 'macOS' ? 'on an Intel Mac? <a href="#download">get the Intel build</a>' : '<a href="#download">other platforms</a>');
+  } else {
+    document.getElementById('hero-dl-label').textContent = 'Choose your download';
   }
-};
 
-/* Update the theme CSS preview block */
-function renderThemeCSS(key) {
-  const t = THEMES[key];
-  document.getElementById('theme-css-fname').textContent = t.name + ' — CSS';
-  document.getElementById('theme-css-body').textContent = t.css;
-}
-
-/* Apply theme to the live demo editors */
-let liveEditors = {};
-function setThemeOnLive(key, card) {
-  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
-  card.classList.add('active');
-  renderThemeCSS(key);
-  const tokens = THEMES[key].tokens;
-  // Apply to all live demo editors
-  Object.values(liveEditors).forEach(ed => {
-    if (ed && ed.setTheme) {
-      if (Object.keys(tokens).length) {
-        ed.setTheme(tokens);
-      } else {
-        // default — reset
-        const root = ed._root;
-        if (root) root.removeAttribute('style');
-      }
-    }
+  /* ── download feedback: the browser starts the download; we just tell the user what happens next ── */
+  var toast = document.getElementById('dl-toast'), toastTimer;
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a.dl'); if (!a) return;
+    toast.innerHTML = '⬇️ Downloading <b>' + a.dataset.file + '</b> — when it finishes, open it to run the setup.';
+    toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 7000);
   });
-}
-renderThemeCSS('default');
 
-/* ════════════════════════════════════════
-   INITIALISE LIVE DEMO EDITORS
-════════════════════════════════════════ */
+  /* ── theme switcher (changes the whole page, mirroring the editor's own themes) ── */
+  document.getElementById('theme-row').addEventListener('click', function (e) {
+    var b = e.target.closest('.theme-btn'); if (!b) return;
+    document.documentElement.dataset.theme = b.dataset.t;
+    document.querySelectorAll('.theme-btn').forEach(function (x) { x.classList.toggle('on', x === b); });
+    try { localStorage.setItem('xcode-site-theme', b.dataset.t); } catch (err) {}
+  });
+  try { var saved = localStorage.getItem('xcode-site-theme'); if (saved) { document.documentElement.dataset.theme = saved; document.querySelectorAll('.theme-btn').forEach(function (x) { x.classList.toggle('on', x.dataset.t === saved); }); } } catch (err) {}
 
-// Demo 1 — JS + Console
-liveEditors.js = new XCodeEditor({
-  container:   '#demo-js',
-  language:    'javascript',
-  viewer:      'console',
-  aiEnabled:   true,
-  initialCode: `// FizzBuzz — press ▶ Run
-for (let i = 1; i <= 15; i++) {
-  if (i % 15 === 0)     console.log('FizzBuzz');
-  else if (i % 3 === 0) console.log('Fizz');
-  else if (i % 5 === 0) console.log('Buzz');
-  else                  console.log(i);
-}`
-});
+  /* ── scroll reveal ── */
+  var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, {threshold: 0.12});
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
 
-// Demo 2 — HTML + Page viewer
-liveEditors.html = new XCodeEditor({
-  container:   '#demo-html',
-  language:    'html',
-  viewer:      'page',
-  aiEnabled:   true,
-  initialCode: `<!DOCTYPE html>
-<html>
-<head>
-<style>
-  body{background:#0a0a0f;display:flex;
-    justify-content:center;align-items:center;
-    height:100vh;margin:0;font-family:monospace;}
-  .box{
-    padding:20px 36px;border:2px solid #00d4ff;
-    color:#00d4ff;border-radius:8px;font-size:18px;
-    animation:glow 2s ease-in-out infinite alternate;
+  /* ── hero editor: types a function, then shows the AI ghost-text completion ── */
+  var typed = document.getElementById('typed'), ghost = document.getElementById('ghost');
+  var line = 'return ', rest = '`$${value.toFixed(2)}`;';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { typed.innerHTML = '<span class="k">return</span> '; ghost.innerHTML = '<span class="s">`$${value.toFixed(2)}`</span>;<span class="tab-hint">Tab</span>'; return; }
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function cycle() {
+    typed.textContent = ''; ghost.innerHTML = ''; var i = 0;
+    var t = setInterval(function () {
+      i++; typed.innerHTML = '<span class="k">' + esc(line.slice(0, Math.min(i, 6))) + '</span>' + esc(line.slice(6, i));
+      if (i >= line.length) {
+        clearInterval(t);
+        setTimeout(function () { ghost.innerHTML = '<span class="s">' + esc(rest.slice(0, -1)) + '</span>;<span class="tab-hint">Tab</span>'; }, 650);
+        setTimeout(function () { typed.innerHTML = '<span class="k">return</span> '; ghost.innerHTML = ''; typed.innerHTML += '<span class="s">' + esc(rest.slice(0, -1)) + '</span>;'; }, 2600);
+        setTimeout(cycle, 5200);
+      }
+    }, 110);
   }
-  @keyframes glow{
-    from{box-shadow:0 0 8px #00d4ff;}
-    to{box-shadow:0 0 30px #00d4ff,0 0 60px #00d4ff44;}
-  }
-</style>
-</head>
-<body>
-  <div class="box">✦ XCode Editor</div>
-</body></html>`
-});
-
-// Demo 3 — Python, editor only
-liveEditors.py = new XCodeEditor({
-  container:   '#demo-py',
-  language:    'python',
-  viewer:      'none',
-  aiEnabled:   true,
-  initialCode: `# Python — no viewer mode
-def quicksort(arr):
-    if len(arr) <= 1:
-        return arr
-    pivot = arr[len(arr) // 2]
-    left   = [x for x in arr if x < pivot]
-    middle = [x for x in arr if x == pivot]
-    right  = [x for x in arr if x > pivot]
-    return quicksort(left) + middle + quicksort(right)
-
-nums = [3, 6, 8, 10, 1, 2, 1]
-print(quicksort(nums))`
-});
-
-// Demo 4 — CSS + Page viewer
-liveEditors.css = new XCodeEditor({
-  container:   '#demo-css',
-  language:    'css',
-  viewer:      'page',
-  aiEnabled:   true,
-  initialCode: `body {
-  background: #282a36;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
-  font-family: monospace;
-  gap: 16px;
-}
-.dot {
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  background: #bd93f9;
-  animation: bounce .8s ease-in-out infinite alternate;
-}
-.dot:nth-child(2){ animation-delay:.15s; background:#ff79c6; }
-.dot:nth-child(3){ animation-delay:.30s; background:#50fa7b; }
-@keyframes bounce{
-  to{ transform: translateY(-24px); }
-}`
-});
-
-// Mockup editor (inside the website preview)
-liveEditors.mockup = new XCodeEditor({
-  container:   '#mockup-editor',
-  language:    'javascript',
-  viewer:      'console',
-  aiEnabled:   true,
-  initialCode: `// This editor is embedded in a website layout
-const greet = name => \`Hello, \${name}!\`;
-console.log(greet('World'));
-console.log('Editor ready ✓');`
-});
+  setTimeout(cycle, 900);
+})();
 </script>
-
 </body>
 </html>

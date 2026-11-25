@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Embed X Code in your website — editor &amp; live previewer for course sites</title>
+<meta name="description" content="Add a live code editor and previewer to any web page with one script tag. Built for course websites, tutorials and docs.">
+<link rel="icon" href="X-Code.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+<!-- The widget. "defer" makes the browser download it without blocking the page, then run it
+     in order before DOMContentLoaded — which is why the setup code below waits for that event. -->
+<script src="XCode.js" defer></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#07090d;--bg2:#0d1117;--bg3:#141a23;--card:#0f141c;--border:#1e2735;--text:#e6edf3;--muted:#8b98a9;--accent:#39ff14;--accent2:#00c8ff;--accent-dim:rgba(57,255,20,.10);--accent-glow:rgba(57,255,20,.35);--code:#11161f;--font:'Exo 2',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,Consolas,monospace;--display:'Orbitron','Exo 2',sans-serif;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+.bg-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(800px 420px at 80% -5%,var(--accent-dim),transparent 60%),linear-gradient(var(--border) 1px,transparent 1px) 0 0/64px 64px,linear-gradient(90deg,var(--border) 1px,transparent 1px) 0 0/64px 64px;-webkit-mask-image:radial-gradient(ellipse at 50% 0%,#000 20%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 0%,#000 20%,transparent 70%);opacity:.5;}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px;}
+nav{position:sticky;top:0;z-index:50;background:rgba(7,9,13,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:60px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:900;font-size:16px;color:var(--text);}
+.brand img{width:28px;height:28px;border-radius:7px;}
+.brand b{color:var(--accent);}
+.nav-links{display:flex;gap:22px;align-items:center;font-size:14px;}
+.nav-links a{color:var(--muted);}
+.nav-links a:hover{color:var(--text);text-decoration:none;}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:9px;padding:9px 18px;font-weight:600;font-size:14px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer;font-family:inherit;transition:.18s;}
+.btn:hover{border-color:var(--accent);text-decoration:none;transform:translateY(-1px);}
+.btn.primary{background:var(--accent);color:#04120a;border-color:var(--accent);}
+header.top{padding:64px 0 28px;}
+.eyebrow{font-size:12px;letter-spacing:2.2px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px;}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(28px,5vw,46px);line-height:1.12;margin-bottom:16px;}
+h1 em{font-style:normal;color:var(--accent);text-shadow:0 0 30px var(--accent-glow);}
+h2{font-family:var(--display);font-size:clamp(21px,3vw,28px);font-weight:900;margin:64px 0 14px;}
+h3{font-size:17px;margin:26px 0 8px;}
+p{color:var(--muted);margin-bottom:12px;}
+p b,li b{color:var(--text);}
+.lead{font-size:18px;max-width:720px;}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:1px 6px;color:var(--text);}
+.demo{margin:26px 0 8px;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.4),0 0 60px var(--accent-dim);}
+.demo-label{display:flex;justify-content:space-between;padding:9px 14px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:12.5px;color:var(--muted);}
+.demo-label b{color:var(--accent);}
+#demo1,#demo2{width:100%;height:440px;}
+#demo1 .xce-viewer{height:150px !important;}
+.demo-missing{display:none;padding:22px;background:rgba(230,180,85,.08);border:1px solid rgba(230,180,85,.3);border-radius:10px;color:#e6c76a;font-size:14px;margin:14px 0;}
+.codebox{position:relative;margin:14px 0 18px;border:1px solid var(--border);border-radius:12px;background:var(--code);overflow:hidden;}
+.codebox .cap{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);}
+.copy{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 10px;font-size:12px;cursor:pointer;font-family:inherit;}
+.copy:hover{color:var(--accent);border-color:var(--accent);}
+pre{padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;color:#cdd9e5;}
+.steps{display:grid;gap:6px;margin:18px 0;counter-reset:s;}
+.step{display:flex;gap:16px;align-items:flex-start;}
+.step::before{counter-increment:s;content:counter(s);flex-shrink:0;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#04120a;font-weight:800;font-family:var(--display);font-size:14px;margin-top:2px;}
+.step div{flex:1;min-width:0;}
+.callout{border:1px solid var(--border);border-left:3px solid var(--accent2);background:var(--card);border-radius:10px;padding:14px 18px;margin:18px 0;font-size:14.5px;color:var(--muted);}
+.callout.warn{border-left-color:#e6b455;}
+.callout b{color:var(--text);}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+th{color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.8px;}
+td:first-child{white-space:nowrap;}
+td{color:var(--muted);}
+.table-wrap{overflow-x:auto;}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+.tags span{font-family:var(--mono);font-size:12.5px;background:var(--bg3);border:1px solid var(--border);border-radius:999px;padding:3px 12px;color:var(--text);}
+details{border:1px solid var(--border);border-radius:10px;background:var(--card);padding:14px 18px;margin:10px 0;}
+summary{cursor:pointer;font-weight:600;}
+details p{margin:10px 0 0;}
+footer{border-top:1px solid var(--border);margin-top:80px;padding:30px 0;color:var(--muted);font-size:13.5px;}
+.foot-in{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+@media (max-width:700px){.nav-links a.hide-m{display:none;}#demo1,#demo2{height:520px;}}
+</style>
+</head>
+<body>
+<div class="bg-fx"></div>
+
+<nav><div class="wrap nav-in">
+  <a class="brand" href="index.html"><img src="X-Code.png" alt=""><span>X <b>Code</b></span></a>
+  <div class="nav-links"><a class="hide-m" href="#quickstart">Quick start</a><a class="hide-m" href="#courses">Course sites</a><a class="hide-m" href="#reference">Reference</a><a href="index.html" class="btn sm">Get the desktop app</a></div>
+</div></nav>
+
+<main class="wrap">
+<header class="top">
+  <div class="eyebrow">For developers &amp; course creators</div>
+  <h1>Put a <em>live code editor</em><br>inside any web page.</h1>
+  <p class="lead">One script tag, a few lines of setup, and your page has a real editor with syntax highlighting, a console or live HTML preview, and optional AI suggestions. It's the easiest way to let learners <b>try the code right where they're reading it</b>.</p>
+
+  <div class="demo"><div class="demo-label"><span><b>Live demo</b> — this is the exact code from the Quick start below</span><span>Edit it, then press Run</span></div><div id="demo1"></div></div>
+  <div class="demo-missing" id="missing">The editor script couldn't be loaded here. If you opened this file directly, make sure <code>XCode.js</code> sits next to it, or that you're online so it can load from GitHub Pages.</div>
+</header>
+
+<h2 id="quickstart">Quick start</h2>
+<p>Three steps. This is the pattern we tested and know works.</p>
+<div class="steps">
+  <div class="step"><div><b>Add a container</b> where the editor should appear, and give it a size.</div></div>
+  <div class="step"><div><b>Load the script</b> with <code>defer</code>.</div></div>
+  <div class="step"><div><b>Create the editor</b> once the page has loaded.</div></div>
+</div>
+
+<div class="codebox"><div class="cap"><span>index.html — a complete working page</span><button class="copy" data-copy="qs">Copy</button></div>
+<pre id="qs">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;My lesson&lt;/title&gt;
+
+  &lt;!-- 1. Load the editor. "defer" = don't block the page while it downloads --&gt;
+  &lt;script src="https://phinex-org.github.io/X-Code/XCode.js" defer&gt;&lt;/script&gt;
+
+  &lt;style&gt;
+    #my-editor { width: 100%; height: 500px; border-radius: 8px; overflow: hidden; }
+    #my-editor .xce-viewer { height: 180px !important; }   /* console height */
+  &lt;/style&gt;
+
+  &lt;script&gt;
+    /* 3. Create the editor after the page (and the deferred script) are ready */
+    document.addEventListener('DOMContentLoaded', () =&gt; {
+      const editor = new XCodeEditor({
+        container: '#my-editor',
+        language:  'javascript',    // pick ONE language
+        viewer:    'console',       // 'console' | 'page' | 'none'
+        ai:        true,            // ghost-text suggestions, Tab to accept
+        initialCode: `console.log("Hello from X Code 🚀");
+
+for (let i = 1; i &lt;= 5; i++) {
+  console.log(\`Count: \${i}\`);
+}`
+      });
+    });
+  &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;!-- 2. The container --&gt;
+  &lt;div id="my-editor"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre></div>
+
+<div class="callout warn"><b>One thing to avoid:</b> an early test page used <code>language: 'html' || 'javascript'</code>. In JavaScript that expression always evaluates to <code>'html'</code> (the right-hand side is never reached), so a JavaScript lesson would be highlighted as HTML. Use a single plain string, as above.</div>
+<div class="callout"><b>Why <code>defer</code> and <code>DOMContentLoaded</code>?</b> Deferred scripts run after the HTML is parsed but before <code>DOMContentLoaded</code> fires. Creating the editor inside that event guarantees both your container and the <code>XCodeEditor</code> class exist. Skip either one and you'll see “XCodeEditor is not defined” or “container not found”.</div>
+
+<h2 id="courses">Building a course site</h2>
+<p>For a lesson page, put an editor beside the explanation and let the learner run it. HTML and CSS lessons work best with <code>viewer: 'page'</code> — the result renders live under the editor as they type. Each editor is created from its own container, so a page can hold as many as it needs.</p>
+
+<div class="demo"><div class="demo-label"><span><b>Live demo</b> — an HTML lesson with a live preview</span><span>Change the colour and watch it update</span></div><div id="demo2"></div></div>
+
+<div class="codebox"><div class="cap"><span>An HTML lesson with a live preview</span><button class="copy" data-copy="lesson">Copy</button></div>
+<pre id="lesson">const lesson = new XCodeEditor({
+  container: '#lesson-editor',
+  language:  'html',
+  viewer:    'page',          // render the HTML live instead of showing a console
+  viewerHeight: '220px',
+  ai: false,                  // turn suggestions off for beginner exercises
+  initialCode: `&lt;h1 style="color: tomato"&gt;Change my colour!&lt;/h1&gt;
+&lt;p&gt;Edit the code on the left side.&lt;/p&gt;`
+});</pre></div>
+
+<h3>Checking a learner's answer</h3>
+<p>Use <code>onChange</code> to react as they type, or <code>onRun</code> when they press Run. Read the current code with <code>getValue()</code>.</p>
+<div class="codebox"><div class="cap"><span>A simple “did they do it?” check</span><button class="copy" data-copy="check">Copy</button></div>
+<pre id="check">const exercise = new XCodeEditor({
+  container: '#exercise',
+  language: 'javascript',
+  initialCode: '// Task: log the word "done"\n',
+  onRun(code) {
+    const passed = /console\.log\(\s*['"`]done['"`]\s*\)/.test(code);
+    document.getElementById('result').textContent =
+      passed ? '✅ Correct — nice work!' : '❌ Not yet — log the word "done".';
+  }
+});</pre></div>
+
+<div class="callout"><b>Heads-up:</b> checks like this run in the learner's browser, so they're great for friendly feedback but shouldn't be used for anything that needs to be tamper-proof (grades, certificates).</div>
+
+<h2 id="reference">Reference</h2>
+<h3>Options</h3>
+<div class="table-wrap"><table>
+<tr><th>Option</th><th>Default</th><th>What it does</th></tr>
+<tr><td><code>container</code></td><td>required</td><td>A CSS selector (<code>'#my-editor'</code>) or a DOM element where the editor is drawn.</td></tr>
+<tr><td><code>language</code></td><td><code>'javascript'</code></td><td>Starting language for highlighting.</td></tr>
+<tr><td><code>initialCode</code></td><td><code>''</code></td><td>The code the editor starts with.</td></tr>
+<tr><td><code>viewer</code></td><td><code>'console'</code></td><td><code>'console'</code> shows run output, <code>'page'</code> renders HTML live, <code>'none'</code> hides the panel.</td></tr>
+<tr><td><code>viewerHeight</code></td><td><code>'180px'</code></td><td>Height of the output panel, as a CSS value.</td></tr>
+<tr><td><code>ai</code></td><td><code>true</code></td><td>Inline AI suggestions (Tab to accept). Set <code>false</code> to disable.</td></tr>
+<tr><td><code>onChange</code></td><td><code>null</code></td><td>Called with the current code whenever it changes.</td></tr>
+<tr><td><code>onRun</code></td><td><code>null</code></td><td>Called with the current code when the user runs it.</td></tr>
+</table></div>
+
+<h3>Methods</h3>
+<div class="table-wrap"><table>
+<tr><th>Method</th><th>What it does</th></tr>
+<tr><td><code>getValue()</code></td><td>Returns the code as a string.</td></tr>
+<tr><td><code>setValue(code)</code></td><td>Replaces the code.</td></tr>
+<tr><td><code>getLanguage()</code> / <code>setLanguage(lang)</code></td><td>Read or change the language.</td></tr>
+<tr><td><code>getViewerMode()</code> / <code>setViewerMode(mode)</code></td><td>Read or change the output panel mode.</td></tr>
+<tr><td><code>run()</code></td><td>Runs the code, as if the user pressed Run.</td></tr>
+<tr><td><code>log(text, type)</code></td><td>Writes a line to the console panel. <code>type</code> is <code>'log'</code>, <code>'warn'</code>, <code>'error'</code> or <code>'info'</code>.</td></tr>
+<tr><td><code>focus()</code></td><td>Moves the cursor into the editor.</td></tr>
+<tr><td><code>setTheme({ accent: '#f00' })</code></td><td>Overrides colour tokens at runtime (see Styling).</td></tr>
+<tr><td><code>on('change' | 'run', fn)</code> / <code>off(...)</code></td><td>Subscribe to or remove an event listener.</td></tr>
+<tr><td><code>destroy()</code></td><td>Removes the editor and cleans up.</td></tr>
+</table></div>
+
+<h3>Supported languages</h3>
+<div class="tags"><span>javascript</span><span>typescript</span><span>html</span><span>css</span><span>python</span><span>json</span><span>markdown</span><span>shell</span><span>plaintext</span></div>
+
+<h3>Styling</h3>
+<p>Size the editor with ordinary CSS on your container, and recolour it with CSS variables:</p>
+<div class="codebox"><div class="cap"><span>CSS</span><button class="copy" data-copy="css">Copy</button></div>
+<pre id="css">#my-editor {
+  width: 100%;
+  height: 500px;
+  --xce-accent:    #39ff14;   /* highlights and buttons */
+  --xce-bg:        #1e1e1e;   /* editor background */
+  --xce-font-size: 13px;
+}
+#my-editor .xce-viewer { height: 200px; }   /* output panel */</pre></div>
+
+<h2>Questions</h2>
+<details><summary>Do I need to install anything?</summary><p>No. It's a single JavaScript file loaded with a normal <code>&lt;script&gt;</code> tag — no build step, no framework required.</p></details>
+<details><summary>Can I put several editors on one page?</summary><p>Yes — give each its own container element and create one <code>XCodeEditor</code> per container, like the two live demos on this page.</p></details>
+<details><summary>Does this need the desktop app?</summary><p>No. The embeddable editor is separate from the <a href="index.html">X Code desktop app</a>. The desktop app is the full editor you install; this is the small version for web pages.</p></details>
+<details><summary>What happens if the AI service is unavailable?</summary><p>Suggestions simply don't appear — typing, highlighting and running code keep working. Set <code>ai: false</code> if you'd rather never show suggestions.</p></details>
+</main>
+
+<footer><div class="wrap foot-in"><span>© PhineX Group</span><span><a href="index.html">Download X Code</a> &nbsp;·&nbsp; <a href="https://github.com/PhineX-org/X-Code">GitHub</a> &nbsp;·&nbsp; <a href="https://github.com/PhineX-org/X-Code/issues">Report a problem</a></span></div></footer>
+
+<script>
+  /* If XCode.js isn't next to this file (e.g. you opened a copy elsewhere), fall back to the public copy. */
+  (function () {
+    function boot() {
+      if (typeof XCodeEditor === 'undefined') { document.getElementById('missing').style.display = 'block'; return; }
+      new XCodeEditor({
+        container: '#demo1',
+        language:  'javascript',
+        viewer:    'console',
+        ai:        true,
+        initialCode: 'console.log("Hello from X Code 🚀");\n\nfor (let i = 1; i <= 5; i++) {\n  console.log(`Count: ${i}`);\n}'
+      });
+      new XCodeEditor({
+        container: '#demo2',
+        language:  'html',
+        viewer:    'page',
+        viewerHeight: '200px',
+        ai:        false,
+        initialCode: '<h1 style="color: tomato">Change my colour!</h1>\n<p>Edit the code, then run it.</p>'
+      });
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof XCodeEditor !== 'undefined') return boot();
+      var s = document.createElement('script');
+      s.src = 'https://phinex-org.github.io/X-Code/XCode.js';
+      s.onload = boot; s.onerror = boot;
+      document.head.appendChild(s);
+    });
+
+    /* copy buttons */
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('.copy'); if (!b) return;
+      var text = document.getElementById(b.dataset.copy).textContent;
+      (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () {
+        b.textContent = 'Copied ✓'; setTimeout(function () { b.textContent = 'Copy'; }, 1600);
+      }).catch(function () { b.textContent = 'Select & copy'; });
+    });
+  })();
+</script>
+</body>
+</html>

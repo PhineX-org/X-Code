@@ -9,7 +9,7 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --bg:#1e1e1e;--bg2:#252526;--bg3:#2d2d30;--bg4:#333333;
-  --sidebar:#252526;--activity:#333333;--tab-bg:#2d2d30;--tab-active:#1e1e1e;
+  --sidebar:var(--bg2);--activity:#333333;--tab-bg:#2d2d30;--tab-active:#1e1e1e;
   --border:#3c3c3c;--text:#d4d4d4;--muted:#858585;--accent:#39ff14;
   --accent-dim:rgba(57,255,20,0.12);--accent-glow:rgba(57,255,20,0.35);
   --sel:rgba(57,255,20,0.18);
@@ -21,6 +21,11 @@
   --font:'JetBrains Mono','Fira Code',monospace;
   --display-font:'Orbitron','Exo 2',sans-serif;
 }
+/* Themes — everything in the UI reads these variables, so switching is instant and complete.
+   Soft Night / Dusk lower contrast and saturation for long sessions; Paper is a warm light theme for daytime. */
+html[data-theme="soft-night"]{--bg:#1f2227;--bg2:#252930;--bg3:#2b3038;--bg4:#2a2e35;--sidebar:#22262c;--activity:#2a2e35;--tab-bg:#262a31;--tab-active:#1f2227;--border:#363b44;--text:#c3c7cf;--muted:#7f8794;--accent:#8fd694;--accent-dim:rgba(143,214,148,.12);--accent-glow:rgba(143,214,148,.25);--sel:rgba(143,214,148,.16);--kw:#7aa2d6;--str:#d4a07f;--cmt:#6f8a68;--fn:#d8cfa0;--num:#a9c4a0;--type:#6fc0b0;--prop:#8fc4e6;--regex:#cf7f7f;--interp:#d9b45f;--status-bg:#3a5f8f;--err:#e06c6c;--warn:#d1a63a;}
+html[data-theme="dusk"]{--bg:#1e2230;--bg2:#252a3a;--bg3:#2b3042;--bg4:#2a2f40;--sidebar:#222637;--activity:#2a2f40;--tab-bg:#262b3c;--tab-active:#1e2230;--border:#363d54;--text:#c6cbe0;--muted:#7a82a0;--accent:#e6b455;--accent-dim:rgba(230,180,85,.13);--accent-glow:rgba(230,180,85,.25);--sel:rgba(230,180,85,.16);--kw:#8aa8f0;--str:#e0a27a;--cmt:#69809a;--fn:#e6d28f;--num:#a8cfa0;--type:#72c7c0;--prop:#9fc7f0;--regex:#d98080;--interp:#e6b455;--status-bg:#4a4f8f;--err:#e06c6c;--warn:#d1a63a;}
+html[data-theme="paper"]{--bg:#f7f3ea;--bg2:#efe9dc;--bg3:#e7e0d1;--bg4:#e2dac9;--sidebar:#efe9dc;--activity:#e2dac9;--tab-bg:#e9e2d3;--tab-active:#f7f3ea;--border:#d3cab6;--text:#3d3b36;--muted:#8a8576;--accent:#1f8a4c;--accent-dim:rgba(31,138,76,.12);--accent-glow:rgba(31,138,76,.25);--sel:rgba(31,138,76,.18);--kw:#2f5fa8;--str:#a2552b;--cmt:#7b8a6a;--fn:#7a6410;--num:#2e7d5b;--type:#1f7a78;--prop:#2a6f97;--regex:#b03a3a;--interp:#9a6a00;--status-bg:#2f5fa8;--err:#c0392b;--warn:#a87400;}
 html,body{height:100%;width:100%;overflow:hidden;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;}
 #app{height:100%;width:100%;display:flex;flex-direction:column;overflow:hidden;}
@@ -44,6 +49,12 @@ input,textarea,select{font-family:inherit;}
 .tb-right{display:flex;align-items:center;gap:2px;flex-shrink:0;}
 .tb-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--text);border-radius:4px;}
 .tb-icon:hover{background:rgba(255,255,255,.1);color:var(--accent);}
+.is-desktop .titlebar{-webkit-app-region:drag;user-select:none;}
+.is-desktop .titlebar button,.is-desktop .titlebar input,.is-desktop .titlebar select,.is-desktop .tb-conn{-webkit-app-region:no-drag;}
+.win-controls{display:flex;margin-left:8px;margin-right:-10px;height:38px;}
+.win-btn{width:46px;height:38px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--text);}
+.win-btn:hover{background:rgba(255,255,255,.1);}
+.win-close:hover{background:#e81123;color:#fff;}
 
 /* ── Main body layout ── */
 .main-body{flex:1;display:flex;overflow:hidden;min-height:0;}
@@ -87,6 +98,7 @@ input,textarea,select{font-family:inherit;}
 
 /* ── Search panel ── */
 .search-box{padding:8px 10px;flex-shrink:0;}
+.search-note{margin-top:6px;font-size:11px;color:var(--muted);line-height:1.5;}
 .search-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:12.5px;padding:6px 8px;border-radius:4px;outline:none;}
 .search-input:focus{border-color:var(--accent);}
 .search-results{flex:1;overflow-y:auto;padding:0 4px;}
@@ -159,7 +171,31 @@ mark{background:var(--accent-dim);color:var(--accent);border-radius:2px;}
 .editor-body{flex:1;display:flex;overflow:hidden;min-height:0;position:relative;}
 .gutter{flex-shrink:0;width:52px;background:var(--bg);overflow:hidden;position:relative;padding:16px 0 16px 0;text-align:right;color:var(--muted);user-select:none;}
 .gutter-inner{position:relative;}
-.gutter-line{height:21px;padding-right:12px;font-size:14px;line-height:21px;}
+.theme-picker{width:420px;max-width:92vw;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 60px rgba(0,0,0,.5);padding:14px;}
+.theme-picker-title{font-size:13px;font-weight:700;margin:2px 4px 10px;color:var(--text);}
+.theme-card{display:flex;align-items:center;gap:14px;padding:10px;border-radius:8px;cursor:pointer;border:1px solid transparent;}
+.theme-card:hover{background:var(--bg3);}
+.theme-card.active{border-color:var(--accent);background:var(--accent-dim);}
+.theme-swatch{display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;}
+.theme-swatch i{width:20px;height:34px;display:block;}
+.theme-name{font-size:13px;font-weight:600;color:var(--text);}
+.theme-note{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:30px;overflow:auto;}
+.welcome-logo{font-family:var(--display-font);font-size:34px;font-weight:900;color:var(--accent);text-shadow:0 0 22px var(--accent-glow);letter-spacing:1px;}
+.welcome-sub{color:var(--muted);font-size:14px;margin-top:-8px;}
+.welcome-cards{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+.welcome-card{width:210px;text-align:left;padding:16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text);display:flex;flex-direction:column;gap:6px;transition:.15s;}
+.welcome-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.25);}
+.welcome-card b{font-size:14px;color:var(--accent);}
+.welcome-card span{font-size:12px;color:var(--muted);line-height:1.5;}
+.welcome-keys{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-size:12px;color:var(--muted);margin-top:8px;}
+kbd{background:var(--bg3);border:1px solid var(--border);border-bottom-width:2px;border-radius:4px;padding:1px 6px;font-family:inherit;font-size:11px;color:var(--text);}
+.large-banner{flex-shrink:0;display:flex;align-items:center;gap:10px;padding:7px 14px;background:rgba(255,193,7,.09);border-bottom:1px solid rgba(255,193,7,.25);font-size:12px;color:#e6c76a;}
+.large-banner span{flex:1;}
+.large-banner button{background:transparent;border:1px solid rgba(255,193,7,.45);color:#e6c76a;border-radius:4px;padding:3px 10px;font-size:11.5px;}
+.large-banner button:hover{background:rgba(255,193,7,.15);}
+.large-mode .hl-layer{pointer-events:auto;user-select:text;cursor:text;}
+.gutter-line{height:var(--lh,21px);padding-right:12px;font-size:inherit;line-height:var(--lh,21px);}
 .gutter-err-col{position:absolute;left:0;top:0;bottom:0;width:3px;}
 .gutter-err-mark{position:absolute;left:0;width:3px;}
 .gutter-err-mark.sev-error{background:var(--err);}
@@ -194,14 +230,14 @@ mark{background:var(--accent-dim);color:var(--accent);border-radius:2px;}
 .ghost-hint{color:var(--ghost);opacity:.5;font-size:10px;font-style:italic;margin-left:4px;}
 
 /* ── Error tooltip ── */
-.err-tooltip{display:none;position:fixed;z-index:200;background:#252526;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;max-width:340px;box-shadow:0 4px 16px rgba(0,0,0,.5);line-height:1.5;}
+.err-tooltip{display:none;position:fixed;z-index:200;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;max-width:340px;box-shadow:0 4px 16px rgba(0,0,0,.5);line-height:1.5;}
 .err-tooltip-head{font-weight:700;font-size:10.5px;letter-spacing:.5px;margin-bottom:3px;text-transform:uppercase;}
 .err-tooltip.sev-error .err-tooltip-head{color:var(--err);}
 .err-tooltip.sev-warning .err-tooltip-head{color:var(--warn);}
 .err-tooltip.sev-info .err-tooltip-head{color:var(--info);}
 
 /* ── Find & Replace widget ── */
-.find-widget{position:absolute;top:8px;right:24px;z-index:20;background:#252526;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.5);padding:6px;display:flex;flex-direction:column;gap:4px;}
+.find-widget{position:absolute;top:8px;right:24px;z-index:20;background:var(--bg2);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.5);padding:6px;display:flex;flex-direction:column;gap:4px;}
 .find-row{display:flex;align-items:center;gap:4px;}
 .find-input{width:180px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:12px;padding:5px 7px;border-radius:4px;outline:none;}
 .find-input:focus{border-color:var(--accent);}
@@ -211,7 +247,7 @@ mark{background:var(--accent-dim);color:var(--accent);border-radius:2px;}
 .find-row button.active{color:var(--accent);background:var(--accent-dim);}
 
 /* ── Quick fix panel ── */
-.quick-fix-panel{flex-shrink:0;background:#252526;border-top:1px solid var(--border);padding:10px 14px;font-size:12.5px;}
+.quick-fix-panel{flex-shrink:0;background:var(--bg2);border-top:1px solid var(--border);padding:10px 14px;font-size:12.5px;}
 .quick-fix-head{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:6px;}
 .quick-fix-head button{margin-left:auto;background:transparent;border:none;color:var(--muted);width:20px;height:20px;border-radius:3px;}
 .quick-fix-head button:hover{color:var(--text);background:rgba(255,255,255,.1);}
@@ -260,28 +296,28 @@ mark{background:var(--accent-dim);color:var(--accent);border-radius:2px;}
 .ss-spacer{flex:1;}
 
 /* ── Context menu ── */
-.ctx-menu{position:fixed;z-index:300;background:#252526;border:1px solid var(--border);border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.5);padding:4px;min-width:170px;}
+.ctx-menu{position:fixed;z-index:300;background:var(--bg2);border:1px solid var(--border);border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.5);padding:4px;min-width:170px;}
 .ctx-item{padding:7px 12px;font-size:12.5px;border-radius:4px;cursor:pointer;}
 .ctx-item:hover{background:var(--accent-dim);color:var(--accent);}
 .ctx-item.danger:hover{background:rgba(244,71,71,.15);color:var(--err);}
 
 /* ── Modal backdrop (Quick Open / Language picker) ── */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-start;justify-content:center;padding-top:12vh;}
-.quick-open{width:560px;max-width:90vw;background:#252526;border:1px solid var(--border);border-radius:8px;box-shadow:0 12px 48px rgba(0,0,0,.6);overflow:hidden;}
+.quick-open{width:560px;max-width:90vw;background:var(--bg2);border:1px solid var(--border);border-radius:8px;box-shadow:0 12px 48px rgba(0,0,0,.6);overflow:hidden;}
 .quick-open-input{width:100%;background:var(--bg);border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:14px;padding:12px 14px;outline:none;}
 .quick-open-results{max-height:50vh;overflow-y:auto;padding:4px;}
 .quick-open-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:5px;cursor:pointer;font-size:12.5px;}
 .quick-open-item.active,.quick-open-item:hover{background:var(--accent-dim);}
 .quick-open-item span:first-of-type{flex-shrink:0;}
 .quick-open-dir{margin-left:auto;color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;}
-.lang-picker{width:220px;max-height:50vh;overflow-y:auto;background:#252526;border:1px solid var(--border);border-radius:8px;box-shadow:0 12px 48px rgba(0,0,0,.6);padding:4px;}
+.lang-picker{width:220px;max-height:50vh;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:8px;box-shadow:0 12px 48px rgba(0,0,0,.6);padding:4px;}
 .lang-picker-item{padding:8px 12px;font-size:12.5px;border-radius:5px;cursor:pointer;text-transform:capitalize;}
 .lang-picker-item:hover{background:rgba(255,255,255,.08);}
 .lang-picker-item.active{color:var(--accent);background:var(--accent-dim);}
 
 /* ── Draw mode ── */
 .draw-canvas{position:absolute;inset:0;z-index:15;cursor:crosshair;}
-.draw-toolbar{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:16;background:#252526;border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.5);padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:12px;}
+.draw-toolbar{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:16;background:var(--bg2);border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.5);padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:12px;}
 .draw-act{background:transparent;border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:5px;font-size:11.5px;display:flex;align-items:center;gap:5px;}
 .draw-act:hover{background:rgba(255,255,255,.08);}
 .draw-act.active-tool{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);}
@@ -290,7 +326,7 @@ mark{background:var(--accent-dim);color:var(--accent);border-radius:2px;}
 .draw-toolbar input[type=range]{width:80px;}
 
 /* ── Toast ── */
-.xc-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:500;background:#252526;border:1px solid var(--border);color:var(--text);font-size:12.5px;padding:10px 18px;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.55);}
+.xc-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:500;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:12.5px;padding:10px 18px;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.55);}
 .xc-toast-success{border-color:var(--accent);color:var(--accent);}
 .xc-toast-error{border-color:var(--err);color:var(--err);}
 
@@ -393,6 +429,7 @@ const DEFAULT_STATE = {
   searchQuery: '',
   searchResults: [],
   searchIdx: 0,
+  searchSkippedUnloaded: false,
   drawMode: false,
   drawTool: 'pen',
   drawColor: '#39ff14',
@@ -412,8 +449,14 @@ const DEFAULT_STATE = {
   diagCollapsed: {},
   problemsFilter: '',
   diagRunning: {},
-  workspaceName: ''
+  workspaceName: '',
+  themeName: 'x-dark',
+  desktopRoot: null      // absolute folder path when running inside the Electron shell with a folder opened
 };
+// True only inside the Electron wrapper (preload.js exposes this); the exact same
+// XCode.html keeps working as a plain webpage when this is undefined — every desktop
+// branch below is additive, never a replacement of the browser code path.
+const DESKTOP = typeof window !== 'undefined' && !!window.xcodeDesktop;
 // getDefaultState() returns a brand-new object graph every call. DEFAULT_STATE
 // itself must never be spread directly — {...DEFAULT_STATE} only copies the top
 // level, so every "fresh" state would still share the SAME nested files/history/
@@ -449,6 +492,10 @@ function freshRuntimeState() {
   state.toast = null;
   state.pyodideStatus = 'idle';  // idle | loading | ready | error
   state.connectedDirName = state.connectedDirName || null;
+  state.themePicker = false;
+  state.forceEdit = {};          // path -> true when the user chose 'Edit anyway' on a large file
+  state.looseFileObjects = {};   // path -> raw File object, for the no-FS-Access-API fallback's lazy loading
+  state.dirHandle = null;
 }
 
 async function loadState() {
@@ -486,6 +533,17 @@ async function loadState() {
 }
 
 let _saveQueued = false;
+/* With a real folder connected, unmodified files already live on disk — re-cloning all of
+   their content into IndexedDB on every autosave is pure overhead that grows with workspace
+   size. Only unsaved edits need stashing. */
+function persistableFiles() {
+  if (!hasDiskFolder()) return state.files;
+  const out = {};
+  for (const [p, f] of Object.entries(state.files)) {
+    out[p] = (state.modified[p] || f.content === null) ? f : {name: f.name, path: f.path, content: null, language: f.language};
+  }
+  return out;
+}
 async function saveState() {
   // Debounce bursts of saves (typing, dragging) into one write per animation-ish tick.
   if (_saveQueued) return;
@@ -494,7 +552,7 @@ async function saveState() {
     _saveQueued = false;
     try {
       const s = {
-        files: state.files,
+        files: persistableFiles(),
         openTabs: state.openTabs,
         activeTab: state.activeTab,
         fileTree: state.fileTree,
@@ -518,7 +576,9 @@ async function saveState() {
         problemsFilter: state.problemsFilter || '',
         terminalCmdHistory: (state.terminalCmdHistory || []).slice(-100),
         connectedDirName: state.connectedDirName || null,
-        workspaceName: state.workspaceName || ''
+        workspaceName: state.workspaceName || '',
+        desktopRoot: state.desktopRoot || null,
+        themeName: state.themeName || 'x-dark'
       };
       const ok = await idbSet('workspace', s);
       if (!ok) showToast('Could not save workspace (storage unavailable)', 'error');
@@ -1513,13 +1573,14 @@ function findMatchingBracket(text, pos) {
     else return null;
   }
   let depth = 0;
+  const SCAN_LIMIT = 20000; // an unmatched bracket in a huge file must not mean scanning the whole thing on every cursor move
   if (dir === 1) {
-    for (let i = pos; i < text.length; i++) {
+    for (let i = pos, end = Math.min(text.length, pos + SCAN_LIMIT); i < end; i++) {
       if (text[i] === open) depth++;
       else if (text[i] === close) { depth--; if (depth === 0) return {from: pos, to: i}; }
     }
   } else {
-    for (let i = pos; i >= 0; i--) {
+    for (let i = pos, end = Math.max(0, pos - SCAN_LIMIT); i >= end; i--) {
       if (text[i] === close) depth++;
       else if (text[i] === open) { depth--; if (depth === 0) return {from: i, to: pos}; }
     }
@@ -1626,13 +1687,14 @@ function isFolderPath(path) {
 /* ════════════════════════════════════════════════════════════
    TABS
 ════════════════════════════════════════════════════════════ */
-function openFile(path) {
+async function openFile(path) {
   if (!state.files[path]) return;
+  await ensureFileLoaded(path);
   if (isImg(state.files[path].name)) {
     if (!state.openTabs.find(t => t.path === path)) state.openTabs.push({path, name: state.files[path].name});
     state.activeTab = path;
     state.focusedPaneId = 'main';
-    render();
+    renderEditorChrome();
     return;
   }
   if (!state.openTabs.find(t => t.path === path)) {
@@ -1640,7 +1702,7 @@ function openFile(path) {
   }
   state.activeTab = path;
   state.focusedPaneId = 'main';
-  render();
+  renderEditorChrome();
   const ta = paneTextareaEl('main');
   if (ta) ta.focus();
   scheduleDiagnostics(path);
@@ -1654,12 +1716,12 @@ function closeTab(path) {
   }
   state.splitPanes = state.splitPanes.filter(p => p.path !== path);
   delete state.aiSuggestions[path];
-  render();
+  renderEditorChrome();
 }
 function switchTab(path) {
   state.activeTab = path;
   state.focusedPaneId = 'main';
-  render();
+  renderEditorChrome();
   scheduleDiagnostics(path);
 }
 
@@ -1684,11 +1746,11 @@ async function confirmCreate() {
   if (info.type === 'folder') {
     const keep = pathJoin(fp, '.keep');
     state.files[keep] = {name: '.keep', path: keep, content: '', language: 'plaintext'};
-    if (state.dirHandle) await fsMkdir(fp).catch(() => {});
+    if (hasDiskFolder()) await fsMkdir(fp).catch(() => {});
   } else {
     if (state.files[fp]) { showToast('A file with that name already exists', 'error'); return; }
     state.files[fp] = {name, path: fp, content: '', language: getLang(name)};
-    if (state.dirHandle) await fsWriteFile(fp, '').catch(() => {});
+    if (hasDiskFolder()) await fsWriteFile(fp, '').catch(() => {});
   }
   state.fileTree = rebuildTree(state.files);
   state.creatingIn = null;
@@ -1718,6 +1780,9 @@ async function confirmRename() {
 
   if (isFolderPath(oldPath)) {
     const members = allPathsUnder(oldPath);
+    if (state.dirHandle) {
+      for (const p of members) await ensureFileLoaded(p); // must have real content in hand before relocating via copy+delete, or an unread file's bytes would be overwritten with ''
+    }
     for (const p of members) {
       const rest = p === oldPath ? '' : p.slice(oldPath.length + 1);
       const np = rest ? pathJoin(newPath, rest) : newPath;
@@ -1735,16 +1800,17 @@ async function confirmRename() {
       state.activeTab = state.activeTab === oldPath ? newPath : newPath + state.activeTab.slice(oldPath.length);
     }
     state.expandedFolders = state.expandedFolders.map(f => f === oldPath || f.startsWith(oldPath + '/') ? (f === oldPath ? newPath : newPath + f.slice(oldPath.length)) : f);
-    if (state.dirHandle) await fsRenameFolder(oldPath, newPath).catch(() => {});
+    if (hasDiskFolder()) await fsRenameFolder(oldPath, newPath).catch(() => {});
   } else {
     if (!state.files[oldPath]) { state.renamingPath = null; render(); return; }
+    if (state.dirHandle) await ensureFileLoaded(oldPath); // same reasoning as above, for the single-file case
     state.files[newPath] = {...state.files[oldPath], name: newName, path: newPath, language: getLang(newName)};
     delete state.files[oldPath];
     state.openTabs = state.openTabs.map(t => t.path === oldPath ? {path: newPath, name: newName} : t);
     if (state.activeTab === oldPath) state.activeTab = newPath;
     state.splitPanes = state.splitPanes.map(p => p.path === oldPath ? {path: newPath} : p);
     if (state.diagnostics[oldPath]) { state.diagnostics[newPath] = state.diagnostics[oldPath]; delete state.diagnostics[oldPath]; }
-    if (state.dirHandle) await fsRenameFile(oldPath, newPath).catch(() => {});
+    if (hasDiskFolder()) await fsRenameFile(oldPath, newPath).catch(() => {});
   }
   state.fileTree = rebuildTree(state.files);
   state.renamingPath = null;
@@ -1772,7 +1838,7 @@ async function deleteFilePath(path) {
   state.fileTree = rebuildTree(state.files);
   state.contextMenu = null;
 
-  if (state.dirHandle) {
+  if (hasDiskFolder()) {
     if (folder) await fsRemove(path, true).catch(() => {});
     else await fsRemove(path, false).catch(() => {});
   }
@@ -1794,6 +1860,10 @@ function collapseAll() { state.expandedFolders = []; render(); }
    on browsers without support (Firefox / Safari today).
 ════════════════════════════════════════════════════════════ */
 const FS_ACCESS_SUPPORTED = typeof window !== 'undefined' && 'showDirectoryPicker' in window;
+/* True when a real on-disk folder is connected, either via the browser's File System
+   Access API (dirHandle) or the desktop shell's native fs (desktopRoot). Every place that
+   mirrors an in-memory change to disk gates on this, not on dirHandle directly. */
+function hasDiskFolder() { return !!state.dirHandle || (DESKTOP && !!state.desktopRoot); }
 
 async function fsGetDirHandle(path, opts) {
   if (!state.dirHandle) return null;
@@ -1804,10 +1874,17 @@ async function fsGetDirHandle(path, opts) {
   }
   return dh;
 }
+async function fsGetFileHandle(path) {
+  const dir = pathDir(path);
+  const dh = dir ? await fsGetDirHandle(dir, {}) : state.dirHandle;
+  return await dh.getFileHandle(pathBase(path));
+}
 async function fsMkdir(folderPath) {
+  if (DESKTOP && state.desktopRoot) { await window.xcodeDesktop.mkdir(state.desktopRoot, folderPath); return; }
   await fsGetDirHandle(folderPath, {create: true});
 }
 async function fsWriteFile(path, content) {
+  if (DESKTOP && state.desktopRoot) { await window.xcodeDesktop.writeFile(state.desktopRoot, path, content); return; }
   const dir = pathDir(path);
   const dh = dir ? await fsGetDirHandle(dir, {create: true}) : state.dirHandle;
   const fh = await dh.getFileHandle(pathBase(path), {create: true});
@@ -1816,16 +1893,19 @@ async function fsWriteFile(path, content) {
   await writable.close();
 }
 async function fsRemove(path, isDir) {
+  if (DESKTOP && state.desktopRoot) { await window.xcodeDesktop.remove(state.desktopRoot, path); return; }
   const dir = pathDir(path);
   const dh = dir ? await fsGetDirHandle(dir, {}) : state.dirHandle;
   await dh.removeEntry(pathBase(path), {recursive: isDir});
 }
 async function fsRenameFile(oldPath, newPath) {
+  if (DESKTOP && state.desktopRoot) { await window.xcodeDesktop.rename(state.desktopRoot, oldPath, newPath); return; }
   const content = state.files[newPath]?.content ?? '';
   await fsWriteFile(newPath, content);
   await fsRemove(oldPath, false).catch(() => {});
 }
 async function fsRenameFolder(oldPath, newPath) {
+  if (DESKTOP && state.desktopRoot) { await window.xcodeDesktop.rename(state.desktopRoot, oldPath, newPath); return; } // a real directory move — no need to touch individual files at all
   const members = allPathsUnder(newPath); // already renamed in state.files by the caller
   for (const p of members) {
     if (pathBase(p) === '.keep' && !state.files[p].content) continue;
@@ -1834,7 +1914,56 @@ async function fsRenameFolder(oldPath, newPath) {
   await fsRemove(oldPath, true).catch(() => {});
 }
 
+/* Reads a file's content on first actual need (opening it, previewing it, searching it,
+   or relocating it on disk during a rename) instead of importDirectoryHandle() reading
+   every file in the folder up front. On a large workspace, "Open Folder" used to mean
+   "read every file's full text before you can do anything" — this makes opening the
+   folder itself near-instant regardless of size, at the cost of a (typically
+   imperceptible, local-disk-speed) read the first time each individual file is touched. */
+async function ensureFileLoaded(path) {
+  const file = state.files[path];
+  if (!file || file.content !== null) return; // missing, or already loaded
+  try {
+    let content;
+    if (DESKTOP && state.desktopRoot) {
+      content = await window.xcodeDesktop.readFile(state.desktopRoot, path);
+    } else if (state.dirHandle) {
+      const fh = await fsGetFileHandle(path);
+      const blob = await fh.getFile();
+      content = isImg(file.name) ? await blobToDataURL(blob) : await blob.text();
+    } else if (state.looseFileObjects && state.looseFileObjects[path]) {
+      const f = state.looseFileObjects[path];
+      content = isImg(file.name) ? await blobToDataURL(f) : await f.text();
+    } else {
+      showToast(`Can't read "${file.name}" — reconnect the folder to load its content`, 'error');
+      content = '';
+    }
+    file.content = content;
+  } catch (e) {
+    file.content = '';
+    showToast(`Could not read ${file.name}: ${e.message}`, 'error');
+  }
+}
+
+async function importDesktopFolder(res) {
+  state.desktopRoot = res.root;
+  state.dirHandle = null;
+  state.connectedDirName = res.name;
+  const files = {};
+  for (const f of res.files) files[f.path] = {name: f.name, path: f.path, content: null, language: getLang(f.name)};
+  state.files = files;
+  state.fileTree = rebuildTree(state.files);
+  state.openTabs = []; state.activeTab = null; state.splitPanes = [];
+  const idx = Object.keys(files).find(p => pathBase(p).toLowerCase() === 'index.html') || Object.keys(files)[0];
+  if (idx) await openFile(idx); else render();
+  saveState();
+}
 async function openFolder() {
+  if (DESKTOP) {
+    const res = await window.xcodeDesktop.openFolder();
+    if (res) { await importDesktopFolder(res); showToast(`Opened "${res.name}"`, 'success'); }
+    return;
+  }
   if (!FS_ACCESS_SUPPORTED) {
     document.getElementById('folder-input-fallback')?.click();
     return;
@@ -1855,11 +1984,7 @@ async function importDirectoryHandle(handle) {
       if (name.startsWith('.git') || name === 'node_modules') continue;
       const p = pathJoin(prefix, name);
       if (entry.kind === 'file') {
-        const file = await entry.getFile();
-        let content;
-        if (isImg(name)) content = await blobToDataURL(file);
-        else content = await file.text().catch(() => '');
-        files[p] = {name, path: p, content, language: getLang(name)};
+        files[p] = {name, path: p, content: null, language: getLang(name)};
       } else if (entry.kind === 'directory') {
         await walk(entry, p);
       }
@@ -1878,7 +2003,7 @@ async function importDirectoryHandle(handle) {
   state.splitPanes = [];
   const idx = Object.keys(files).find(p => pathBase(p).toLowerCase() === 'index.html') || Object.keys(files)[0];
   try { await idbSet('dirHandle', handle); } catch (e) {}
-  if (idx) openFile(idx); else render();
+  if (idx) await openFile(idx); else render();
   showToast(`Opened "${handle.name}"`, 'success');
   saveState();
 }
@@ -1903,17 +2028,18 @@ function blobToDataURL(blob) {
   });
 }
 
-/* Fallback for browsers without File System Access API: <input webkitdirectory>. Import-only, one-way. */
+/* Fallback for browsers without File System Access API: <input webkitdirectory>. Import-only,
+   one-way. The raw File objects are kept (runtime-only, not persisted) so their content can
+   still be read lazily via ensureFileLoaded, the same as the FS-Access-API path. */
 async function uploadFolderFallback(fileList) {
   const files = {...state.files};
+  state.looseFileObjects = state.looseFileObjects || {};
   for (const f of fileList) {
     const rel = f.webkitRelativePath || f.name;
     const parts = rel.split('/');
     const p = parts.slice(1).join('/') || parts[0];
-    let content;
-    if (isImg(f.name)) content = await blobToDataURL(f);
-    else content = await f.text().catch(() => '');
-    files[p] = {name: pathBase(p), path: p, content, language: getLang(f.name)};
+    files[p] = {name: pathBase(p), path: p, content: null, language: getLang(f.name)};
+    state.looseFileObjects[p] = f;
   }
   state.files = files;
   state.fileTree = rebuildTree(state.files);
@@ -1925,11 +2051,10 @@ async function uploadFolderFallback(fileList) {
 }
 async function uploadFilesFallback(fileList) {
   const files = {...state.files};
+  state.looseFileObjects = state.looseFileObjects || {};
   for (const f of fileList) {
-    let content;
-    if (isImg(f.name)) content = await blobToDataURL(f);
-    else content = await f.text().catch(() => '');
-    files[f.name] = {name: f.name, path: f.name, content, language: getLang(f.name)};
+    files[f.name] = {name: f.name, path: f.name, content: null, language: getLang(f.name)};
+    state.looseFileObjects[f.name] = f;
   }
   state.files = files;
   state.fileTree = rebuildTree(state.files);
@@ -1949,7 +2074,13 @@ function saveActiveFile() {
 async function saveFile(path) {
   const file = state.files[path];
   if (!file) return;
-  if (state.dirHandle) {
+  await ensureFileLoaded(path); // e.g. the terminal's `save <file>` can target a file that was never opened
+  if (DESKTOP && !state.desktopRoot) {
+    const saved = await window.xcodeDesktop.saveFileAs(file.name, file.content);
+    if (saved) { state.modified[path] = false; showToast('Saved ' + file.name, 'success'); renderStatusBarOnly(); }
+    return;
+  }
+  if (hasDiskFolder()) {
     try {
       await fsWriteFile(path, file.content);
       state.modified[path] = false;
@@ -2010,22 +2141,44 @@ function resolveRelative(baseDir, ref) {
   if (/^(https?:)?\/\//.test(ref) || ref.startsWith('data:')) return null; // external, leave alone
   return resolvePath(baseDir, ref.split('#')[0].split('?')[0]);
 }
-function buildPreviewHTML(htmlPath) {
+async function buildPreviewHTML(htmlPath) {
   const file = state.files[htmlPath];
   if (!file) return '';
+  await ensureFileLoaded(htmlPath);
   const baseDir = pathDir(htmlPath);
-  let html = file.content;
+  const html = state.files[htmlPath].content;
 
-  html = html.replace(/<link\s+[^>]*rel=["']stylesheet["'][^>]*>/gi, tag => {
-    const m = tag.match(/href=["']([^"']+)["']/i);
-    if (!m) return tag;
-    const resolved = resolveRelative(baseDir, m[1]);
+  // Referenced local files might not be loaded yet (lazy loading) — collect every
+  // reference first and make sure they're all in memory before doing any replacement,
+  // rather than trying to await inside String.replace (which doesn't work).
+  const refs = new Set();
+  let m;
+  const linkRe = /<link\s+[^>]*rel=["']stylesheet["'][^>]*>/gi;
+  while ((m = linkRe.exec(html))) {
+    const hrefM = m[0].match(/href=["']([^"']+)["']/i);
+    if (hrefM) { const r = resolveRelative(baseDir, hrefM[1]); if (r !== null) refs.add(r); }
+  }
+  const scriptRe = /<script\s+([^>]*)src=["']([^"']+)["']([^>]*)>\s*<\/script>/gi;
+  while ((m = scriptRe.exec(html))) {
+    const r = resolveRelative(baseDir, m[2]); if (r !== null) refs.add(r);
+  }
+  const imgRe = /<img\s+[^>]*src=["']([^"']+)["']/gi;
+  while ((m = imgRe.exec(html))) {
+    const r = resolveRelative(baseDir, m[1]); if (r !== null) refs.add(r);
+  }
+  await Promise.all([...refs].filter(p => state.files[p]).map(ensureFileLoaded));
+
+  let out = html;
+  out = out.replace(/<link\s+[^>]*rel=["']stylesheet["'][^>]*>/gi, tag => {
+    const hm = tag.match(/href=["']([^"']+)["']/i);
+    if (!hm) return tag;
+    const resolved = resolveRelative(baseDir, hm[1]);
     if (resolved === null) return tag;
     const cssFile = state.files[resolved];
     return cssFile ? `<style>\n${cssFile.content}\n</style>` : tag;
   });
 
-  html = html.replace(/<script\s+([^>]*)src=["']([^"']+)["']([^>]*)>\s*<\/script>/gi, (tag, pre, src, post) => {
+  out = out.replace(/<script\s+([^>]*)src=["']([^"']+)["']([^>]*)>\s*<\/script>/gi, (tag, pre, src, post) => {
     const resolved = resolveRelative(baseDir, src);
     if (resolved === null) return tag;
     const jsFile = state.files[resolved];
@@ -2034,7 +2187,7 @@ function buildPreviewHTML(htmlPath) {
     return `<script${typeAttr}>\n${jsFile.content}\n<\/script>`;
   });
 
-  html = html.replace(/(<img\s+[^>]*src=)["']([^"']+)["']/gi, (m0, pre, src) => {
+  out = out.replace(/(<img\s+[^>]*src=)["']([^"']+)["']/gi, (m0, pre, src) => {
     const resolved = resolveRelative(baseDir, src);
     if (resolved === null) return m0;
     const imgFile = state.files[resolved];
@@ -2042,7 +2195,7 @@ function buildPreviewHTML(htmlPath) {
     return `${pre}"${imgFile.content}"`;
   });
 
-  return html;
+  return out;
 }
 function pickPreviewPath() {
   if (state.activeTab && state.files[state.activeTab]?.language === 'html') return state.activeTab;
@@ -2050,29 +2203,34 @@ function pickPreviewPath() {
   if (rootIndex) return rootIndex;
   return Object.keys(state.files).find(p => state.files[p].language === 'html') || null;
 }
-function openPreview() {
+async function openPreview() {
   const path = pickPreviewPath();
   if (!path) { showToast('No HTML file to preview', 'error'); return; }
-  const html = buildPreviewHTML(path);
-  if (state.previewWin && !state.previewWin.closed) {
-    state.previewWin.document.open();
-    state.previewWin.document.write(html);
-    state.previewWin.document.close();
-    state.previewWin.focus();
-  } else {
-    state.previewWin = window.open('', 'xcode-preview', 'width=1000,height=720');
-    if (!state.previewWin) { showToast('Preview popup was blocked by the browser', 'error'); return; }
-    state.previewWin.document.open();
-    state.previewWin.document.write(html);
-    state.previewWin.document.close();
+  let win = state.previewWin && !state.previewWin.closed ? state.previewWin : null;
+  if (!win) {
+    // window.open() must happen synchronously, before any await, or the browser no
+    // longer treats it as part of this click's user gesture and blocks it as a popup.
+    win = window.open('', 'xcode-preview', 'width=1000,height=720');
+    if (!win) { showToast('Preview popup was blocked by the browser', 'error'); return; }
+    state.previewWin = win;
   }
+  win.document.open();
+  win.document.write('<p style="font-family:sans-serif;color:#888;padding:20px">Loading preview…</p>');
+  win.document.close();
+  const html = await buildPreviewHTML(path);
+  if (win.closed) return;
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  win.focus();
 }
-function updatePreview() {
+async function updatePreview() {
   if (!state.previewWin || state.previewWin.closed) return;
   const path = pickPreviewPath();
   if (!path) return;
-  const html = buildPreviewHTML(path);
+  const html = await buildPreviewHTML(path);
   try {
+    if (state.previewWin.closed) return;
     state.previewWin.document.open();
     state.previewWin.document.write(html);
     state.previewWin.document.close();
@@ -2243,6 +2401,7 @@ async function runCommand(raw) {
         const p = resolveFileOrDir(cwd, args[0]);
         const f = state.files[p];
         if (!f) { addTermLines([termLine(`cat: ${args[0]}: no such file`, 'err')]); break; }
+        await ensureFileLoaded(p);
         addTermLines(f.content.split('\n').map(l => termLine(l)));
         break;
       }
@@ -2252,7 +2411,7 @@ async function runCommand(raw) {
         if (!state.files[p]) {
           state.files[p] = {name: pathBase(p), path: p, content: '', language: getLang(p)};
           state.fileTree = rebuildTree(state.files);
-          if (state.dirHandle) await fsWriteFile(p, '').catch(() => {});
+          if (hasDiskFolder()) await fsWriteFile(p, '').catch(() => {});
           saveState();
         }
         break;
@@ -2263,7 +2422,7 @@ async function runCommand(raw) {
         const keep = pathJoin(p, '.keep');
         state.files[keep] = {name: '.keep', path: keep, content: '', language: 'plaintext'};
         state.fileTree = rebuildTree(state.files);
-        if (state.dirHandle) await fsMkdir(p).catch(() => {});
+        if (hasDiskFolder()) await fsMkdir(p).catch(() => {});
         saveState();
         break;
       }
@@ -2275,10 +2434,10 @@ async function runCommand(raw) {
         if (isFolderPath(p)) {
           if (!recursive) { addTermLines([termLine(`rm: ${target} is a directory (use -r)`, 'err')]); break; }
           for (const sub of allPathsUnder(p)) { delete state.files[sub]; delete state.diagnostics[sub]; }
-          if (state.dirHandle) await fsRemove(p, true).catch(() => {});
+          if (hasDiskFolder()) await fsRemove(p, true).catch(() => {});
         } else if (state.files[p]) {
           delete state.files[p]; delete state.diagnostics[p];
-          if (state.dirHandle) await fsRemove(p, false).catch(() => {});
+          if (hasDiskFolder()) await fsRemove(p, false).catch(() => {});
         } else {
           addTermLines([termLine(`rm: ${target}: no such file`, 'err')]);
           break;
@@ -2309,7 +2468,7 @@ async function runCommand(raw) {
           state.files[p] = state.files[p] || {name: pathBase(p), path: p, content: '', language: getLang(p)};
           state.files[p].content = text + '\n';
           state.fileTree = rebuildTree(state.files);
-          if (state.dirHandle) await fsWriteFile(p, state.files[p].content).catch(() => {});
+          if (hasDiskFolder()) await fsWriteFile(p, state.files[p].content).catch(() => {});
           saveState();
         } else {
           addTermLines([termLine(args.join(' '))]);
@@ -2326,14 +2485,18 @@ async function runCommand(raw) {
         if (!args[0]) { addTermLines([termLine('usage: grep <text> [file]', 'err')]); break; }
         const needle = args[0].toLowerCase();
         const targets = args[1] ? [resolveFileOrDir(cwd, args[1])] : Object.keys(state.files);
+        const SCAN_CAP = 800; // explicit command, so it's fine to load files on demand as it goes — just guard against a truly enormous workspace turning one grep into a very long wait
+        const scanned = targets.slice(0, SCAN_CAP);
         const out = [];
-        for (const p of targets) {
+        for (const p of scanned) {
           const f = state.files[p];
-          if (!f || pathBase(p) === '.keep') continue;
+          if (!f || pathBase(p) === '.keep' || isImg(f.name)) continue;
+          await ensureFileLoaded(p);
           f.content.split('\n').forEach((l, i) => {
             if (l.toLowerCase().includes(needle)) out.push(termLine(`${p}:${i + 1}: ${l.trim()}`));
           });
         }
+        if (targets.length > SCAN_CAP) out.push(termLine(`(stopped after ${SCAN_CAP} files — name a specific file to search beyond that)`, 'warn'));
         addTermLines(out.length ? out.slice(0, 200) : [termLine('no matches')]);
         break;
       }
@@ -2341,7 +2504,7 @@ async function runCommand(raw) {
         if (!args[0]) { addTermLines([termLine('usage: open <file>', 'err')]); break; }
         const p = resolveFileOrDir(cwd, args[0]);
         if (!state.files[p]) { addTermLines([termLine(`open: ${args[0]}: no such file`, 'err')]); break; }
-        openFile(p);
+        await openFile(p);
         break;
       }
       case 'save': {
@@ -2393,6 +2556,7 @@ async function runCommand(raw) {
 async function execJSFile(path) {
   const f = state.files[path];
   if (!f) { addTermLines([termLine(`no such file: ${path}`, 'err')]); return; }
+  await ensureFileLoaded(path);
   const lines = [];
   const fmt = a => a.map(v => {
     if (typeof v === 'string') return v;
@@ -2437,6 +2601,7 @@ function loadPyodideOnce() {
 async function execPythonFile(path) {
   const f = state.files[path];
   if (!f) { addTermLines([termLine(`no such file: ${path}`, 'err')]); return; }
+  await ensureFileLoaded(path);
   if (!_pyodideInstance) {
     addTermLines([termLine('Loading Python runtime (first run only, needs internet)…')]);
     render();
@@ -2532,7 +2697,7 @@ let aiTimer = null, aiCtrl = null;
 
 function getWorkspaceCtx(excludePath) {
   return Object.entries(state.files)
-    .filter(([p, f]) => !isImg(f.name) && p !== excludePath && f.content.trim())
+    .filter(([p, f]) => !isImg(f.name) && p !== excludePath && f.content && f.content.trim())
     .map(([p, f]) => `// ${p}\n${f.content.slice(0, 250)}`)
     .join('\n\n')
     .slice(0, 1000);
@@ -2541,7 +2706,7 @@ function getWorkspaceCtx(excludePath) {
 function scheduleAI(path, content, lang, cursorPos) {
   clearTimeout(aiTimer);
   delete state.aiSuggestions[path];
-  const lines = content.split('\n').length;
+  const lines = Math.round(content.length / 40); // rough line estimate — a real split would be O(file size) on every keystroke
   aiTimer = setTimeout(
     () => fetchAI(path, content, lang, cursorPos),
     lines < 200 ? 600 : lines < 800 ? 900 : 1400
@@ -2605,6 +2770,131 @@ function acceptAI(paneId) {
 /* Re-render just one pane's highlight layer + gutter, without a full app re-render
    (keeps focus/selection/scroll intact — the same discipline the original app used
    for the primary editor, now shared by every pane). */
+/* ════════════════════════════════════════════════════════════
+   LARGE-FILE RENDERING
+   The slow part of a big file was never the text box (the browser handles that natively);
+   it was repainting the syntax-highlight layer and line numbers for the WHOLE file on every
+   keystroke. Past WINDOW_THRESHOLD_LINES a pane now paints only the lines currently on
+   screen (plus a buffer) and repaints that small window as you scroll or type, so per-keystroke
+   work no longer grows with file size. Line starts are cached per file in a WeakMap (never
+   stored on the file object, which gets persisted).
+════════════════════════════════════════════════════════════ */
+const WINDOW_THRESHOLD_LINES = 1500;
+const WINDOW_BUFFER_LINES = 30;
+/* Above this size a pane opens in large-file mode: no text box at all (the browser's own
+   <textarea> re-lays-out the entire text on every edit, which is the one cost painting tricks
+   can't remove), just the windowed viewer. 'Edit anyway' switches that file back to the editor. */
+const LARGE_FILE_BYTES = 2 * 1024 * 1024;
+function isLargeMode(file, path) {
+  return !!file && typeof file.content === 'string' && file.content.length > LARGE_FILE_BYTES && !(state.forceEdit && state.forceEdit[path]);
+}
+function forceEditLarge(path) {
+  state.forceEdit[path] = true;
+  showToast('Editing a very large file — typing may feel slower than usual', 'info');
+  renderEditorChrome();
+}
+function goToLinePrompt(paneId) {
+  const path = paneIdToPath(paneId), file = path && state.files[path];
+  if (!file) return;
+  const total = lineIndexFor(file).starts.length;
+  const answer = prompt(`Go to line (1 – ${total.toLocaleString()}):`);
+  const n = parseInt(answer, 10);
+  if (!n || n < 1) return;
+  const sc = document.getElementById(paneScrollId(paneId));
+  if (sc) sc.scrollTop = Math.max(0, (Math.min(n, total) - 1) * getLineH() - sc.clientHeight / 3);
+}
+const _lidxCache = new WeakMap();
+function lineIndexFor(file) {
+  const text = file.content || '';
+  const hit = _lidxCache.get(file);
+  if (hit && hit.text === text) return hit;
+  const starts = [0];
+  let i = -1, prev = 0, maxLen = 0;
+  while ((i = text.indexOf('\n', i + 1)) !== -1) {
+    starts.push(i + 1);
+    if (i - prev > maxLen) maxLen = i - prev;
+    prev = i + 1;
+  }
+  if (text.length - prev > maxLen) maxLen = text.length - prev;
+  const entry = {text, starts, maxLen};
+  _lidxCache.set(file, entry);
+  return entry;
+}
+/* 0-based line and column for a character offset, via binary search on the cached index */
+function lineColAt(file, pos) {
+  const starts = lineIndexFor(file).starts;
+  let lo = 0, hi = starts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (starts[mid] <= pos) lo = mid; else hi = mid - 1;
+  }
+  return {line: lo, col: pos - starts[lo]};
+}
+function gutterLinesHtml(from, to) {
+  let s = '';
+  for (let n = from; n <= to; n++) s += `<div class="gutter-line">${n}</div>`;
+  return s;
+}
+function paintPane(paneId, force) {
+  const path = paneIdToPath(paneId);
+  const file = path && state.files[path];
+  const hl = document.getElementById(paneHlId(paneId));
+  const gutter = document.getElementById(paneGutterId(paneId));
+  if (!file || !hl || !gutter || file.content === null || file.content === undefined) return;
+  const inner = document.getElementById('editor-inner-' + paneId);
+  const sc = document.getElementById(paneScrollId(paneId));
+  const gInner = gutter.querySelector('.gutter-inner');
+  const idx = lineIndexFor(file);
+  const total = idx.starts.length;
+  const sug = state.aiSuggestions[path];
+  const lineH = getLineH(), pad = getPad();
+  gutter.style.setProperty('--lh', lineH + 'px');
+
+  const large = isLargeMode(file, path);
+  if (total <= WINDOW_THRESHOLD_LINES && !large) {
+    if (hl.dataset.win === '1') {
+      hl.dataset.win = '';
+      ['position', 'top', 'left', 'padding', 'minHeight', 'minWidth'].forEach(k => hl.style[k] = '');
+      if (inner) { inner.style.height = ''; inner.style.width = ''; }
+      if (gInner) gInner.style.height = '';
+    }
+    hl.innerHTML = buildHighlight(file.content, file.language, sug?.text, sug?.pos);
+    if (gInner) gInner.innerHTML = gutterLinesHtml(1, total);
+    return;
+  }
+
+  const charW = getCharW();
+  const viewH = (sc && sc.clientHeight) || 800;
+  const top = sc ? sc.scrollTop : 0;
+  const first = Math.max(0, Math.floor((top - pad) / lineH) - WINDOW_BUFFER_LINES);
+  const last = Math.min(total - 1, Math.ceil((top + viewH - pad) / lineH) + WINDOW_BUFFER_LINES);
+  const key = first + ':' + last;
+  if (!force && hl.dataset.win === '1' && hl.dataset.key === key) return;
+
+  const from = idx.starts[first];
+  const to = last + 1 < total ? idx.starts[last + 1] - 1 : file.content.length;
+  let sugText, sugPos;
+  if (sug && sug.pos >= from && sug.pos <= to) { sugText = sug.text; sugPos = sug.pos - from; }
+
+  hl.dataset.win = '1';
+  hl.dataset.key = key;
+  hl.style.position = 'absolute';
+  hl.style.top = (pad + first * lineH) + 'px';
+  hl.style.left = '0';
+  hl.style.padding = '0 16px';
+  hl.style.minHeight = '0';
+  hl.style.minWidth = '0';
+  hl.innerHTML = buildHighlight(file.content.slice(from, to), file.language, sugText, sugPos);
+  if (inner) {
+    inner.style.height = (pad * 2 + total * lineH) + 'px';
+    inner.style.width = (pad * 2 + (idx.maxLen + 2) * charW) + 'px';
+  }
+  if (gInner) {
+    gInner.style.height = (total * lineH) + 'px';
+    gInner.innerHTML = `<div style="position:absolute;left:0;right:0;top:${first * lineH}px">${gutterLinesHtml(first + 1, last + 1)}</div>`;
+  }
+}
+
 function refreshPaneHighlight(path) {
   for (const id of getAllPaneIds()) {
     if (paneIdToPath(id) !== path) continue;
@@ -2613,12 +2903,7 @@ function refreshPaneHighlight(path) {
     const gutter = document.getElementById(paneGutterId(id));
     const file = state.files[path];
     if (!ta || !hl || !file) continue;
-    const sug = state.aiSuggestions[path];
-    hl.innerHTML = buildHighlight(file.content, file.language, sug?.text, sug?.pos);
-    if (gutter) {
-      const n = file.content.split('\n').length;
-      gutter.innerHTML = Array.from({length: n}, (_, i) => `<div class="gutter-line">${i + 1}</div>`).join('');
-    }
+    paintPane(id, true);
     renderDecorationLayer(id);
   }
 }
@@ -2990,9 +3275,9 @@ function renderTitleBar() {
         <button class="tb-btn" onclick="openFolder()" title="Open Folder (real folder on your computer)">Open Folder</button>
         <input type="file" id="folder-input-fallback" webkitdirectory style="display:none" onchange="uploadFolderFallback(this.files)" />
         <input type="file" id="files-input-fallback" multiple style="display:none" onchange="uploadFilesFallback(this.files)" />
-        <button class="tb-btn" onclick="document.getElementById('files-input-fallback').click()" title="Upload individual files">Upload</button>
+        ${DESKTOP ? '' : `<button class="tb-btn" onclick="document.getElementById('files-input-fallback').click()" title="Upload individual files">Upload</button>`}
         ${state.connectedDirName ? `<span class="tb-conn" title="Connected — saves write straight back to this folder">📁 ${esc(state.connectedDirName)}</span>` : ''}
-        ${state.connectedDirName && !state.dirHandle ? `<button class="tb-btn tb-reconnect" onclick="reconnectWorkspace()">Reconnect</button>` : ''}
+        ${state.connectedDirName && !state.dirHandle && !state.desktopRoot ? `<button class="tb-btn tb-reconnect" onclick="reconnectWorkspace()">Reconnect</button>` : ''}
       </div>
     </div>
     <div class="tb-center">${file ? esc(file.name) : 'X Code'}</div>
@@ -3003,9 +3288,18 @@ function renderTitleBar() {
       <button class="tb-icon" onclick="splitPane('row')" title="Split Right">${svgSplitRow()}</button>
       <button class="tb-icon" onclick="splitPane('column')" title="Split Down">${svgSplitCol()}</button>
       <button class="tb-icon" onclick="toggleDraw()" title="Draw / Annotate">${svgPen()}</button>
+      ${DESKTOP && window.xcodeDesktop.platform !== 'darwin' ? `
+      <span class="win-controls">
+        <button class="win-btn" onclick="xcodeDesktop.minimize()" title="Minimize">${svgMinimize()}</button>
+        <button class="win-btn" id="win-max-btn" onclick="xcodeDesktop.maximizeToggle()" title="Maximize">${state.winMaximized ? svgRestore() : svgMaximize()}</button>
+        <button class="win-btn win-close" onclick="xcodeDesktop.closeWindow()" title="Close">${svgClose()}</button>
+      </span>` : ''}
     </div>
   </div>`;
 }
+function svgMinimize() { return `<svg width="11" height="11" viewBox="0 0 12 12"><path d="M1 6h10" stroke="currentColor" stroke-width="1.2"/></svg>`; }
+function svgMaximize() { return `<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="1.5" width="9" height="9" stroke="currentColor" stroke-width="1.2"/></svg>`; }
+function svgRestore() { return `<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="3.5" width="7" height="7" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 3.5V1.5h7v7h-2" stroke="currentColor" stroke-width="1.2"/></svg>`; }
 
 function svgSearch() { return `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>`; }
 function svgPlay() { return `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`; }
@@ -3049,7 +3343,7 @@ function setActivePanel(id) {
 function toggleBottomPanel() { state.showBottom = !state.showBottom; render(); }
 
 /* ── File tree ── */
-function renderTree(nodes, depth) {
+function renderTree(nodes, depth, diagMap) {
   depth = depth || 0;
   return nodes.map(node => {
     if (node.name === '.keep') return '';
@@ -3065,7 +3359,8 @@ function renderTree(nodes, depth) {
             onblur="confirmRename()" onclick="event.stopPropagation()" />
         </div>`;
       }
-      const errInfo = folderDiagSummary(node.path);
+      const sev = diagMap[node.path];
+      const errInfo = sev === 'error' ? '<span class="ftree-err-dot"></span>' : sev === 'warning' ? '<span class="ftree-warn-dot"></span>' : '';
       return `
       <div class="ftree-row ftree-folder" style="padding-left:${indent}px"
         onclick="toggleFolder('${escAttr(node.path)}')"
@@ -3080,7 +3375,7 @@ function renderTree(nodes, depth) {
         </span>
       </div>
       ${open ? renderCreatingRow(node.path, depth + 1) : ''}
-      ${open ? renderTree(node.children, depth + 1) : ''}`;
+      ${open ? renderTree(node.children, depth + 1, diagMap) : ''}`;
     }
     const active = state.activeTab === node.path;
     const modified = state.modified[node.path];
@@ -3097,7 +3392,7 @@ function renderTree(nodes, depth) {
       </div>`;
     }
     return `
-      <div class="ftree-row ftree-file ${active ? 'active' : ''}" style="padding-left:${indent + 16}px"
+      <div class="ftree-row ftree-file ${active ? 'active' : ''}" data-path="${escAttr(node.path)}" style="padding-left:${indent + 16}px"
         onclick="openFile('${escAttr(node.path)}')"
         oncontextmenu="showContextMenu(event,'${escAttr(node.path)}',false)">
         ${getIcon(node.name)}
@@ -3107,13 +3402,24 @@ function renderTree(nodes, depth) {
       </div>`;
   }).join('');
 }
-function folderDiagSummary(folderPath) {
-  const under = allPathsUnder(folderPath);
-  let err = 0, warn = 0;
-  for (const p of under) for (const d of (state.diagnostics[p] || [])) { if (d.severity === 'error') err++; else if (d.severity === 'warning') warn++; }
-  if (err) return '<span class="ftree-err-dot"></span>';
-  if (warn) return '<span class="ftree-warn-dot"></span>';
-  return '';
+/* One pass over state.diagnostics -> folderPath -> 'error'|'warning', instead of the
+   old approach (allPathsUnder() rescanning every file for every folder on every
+   render, an O(folders x files) cost that dominated render time on large trees). Only
+   files that currently HAVE diagnostics are visited, and each just walks up its own
+   ancestor chain, so this is O(flagged files x depth) regardless of workspace size. */
+function computeFolderDiagMap() {
+  const map = {};
+  for (const [path, diags] of Object.entries(state.diagnostics)) {
+    if (!diags || !diags.length || !state.files[path]) continue;
+    const hasErr = diags.some(d => d.severity === 'error');
+    let dir = pathDir(path);
+    while (dir !== '') {
+      if (hasErr) map[dir] = 'error';
+      else if (map[dir] !== 'error') map[dir] = 'warning';
+      dir = pathDir(dir);
+    }
+  }
+  return map;
 }
 function renderCreatingRow(parent, depth) {
   if (!state.creatingIn || state.creatingIn.parent !== parent) return '';
@@ -3129,6 +3435,7 @@ function renderCreatingRow(parent, depth) {
 function svgChevron() { return `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 6l6 6-6 6"/></svg>`; }
 
 function renderExplorerPanel() {
+  const diagMap = computeFolderDiagMap();
   return `
   <div class="sidebar-panel">
     <div class="sidebar-head">
@@ -3141,7 +3448,7 @@ function renderExplorerPanel() {
     </div>
     <div class="file-tree" onclick="if(event.target===this)state.contextMenu=null">
       ${renderCreatingRow('', 0)}
-      ${state.fileTree.length ? renderTree(state.fileTree, 0) : `<div class="ftree-empty">No files yet.<br>Open a folder or create a file to get started.</div>`}
+      ${state.fileTree.length ? renderTree(state.fileTree, 0, diagMap) : `<div class="ftree-empty">No files yet.<br>Open a folder or create a file to get started.</div>`}
     </div>
   </div>`;
 }
@@ -3154,6 +3461,7 @@ function renderSearchPanel() {
     <div class="search-box">
       <input class="search-input" placeholder="Search in files…" value="${escAttr(state.searchQuery)}"
         oninput="performSearch(this.value)" autofocus />
+      ${state.searchSkippedUnloaded ? `<div class="search-note">Some files haven't been opened yet and aren't included — open a file once to include it in search.</div>` : ''}
     </div>
     <div class="search-results">
       ${state.searchResults.length === 0 && state.searchQuery ? '<div class="ftree-empty">No results</div>' : ''}
@@ -3176,10 +3484,12 @@ function highlightMatch(text, query) {
 }
 function performSearch(q) {
   state.searchQuery = q;
-  if (!q.trim()) { state.searchResults = []; renderSidebarOnly(); return; }
+  if (!q.trim()) { state.searchResults = []; state.searchSkippedUnloaded = false; renderSidebarOnly(); return; }
   const out = [];
+  let skippedAny = false;
   for (const [path, f] of Object.entries(state.files)) {
     if (pathBase(path) === '.keep' || isImg(f.name)) continue;
+    if (f.content === null) { skippedAny = true; continue; } // not yet read from disk — see the lazy-loading note above ensureFileLoaded()
     const matches = [];
     f.content.split('\n').forEach((line, i) => {
       if (line.toLowerCase().includes(q.toLowerCase())) matches.push({line: i + 1, text: line.trim().slice(0, 120)});
@@ -3187,10 +3497,11 @@ function performSearch(q) {
     if (matches.length) out.push({path, name: f.name, matches});
   }
   state.searchResults = out;
+  state.searchSkippedUnloaded = skippedAny;
   renderSidebarOnly();
 }
-function jumpToSearchResult(path, line) {
-  openFile(path);
+async function jumpToSearchResult(path, line) {
+  await openFile(path);
   jumpToLine('main', line);
 }
 
@@ -3244,7 +3555,7 @@ function renderProblemsList() {
     <div class="prob-file-group">
       <div class="prob-file-head" onclick="openFile('${escAttr(path)}')">${getIcon(pathBase(path))} ${esc(path)}</div>
       ${diags.map(d => `
-        <div class="prob-item sev-${d.severity}" onclick="openFile('${escAttr(path)}');jumpToLine('main',${d.line})">
+        <div class="prob-item sev-${d.severity}" onclick="openFile('${escAttr(path)}').then(()=>jumpToLine('main',${d.line}))">
           ${d.severity === 'error' ? svgErrIcon() : d.severity === 'warning' ? svgWarnIcon() : svgInfoIcon()}
           <span class="prob-msg">${esc(d.msg)}</span>
           <span class="prob-loc">${d.line}:${d.col}</span>
@@ -3285,8 +3596,9 @@ function renderSidebarOnly() {
 function renderFileTreeOnly() {
   const el = document.querySelector('.file-tree');
   if (!el) return;
+  const diagMap = computeFolderDiagMap();
   el.innerHTML = renderCreatingRow('', 0) +
-    (state.fileTree.length ? renderTree(state.fileTree, 0) : `<div class="ftree-empty">No files yet.<br>Open a folder or create a file to get started.</div>`);
+    (state.fileTree.length ? renderTree(state.fileTree, 0, diagMap) : `<div class="ftree-empty">No files yet.<br>Open a folder or create a file to get started.</div>`);
 }
 
 /* ── Tab bar (primary editor group) ── */
@@ -3322,10 +3634,7 @@ function renderPane(paneId) {
   if (!path || !state.files[path]) {
     return `<div class="editor-pane" style="flex:${flex} 1 0">
       ${isSplit ? renderPaneHeader(paneId, null) : ''}
-      <div class="editor-empty">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1"><path d="M8 3L4 12l4 9M16 3l4 9-4 9"/></svg>
-        <div>No file open</div>
-      </div>
+      ${isSplit ? `<div class="editor-empty"><div>No file open</div></div>` : renderWelcome()}
     </div>`;
   }
   const file = state.files[path];
@@ -3340,7 +3649,9 @@ function renderPane(paneId) {
   const fz = (14 * state.editorZoom).toFixed(1) + 'px';
   const lh = Math.round(21 * state.editorZoom) + 'px';
   const sug = state.aiSuggestions[path];
-  const lineCount = file.content.split('\n').length;
+  const lineCount = lineIndexFor(file).starts.length;
+  const large = isLargeMode(file, path);
+  const windowed = lineCount > WINDOW_THRESHOLD_LINES || large;
   const gutterId = paneGutterId(paneId);
   const hlId = paneHlId(paneId);
   const taId = paneTextareaId(paneId);
@@ -3348,22 +3659,27 @@ function renderPane(paneId) {
   const scrollId = paneScrollId(paneId);
   const errColId = paneId === 'main' ? 'gutter-err-col' : `gutter-err-col-${paneId}`;
 
-  return `<div class="editor-pane" style="flex:${flex} 1 0" data-pane="${paneId}">
+  const bannerHtml = large ? `<div class="large-banner">
+      <span>⚡ Large file — ${(file.content.length / 1048576).toFixed(1)} MB, ${lineCount.toLocaleString()} lines. Opened in fast read-only view so scrolling stays smooth.</span>
+      <button onclick="goToLinePrompt(${paneId === 'main' ? "'main'" : paneId})">Go to line…</button>
+      <button onclick="forceEditLarge('${escAttr(path)}')">Edit anyway</button></div>` : '';
+  return `<div class="editor-pane${large ? ' large-mode' : ''}" style="flex:${flex} 1 0" data-pane="${paneId}">
     ${isSplit ? renderPaneHeader(paneId, path) : ''}
+    ${bannerHtml}
     <div class="editor-body">
-      <div class="gutter" id="${gutterId}" style="font-size:${fz};line-height:${lh}">
+      <div class="gutter" id="${gutterId}" style="font-size:${fz};line-height:${lh};--lh:${lh}">
         <div class="gutter-err-col" id="${errColId}"></div>
         <div class="gutter-inner">
-          ${Array.from({length: lineCount}, (_, i) => `<div class="gutter-line">${i + 1}</div>`).join('')}
+          ${windowed ? '' : gutterLinesHtml(1, lineCount)}
         </div>
       </div>
       <div class="editor-scroll" id="${scrollId}">
         <div class="editor-inner" id="editor-inner-${paneId}">
-          <pre class="hl-layer" id="${hlId}" style="font-size:${fz};line-height:${lh}">${buildHighlight(file.content, file.language, sug?.text, sug?.pos)}</pre>
+          <pre class="hl-layer" id="${hlId}" style="font-size:${fz};line-height:${lh}">${windowed ? '' : buildHighlight(file.content, file.language, sug?.text, sug?.pos)}</pre>
           <div class="dec-layer" id="${decId}"></div>
           <div class="bracket-match-layer" id="bracket-match-${paneId}"></div>
-          <textarea class="ed-textarea" id="${taId}" spellcheck="false" autocapitalize="off" autocomplete="off"
-            style="font-size:${fz};line-height:${lh}" data-pane="${paneId}">${esc(file.content)}</textarea>
+          ${large ? '' : `<textarea class="ed-textarea" id="${taId}" spellcheck="false" autocapitalize="off" autocomplete="off"
+            style="font-size:${fz};line-height:${lh}" data-pane="${paneId}"></textarea>`}
         </div>
       </div>
       ${renderFindWidget(paneId)}
@@ -3401,11 +3717,11 @@ function splitPane(orientation) {
   state.splitPanes.push({path: state.activeTab, flex: 1});
   const newId = state.splitPanes.length - 1;
   state.focusedPaneId = newId;
-  render();
+  renderEditorChrome();
 }
 function toggleSplitOrientation() {
   state.splitOrientation = state.splitOrientation === 'row' ? 'column' : 'row';
-  render();
+  renderEditorChrome();
 }
 function closeSplitPane(idx) {
   state.splitPanes.splice(idx, 1);
@@ -3413,12 +3729,12 @@ function closeSplitPane(idx) {
     if (state.focusedPaneId === idx) state.focusedPaneId = 'main';
     else if (state.focusedPaneId > idx) state.focusedPaneId--;
   }
-  render();
+  renderEditorChrome();
 }
 function setSplitPanePath(idx, path) {
   if (!path) return;
   state.splitPanes[idx].path = path;
-  render();
+  renderEditorChrome();
 }
 
 function setupPaneDividers() {
@@ -3677,7 +3993,7 @@ function revealInSplit(path) {
   if (state.splitPanes.length >= MAX_SPLIT_PANES) { showToast(`Up to ${MAX_SPLIT_PANES + 1} panes at once`, 'info'); return; }
   if (state.splitPanes.length === 0) state.splitOrientation = 'row';
   state.splitPanes.push({path, flex: 1});
-  render();
+  renderEditorChrome();
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -3720,6 +4036,54 @@ function handleQuickOpenKey(e) {
 /* ════════════════════════════════════════════════════════════
    LANGUAGE PICKER (status bar)
 ════════════════════════════════════════════════════════════ */
+const THEMES = [
+  {id: 'x-dark', name: 'X Dark', note: 'Classic neon-green on near-black', sw: ['#1e1e1e', '#39ff14', '#569cd6']},
+  {id: 'soft-night', name: 'Soft Night', note: 'Lower contrast — easiest on the eyes at night', sw: ['#1f2227', '#8fd694', '#7aa2d6']},
+  {id: 'dusk', name: 'Dusk', note: 'Cool blue-grey with warm amber accents', sw: ['#1e2230', '#e6b455', '#8aa8f0']},
+  {id: 'paper', name: 'Paper', note: 'Warm off-white for bright rooms', sw: ['#f7f3ea', '#1f8a4c', '#2f5fa8']}
+];
+function applyTheme() { document.documentElement.dataset.theme = state.themeName || 'x-dark'; }
+function setTheme(id) { state.themeName = id; state.themePicker = false; applyTheme(); saveState(); render(); }
+function renderThemePicker() {
+  if (!state.themePicker) return '';
+  return `<div class="modal-backdrop" onclick="state.themePicker=false;render()">
+    <div class="theme-picker" onclick="event.stopPropagation()">
+      <div class="theme-picker-title">Choose a theme</div>
+      ${THEMES.map(t => `<div class="theme-card ${t.id === (state.themeName || 'x-dark') ? 'active' : ''}" onclick="setTheme('${t.id}')">
+        <div class="theme-swatch">${t.sw.map(col => `<i style="background:${col}"></i>`).join('')}</div>
+        <div><div class="theme-name">${t.name}</div><div class="theme-note">${t.note}</div></div></div>`).join('')}
+    </div></div>`;
+}
+const SAMPLE_PROJECT = {
+  'index.html': '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>My First Page</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <h1 id="title">Hello, X Code!</h1>\n  <button id="btn">Click me</button>\n  <script src="app.js"><\/script>\n</body>\n</html>\n',
+  'style.css': 'body {\n  font-family: system-ui, sans-serif;\n  display: grid;\n  place-items: center;\n  height: 100vh;\n  background: #0f172a;\n  color: #e2e8f0;\n}\n\nbutton:hover {\n  transform: scale(1.05);\n}\n',
+  'app.js': "const btn = document.getElementById('btn');\nlet clicks = 0;\n\nbtn.addEventListener('click', () => {\n  clicks++;\n  document.getElementById('title').textContent = `Clicked ${clicks} time${clicks === 1 ? '' : 's'}!`;\n});\n"
+};
+async function createSampleProject() {
+  for (const [p, content] of Object.entries(SAMPLE_PROJECT)) state.files[p] = {name: p, path: p, content, language: getLang(p)};
+  state.fileTree = rebuildTree(state.files);
+  await openFile('index.html');
+  showToast('Sample project created — press the ▶ button in the top bar to preview it', 'success');
+  saveState();
+}
+function renderWelcome() {
+  const mod = (DESKTOP && window.xcodeDesktop.platform === 'darwin') ? '⌘' : 'Ctrl';
+  return `<div class="welcome">
+    <div class="welcome-logo">⟨ X Code ⟩</div>
+    <div class="welcome-sub">A fast, calm editor for everyday coding.</div>
+    <div class="welcome-cards">
+      <button class="welcome-card" onclick="openFolder()"><b>Open a folder</b><span>Work on a project that's already on your computer</span></button>
+      <button class="welcome-card" onclick="startCreate('file','')"><b>New file</b><span>Start writing code right away</span></button>
+      <button class="welcome-card" onclick="createSampleProject()"><b>Try a sample project</b><span>A tiny web page you can edit and preview</span></button>
+    </div>
+    <div class="welcome-keys">
+      <span><kbd>${mod}</kbd>+<kbd>K</kbd> find any file</span>
+      <span><kbd>${mod}</kbd>+<kbd>F</kbd> search in file</span>
+      <span><kbd>${mod}</kbd>+<kbd>/</kbd> comment line</span>
+      <span><kbd>${mod}</kbd>+<kbd>B</kbd> hide sidebar</span>
+    </div>
+  </div>`;
+}
 const LANG_LIST = ['javascript', 'typescript', 'html', 'css', 'python', 'json', 'markdown', 'java', 'c', 'cpp', 'go', 'rust', 'php', 'shell', 'yaml', 'sql', 'plaintext'];
 function renderLangPicker() {
   if (!state.langPicker) return '';
@@ -3843,10 +4207,9 @@ function renderStatusBar() {
   const ta = activePaneTextarea();
   let line = 1, col = 1;
   if (ta && file) {
-    const before = ta.value.slice(0, ta.selectionStart);
-    const lines = before.split('\n');
-    line = lines.length;
-    col = lines[lines.length - 1].length + 1;
+    const lc = lineColAt(file, ta.selectionStart);
+    line = lc.line + 1;
+    col = lc.col + 1;
   }
   const diagCount = path ? (state.diagnostics[path] || []).length : 0;
   const errCount = path ? (state.diagnostics[path] || []).filter(d => d.severity === 'error').length : 0;
@@ -3861,6 +4224,7 @@ function renderStatusBar() {
     ${aiLoading ? `<span class="ss-item">AI…</span>` : ''}
     <span class="ss-spacer"></span>
     <span class="ss-item" id="ss-time">${new Date().toLocaleTimeString()}</span>
+    <span class="ss-item ss-clickable" onclick="state.themePicker=true;render()" title="Change theme">🎨 Theme</span>
     <span class="ss-item ss-clickable" onclick="state.editorZoom=1;applyZoom()" title="Reset Zoom">${Math.round(state.editorZoom * 100)}%</span>
   `;
 }
@@ -3869,6 +4233,38 @@ function renderStatusBarOnly() {
   if (el) el.innerHTML = renderStatusBar();
 }
 /* ════════════════════════════════════════════════════════════
+   LIGHT RENDER — for actions that never change the file tree's
+   structure (opening/switching/closing a tab, changing splits).
+   The file tree is the one part of the UI whose cost scales with
+   workspace size — on a folder with thousands of files, a full
+   render() rebuilds and reparses that whole tree's HTML even
+   though switching tabs never actually changes it, just which row
+   is highlighted. This updates the titlebar, editor column, and
+   status bar (all cheap — their size depends on open tabs/panes,
+   not total file count) and patches the tree's active-row
+   highlight directly via the DOM, leaving the tree's own HTML
+   completely untouched.
+════════════════════════════════════════════════════════════ */
+function renderEditorChrome() {
+  const titlebarEl = document.querySelector('.titlebar');
+  const columnEl = document.querySelector('.editor-column');
+  if (!titlebarEl || !columnEl) { render(); return; } // first paint, or DOM got into an unexpected state — fall back to a full render rather than silently doing nothing
+  titlebarEl.outerHTML = renderTitleBar();
+  columnEl.innerHTML = `${renderTabBar()}${renderEditorArea()}${renderQuickFixPanel()}`;
+  updateActiveFileHighlight(state.activeTab);
+  renderStatusBarOnly();
+  attachAllPanes();
+}
+function updateActiveFileHighlight(path) {
+  document.querySelectorAll('.ftree-file.active').forEach(el => el.classList.remove('active'));
+  if (!path) return;
+  let escaped;
+  try { escaped = CSS.escape(path); } catch (e) { return; }
+  const row = document.querySelector(`.ftree-file[data-path="${escaped}"]`);
+  if (row) row.classList.add('active');
+}
+
+/* ════════════════════════════════════════════════════════════
    TOP-LEVEL RENDER
    Every piece is a single-level `${renderX()}` call — see the
    note at the top of 07a-render-shell.js for why that matters.
@@ -3876,6 +4272,7 @@ function renderStatusBarOnly() {
 function render() {
   const app = document.getElementById('app');
   if (!app) return;
+  applyTheme();
   app.innerHTML = `
     ${renderTitleBar()}
     <div class="main-body">
@@ -3893,6 +4290,7 @@ function render() {
     ${renderDrawToolbar()}
     ${renderQuickOpen()}
     ${renderLangPicker()}
+    ${renderThemePicker()}
   `;
   // Synchronous, deliberately: `innerHTML =` above has already updated the DOM by
   // the time this line runs (it is not asynchronous), so every element created by
@@ -3920,18 +4318,33 @@ function attachAllPanes() {
 }
 function attachPane(paneId) {
   const ta = paneTextareaEl(paneId);
-  if (!ta) return;
-  ta.addEventListener('focus', () => { state.focusedPaneId = paneId; renderStatusBarOnly(); });
-  ta.addEventListener('input', () => updateHighlight(paneId));
-  ta.addEventListener('keydown', e => handlePaneKeydown(e, paneId));
-  ta.addEventListener('keyup', e => { if (e.key !== 'Tab') handlePaneCursorActivity(paneId); });
-  ta.addEventListener('click', e => { handlePaneCursorActivity(paneId); handlePaneMouseClick(paneId, e); });
-  ta.addEventListener('mousemove', e => handlePaneMouseMove(paneId, e));
-  ta.addEventListener('mouseleave', handlePaneMouseLeave);
+  const path = paneIdToPath(paneId);
+  const file = path && state.files[path];
+  // The text box is filled by assignment, not by embedding the whole file in HTML markup —
+  // parsing megabytes of escaped text through innerHTML was most of the time it took to open a big file.
+  if (ta && file && typeof file.content === 'string') ta.value = file.content;
+  if (ta) {
+    ta.addEventListener('focus', () => { state.focusedPaneId = paneId; renderStatusBarOnly(); });
+    ta.addEventListener('input', () => updateHighlight(paneId));
+    ta.addEventListener('keydown', e => handlePaneKeydown(e, paneId));
+    ta.addEventListener('keyup', e => { if (e.key !== 'Tab') handlePaneCursorActivity(paneId); });
+    ta.addEventListener('click', e => { handlePaneCursorActivity(paneId); handlePaneMouseClick(paneId, e); });
+    ta.addEventListener('mousemove', e => handlePaneMouseMove(paneId, e));
+    ta.addEventListener('mouseleave', handlePaneMouseLeave);
+  }
   const sc = document.getElementById(paneScrollId(paneId));
   const gutter = document.getElementById(paneGutterId(paneId));
-  if (sc && gutter) sc.addEventListener('scroll', () => { gutter.scrollTop = sc.scrollTop; });
-  updateBracketMatch(paneId);
+  let scrollQueued = false;
+  if (sc && gutter) sc.addEventListener('scroll', () => {
+    gutter.scrollTop = sc.scrollTop;
+    const hlEl = document.getElementById(paneHlId(paneId));
+    if (hlEl && hlEl.dataset.win === '1' && !scrollQueued) {
+      scrollQueued = true;
+      requestAnimationFrame(() => { scrollQueued = false; paintPane(paneId, false); gutter.scrollTop = sc.scrollTop; });
+    }
+  });
+  paintPane(paneId, true);
+  if (ta) updateBracketMatch(paneId);
 }
 function handlePaneCursorActivity(paneId) {
   updateBracketMatch(paneId);
@@ -3950,17 +4363,7 @@ function updateHighlight(paneId) {
   file.content = ta.value;
   markModified(path);
 
-  const hl = document.getElementById(paneHlId(paneId));
-  const gutter = document.getElementById(paneGutterId(paneId));
-  const sug = state.aiSuggestions[path];
-  if (hl) hl.innerHTML = buildHighlight(file.content, file.language, sug?.text, sug?.pos);
-  if (gutter) {
-    const inner = gutter.querySelector('.gutter-inner');
-    if (inner) {
-      const n = file.content.split('\n').length;
-      inner.innerHTML = Array.from({length: n}, (_, i) => `<div class="gutter-line">${i + 1}</div>`).join('');
-    }
-  }
+  paintPane(paneId, true);
   updateBracketMatch(paneId);
   renderDecorationLayer(paneId);
   renderStatusBarOnly();
@@ -3990,12 +4393,10 @@ function updateBracketMatch(paneId) {
   if (!ta || !path || !state.files[path]) return;
   const m = findMatchingBracket(ta.value, ta.selectionStart);
   if (!m) return;
+  const file = state.files[path];
   const charW = getCharW(), lineH = getLineH(), pad = getPad();
   for (const pos of [m.from, m.to]) {
-    const before = ta.value.slice(0, pos);
-    const lines = before.split('\n');
-    const line = lines.length - 1;
-    const col = lines[lines.length - 1].length;
+    const {line, col} = lineColAt(file, pos);
     const el = document.createElement('div');
     el.className = 'bracket-match-box';
     el.style.cssText = `top:${pad + line * lineH}px;left:${pad + col * charW}px;width:${charW}px;height:${lineH}px;`;
@@ -4071,6 +4472,7 @@ function applyZoom() {
     [document.getElementById(paneGutterId(id)), document.getElementById(paneHlId(id)), paneTextareaEl(id)].forEach(el => {
       if (el) { el.style.fontSize = fz; el.style.lineHeight = lh; }
     });
+    paintPane(id, true);
     renderDecorationLayer(id);
     updateBracketMatch(id);
   }
@@ -4221,11 +4623,65 @@ window.addEventListener('resize', () => { cachedCharW = null; });
 /* ════════════════════════════════════════════════════════════
    INIT
 ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   DESKTOP SHELL WIRING (only active inside the Electron app)
+════════════════════════════════════════════════════════════ */
+function handleDesktopMenuAction(action) {
+  const paneId = state.focusedPaneId;
+  const ta = paneTextareaEl(paneId);
+  const path = paneIdToPath(paneId);
+  switch (action) {
+    case 'new-file': startCreate('file', ''); break;
+    case 'new-folder': startCreate('folder', ''); break;
+    case 'open-folder': openFolder(); break;
+    case 'save': saveActiveFile(); break;
+    case 'save-all': saveAllFiles(); break;
+    case 'close-tab': if (state.activeTab) closeTab(state.activeTab); break;
+    case 'find': openFindWidget(paneId, false); break;
+    case 'replace': openFindWidget(paneId, true); break;
+    case 'toggle-comment': if (ta && path) handleCommentToggle(ta, state.files[path].language); break;
+    case 'toggle-sidebar': state.showSidebar = !state.showSidebar; render(); break;
+    case 'toggle-terminal':
+      if (state.showBottom && state.activeBottomPanel === 'terminal') state.showBottom = false;
+      else { state.showBottom = true; state.activeBottomPanel = 'terminal'; }
+      render(); break;
+    case 'quick-open': openQuickOpen(); break;
+    case 'split-right': splitPane('row'); break;
+    case 'zoom-in': zoomStep(0.1); break;
+    case 'zoom-out': zoomStep(-0.1); break;
+    case 'zoom-reset': state.editorZoom = 1; applyZoom(); break;
+    case 'about': window.xcodeDesktop.getVersion().then(v => showToast('X Code ' + v + ' — by PhineX Group', 'info')); break;
+  }
+}
+if (DESKTOP) {
+  document.documentElement.classList.add('is-desktop', 'platform-' + window.xcodeDesktop.platform);
+  window.xcodeDesktop.onMenuAction(handleDesktopMenuAction);
+  window.xcodeDesktop.onMaximizedState(isMax => {
+    state.winMaximized = isMax;
+    const b = document.getElementById('win-max-btn');
+    if (b) b.innerHTML = isMax ? svgRestore() : svgMaximize();
+  });
+}
+
 (async function init() {
   await loadState();
+  if (DESKTOP && state.desktopRoot) {
+    // Reopen the last folder like VS Code does — keep any unsaved edits that autosave stashed.
+    const unsaved = {};
+    for (const [p, f] of Object.entries(state.files)) if (state.modified[p] && f.content !== null) unsaved[p] = f.content;
+    const res = await window.xcodeDesktop.walkFolder(state.desktopRoot);
+    if (res) {
+      const tabs = state.openTabs, active = state.activeTab;
+      await importDesktopFolder(res);
+      for (const [p, content] of Object.entries(unsaved)) if (state.files[p]) { state.files[p].content = content; state.modified[p] = true; }
+      state.openTabs = tabs.filter(t => state.files[t.path]);
+      state.activeTab = state.files[active] ? active : (state.openTabs[0]?.path || null);
+      for (const t of state.openTabs) await ensureFileLoaded(t.path);
+    } else { state.desktopRoot = null; state.connectedDirName = null; }
+  }
   render();
   setTimeout(() => {
-    if (state.connectedDirName && !state.dirHandle) {
+    if (state.connectedDirName && !state.dirHandle && !state.desktopRoot) {
       showToast(`Click "Reconnect" to resume saving to "${state.connectedDirName}"`, 'info');
     }
   }, 800);
